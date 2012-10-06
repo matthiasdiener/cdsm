@@ -2,23 +2,28 @@
 
 MODULE_LICENSE("GPL");
 
-// struct mm_struct *pt_mm;
-// unsigned long pt_pf;
-// unsigned long pt_addr_conflict;
-// unsigned long pt_pf_extra;
-// unsigned long pt_num_walks ;
+struct task_struct *pt_task;
+unsigned long pt_pf;
+unsigned long pt_addr_conflict;
+unsigned long pt_pf_extra;
+unsigned long pt_num_walks ;
+int pt_nt = 0;
 
-// unsigned pt_num_faults = 3;
+unsigned pt_num_faults = 3;
 
-// unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
+unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
+struct task_struct *pt_thr;
 
 #include "pt_pf_thread.c"
+#include "pt_pid.c"
+#include "pt_mem.c"
+
 
 int __init init_mod(void)
 {
-	struct task_struct *pt_thr;
 	printk("Welcome.....\n");
+	pt_reset_all();
 	pt_thr = kthread_create(pt_pf_func, NULL, "pt_pf_func");
 	wake_up_process(pt_thr);
 	return 0;
@@ -27,24 +32,35 @@ int __init init_mod(void)
 
 void __exit cleanup_mod(void)
 {
+	kthread_stop(pt_thr);
+	// pt_reset_all();
 	printk("Bye....\n");
 }
 
 
-// void pt_reset(void)
-// {
-// 	pt_mm = 0;
-// 	pt_mem_clear();
-// 	pt_pid_clear();
-// }
+void pt_reset_all(void)
+{
+	pt_reset();
+	pt_reset_stats();
+}
 
-// void pt_reset_stats(void)
-// {
-// 	pt_num_walks = 0;
-// 	pt_pf = 0;
-// 	pt_pf_extra = 0;
-// 	pt_addr_conflict = 0;
-// }
+
+void pt_reset(void)
+{
+	pt_task = 0;
+	// pt_mem_clear();
+	pt_pid_clear();
+}
+
+
+void pt_reset_stats(void)
+{
+	pt_nt = 0;
+	pt_num_walks = 0;
+	pt_pf = 0;
+	pt_pf_extra = 0;
+	pt_addr_conflict = 0;
+}
 
 
 
