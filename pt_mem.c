@@ -12,9 +12,5 @@ struct pt_mem_info* pt_get_mem(unsigned long addr)
 
 void pt_mem_clear(void)
 {
-	unsigned i;
-	for (i=0; i < PT_MEM_HASH_SIZE; i++) {
-		pt_mem[i].pg_addr = 0;
-	}
-
+	memset(pt_mem, 0, sizeof(pt_mem));
 }

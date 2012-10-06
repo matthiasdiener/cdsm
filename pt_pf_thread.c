@@ -3,7 +3,7 @@
 void pt_detect_app(void)
 {
 	struct task_struct *task, *thread;
-	unsigned long start = get_cycles();
+	// unsigned long start = get_cycles();
 	char name[] = ".x";
 
 	if (pt_task == 0) {
@@ -11,6 +11,7 @@ void pt_detect_app(void)
 		{
 			if (strstr(task->comm, name)) {
 				pt_reset_all();
+				printk("pt: start\n");
 				pt_task = task;
 				thread = task;
 				do {
@@ -26,13 +27,14 @@ void pt_detect_app(void)
 		} while_each_thread(pt_task, thread);
 
 	} else {
+		printk("pt: stop\n");
 		pt_reset();
+		pt_print_comm();
+		pt_reset_stats();
 	}
 
 
-
-
-	printk("time taken: %llu\n", get_cycles()-start);
+	// printk("time taken: %llu\n", get_cycles()-start);
 }
 
 
@@ -43,7 +45,7 @@ int pt_pf_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 		pt_detect_app();
-		msleep(1000);
+		msleep(100);
 	}
 	
 		// if (pt_do_detect==1) {

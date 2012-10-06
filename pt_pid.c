@@ -20,7 +20,6 @@ int pt_add_pid(int pid, int tid)
 
 void pt_pid_clear(void)
 {
-	int i;
 	memset(pt_pid, -1, sizeof(pt_pid));
 }
 
