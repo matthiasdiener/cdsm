@@ -20,7 +20,7 @@ struct task_struct *pt_thr;
 #include "pt_mem.c"
 
 
-int __init init_mod(void)
+int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_all();
@@ -30,7 +30,7 @@ int __init init_mod(void)
 }
 
 
-void __exit cleanup_mod(void)
+void cleanup_module(void)
 {
 	kthread_stop(pt_thr);
 	// pt_reset_all();
@@ -164,7 +164,4 @@ void pt_print_comm(void)
 		printk("\n");
 	}
 }
-
-module_init(init_mod);
-module_exit(cleanup_mod);
 

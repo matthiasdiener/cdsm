@@ -23,6 +23,8 @@ struct pt_mem_info {
 	unsigned sharer[2];
 };
 
+extern int pt_do;
+
 int pt_get_tid(int pid);
 int pt_get_numthreads(void);
 int pt_add_pid(int pid, int tid);
@@ -36,6 +38,8 @@ void pt_print_comm(void);
 void pt_reset_all(void);
 void pt_reset(void);
 void pt_reset_stats(void);
+
+void pt_check_comm(struct task_struct *tsk, unsigned long address);
 
 
 #endif
