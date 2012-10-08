@@ -15,9 +15,11 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thr;
 
-// void (*spcd_page_fault)(struct pt_regs *, unsigned long);
 static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
 extern int (*spcd_func)(struct task_struct *, unsigned long);
+
+static int (*spcd_new_process_original_ref)(struct task_struct *); 
+extern int (*spcd_new_process)(struct task_struct *);
 
 #include "pagewalk.c"
 #include "pt_pf_thread.c"
@@ -26,6 +28,10 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 #include "pt_dpf.c"
 
 
+spcd_new_process_new(struct task_struct *tsk)
+{
+	printk("new proc, name %s", tsk->comm);
+}
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
@@ -44,6 +50,10 @@ int init_module(void)
 	pt_reset_all();
 	spcd_func_original_ref = spcd_func;
 	spcd_func = &spcd_func_new;
+
+	spcd_new_process_original_ref = spcd_new_process;
+	spcd_new_process = &spcd_new_process_new;
+
 	pt_thr = kthread_create(pt_pf_func, NULL, "pt_pf_func");
 	wake_up_process(pt_thr);
 	return 0;
