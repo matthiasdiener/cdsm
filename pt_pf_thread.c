@@ -2,7 +2,7 @@
 
 void pt_detect_app(void)
 {
-	if (!pid_alive(pt_task)) {
+	if (pt_task && !pid_alive(pt_task)) {
 		printk("pt: stop\n");
 		pt_reset();
 		pt_print_stats();
