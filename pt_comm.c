@@ -64,7 +64,7 @@ void cleanup_module(void)
 {
 	kthread_stop(pt_thr);
 	spcd_func = spcd_func_original_ref;
-	// pt_reset_all();
+	spcd_new_process = spcd_new_process_original_ref;
 	printk("Bye....\n");
 }
 
