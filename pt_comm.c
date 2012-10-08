@@ -65,12 +65,13 @@ void pt_reset(void)
 {
 	pt_task = 0;
 	// pt_mem_clear();
-	pt_pid_clear();
+	
 }
 
 
 void pt_reset_stats(void)
 {
+	pt_pid_clear();
 	pt_nt = 0;
 	pt_num_walks = 0;
 	pt_pf = 0;
