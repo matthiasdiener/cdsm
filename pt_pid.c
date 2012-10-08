@@ -12,7 +12,7 @@ int pt_add_pid(int pid, int tid)
 		printk ("pt: added mapping: pid=%d -> tid=%d\n", pid, tid);
 		return tid;
 	} else {
-		// printk("pt: XXX thread already registered %d->%d\n", pid, tid);
+		printk("pt: XXX thread already registered %d->%d\n", pid, tid);
 		return -1;
 	}
 }

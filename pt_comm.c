@@ -114,7 +114,7 @@ void pt_print_stats(void)
 	int i,j;
 	int nt = pt_get_numthreads();
 
-	printk("(%d threads): %lu pfs (%lu extra) %lu walks\n", nt, pt_pf, pt_pf_extra, pt_num_walks);
+	printk("(%d threads): %lu pfs (%lu extra), %lu walks\n", nt, pt_pf, pt_pf_extra, pt_num_walks);
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
