@@ -1,32 +1,5 @@
 #include "pt_comm.h"
 
-dotraplinkage void 
-spcd_page_fault(struct pt_regs *regs, unsigned long error_code)
-{
-	// spinlock_t *ptl;
-	// struct vm_area_struct *vma;
-	struct task_struct *tsk;
-	unsigned long address;
-	struct mm_struct *mm;
-	// int fault;
-	// int write = error_code & PF_WRITE;
-	// unsigned int flags = FAULT_FLAG_ALLOW_RETRY | FAULT_FLAG_KILLABLE |
-					// (write ? FAULT_FLAG_WRITE : 0);
-	// int pt_do, tid = -1;
-
-
-	tsk = current;
-	mm = tsk->mm;
-
-	/* Get the faulting address: */
-	address = read_cr2();
-	__sync_add_and_fetch(&pt_pf, 1);
-
-	if ((pt_pf % 100) == 0)
-		printk("mpf\n");
-	do_page_fault_original(regs, error_code);
-
-}
 
 
 void pt_check_comm(struct task_struct *tsk, unsigned long address)

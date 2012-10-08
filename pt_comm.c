@@ -16,20 +16,26 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 struct task_struct *pt_thr;
 
 // void (*spcd_page_fault)(struct pt_regs *, unsigned long);
-static void (*do_page_fault_original_ref)(struct pt_regs *, unsigned long); 
-extern void (*my_fault)(struct pt_regs *, unsigned long);
+static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
+extern int (*spcd_func)(struct task_struct *, unsigned long);
 
 #include "pt_pf_thread.c"
 #include "pt_pid.c"
 #include "pt_mem.c"
 #include "pt_dpf.c"
 
+int spcd_func_new(struct task_struct *tsk, unsigned long address)
+{
+	printk("test\n");
+	return 0;
+}
+
 int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_all();
-	do_page_fault_original_ref = my_fault;
-	my_fault = &spcd_page_fault;
+	spcd_func_original_ref = spcd_func;
+	spcd_func = &spcd_func_new;
 	pt_thr = kthread_create(pt_pf_func, NULL, "pt_pf_func");
 	wake_up_process(pt_thr);
 	return 0;
@@ -39,7 +45,7 @@ int init_module(void)
 void cleanup_module(void)
 {
 	kthread_stop(pt_thr);
-	my_fault = do_page_fault_original_ref;
+	spcd_func = spcd_func_original_ref;
 	// pt_reset_all();
 	printk("Bye....\n");
 }
