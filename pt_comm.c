@@ -18,8 +18,8 @@ struct task_struct *pt_thr;
 static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
 extern int (*spcd_func)(struct task_struct *, unsigned long);
 
-static int (*spcd_new_process_original_ref)(struct task_struct *); 
-extern int (*spcd_new_process)(struct task_struct *);
+static void (*spcd_new_process_original_ref)(struct task_struct *); 
+extern void (*spcd_new_process)(struct task_struct *);
 
 #include "pagewalk.c"
 #include "pt_pf_thread.c"
@@ -28,9 +28,15 @@ extern int (*spcd_new_process)(struct task_struct *);
 #include "pt_dpf.c"
 
 
-void spcd_new_process_new(struct task_struct *tsk)
+void spcd_new_process_new(struct task_struct *task)
 {
-	printk("new proc, name %s", tsk->comm);
+	char name[] = ".x";
+	if (pt_task == 0 && strstr(task->comm, name)) {
+		printk("pt: start %s \n", task->comm);
+		pt_task = task;
+		pt_add_pid(task->pid, pt_nt++);
+		printk("new proc, name %s\n", task->comm);
+	}
 }
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
