@@ -10,7 +10,6 @@ void pt_detect_app(void)
 		for_each_process(task)
 		{
 			if (strstr(task->comm, name)) {
-				pt_reset_all();
 				printk("pt: start %s \n", task->comm);
 				pt_task = task;
 				thread = task;
@@ -45,7 +44,7 @@ int pt_pf_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 		pt_detect_app();
-		msleep(100);
+		msleep(10);
 	}
 	
 		// if (pt_do_detect==1) {

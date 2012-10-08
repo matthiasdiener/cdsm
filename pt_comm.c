@@ -24,6 +24,7 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 #include "pt_mem.c"
 #include "pt_dpf.c"
 
+
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
 	if (pt_get_tid(tsk->pid) > -1) {
@@ -32,6 +33,7 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 	}
 	return 0;
 }
+
 
 int init_module(void)
 {
