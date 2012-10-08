@@ -28,7 +28,7 @@ extern int (*spcd_new_process)(struct task_struct *);
 #include "pt_dpf.c"
 
 
-spcd_new_process_new(struct task_struct *tsk)
+void spcd_new_process_new(struct task_struct *tsk)
 {
 	printk("new proc, name %s", tsk->comm);
 }
