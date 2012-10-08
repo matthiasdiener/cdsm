@@ -34,7 +34,7 @@ void pt_pid_clear(void);
 struct pt_mem_info* pt_get_mem(unsigned long addr);
 void pt_mem_clear(void);
 
-void pt_print_comm(void);
+void pt_print_stats(void);
 
 void pt_reset_all(void);
 void pt_reset(void);

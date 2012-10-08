@@ -29,7 +29,7 @@ void pt_detect_app(void)
 	} else {
 		printk("pt: stop\n");
 		pt_reset();
-		pt_print_comm();
+		pt_print_stats();
 		pt_reset_stats();
 	}
 

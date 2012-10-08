@@ -81,10 +81,13 @@ void pt_reset_stats(void)
 
 
 
-void pt_print_comm(void)
+void pt_print_stats(void)
 {
 	int i,j;
 	int nt = pt_get_numthreads();
+
+	printk("%s (%d): \n", pt_task->comm, nt);
+
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
 			printk ("%lu", share[i][j]+share[j][i]);
