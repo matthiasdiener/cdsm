@@ -6,7 +6,7 @@ struct task_struct *pt_task;
 unsigned long pt_pf = 0;
 unsigned long pt_addr_conflict;
 unsigned long pt_pf_extra = 0;
-unsigned long pt_num_walks ;
+unsigned long pt_num_walks;
 int pt_nt = 0;
 
 unsigned pt_num_faults = 3;
@@ -87,7 +87,7 @@ void pt_print_stats(void)
 	int i,j;
 	int nt = pt_get_numthreads();
 
-	printk("%s (%d): \n", pt_task->comm, nt);
+	printk("(%d): %lu pfs (%lu extra)\n", nt, pt_pf, pt_pf_extra);
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
