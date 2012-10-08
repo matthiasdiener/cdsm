@@ -26,7 +26,7 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
-	printk("test\n");
+	
 	return 0;
 }
 
