@@ -1,6 +1,6 @@
 static unsigned long pt_next_addr = 0;
 static struct vm_area_struct *pt_next_vma = NULL;
-static unsigned long num_walks = 3;
+static unsigned long pt_num_walks = 3;
 
 static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
@@ -29,7 +29,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 		pte_unmap_unlock(pte, ptl)	;
 		// spin_unlock(&walk->mm->page_table_lock);
 
-		pt_extra_pf++;
+		pt_pf_extra++;
 
 		return 1;
 	}
@@ -39,7 +39,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 
 static void pt_check_next_addr(struct mm_struct *mm)
 {
-	unsigned pt_addr_pbit_changed = 0, mod_walk;
+	unsigned pt_addr_pbit_changed = 0;
 	int i = 0;
 
 	struct mm_walk walk = {
@@ -49,13 +49,13 @@ static void pt_check_next_addr(struct mm_struct *mm)
 	
 	down_write(&mm->mmap_sem);
 
-	mod_walk = n / 1024;
+	// mod_walk = n / 1024;
 
-	for (i=0; i<num_faults; i++) {
+	for (i=0; i<pt_num_faults; i++) {
 		pt_addr_pbit_changed = 0;
 
 		if (pt_next_vma == NULL) {
-			num_walks ++;
+			pt_num_walks ++;
 			pt_next_vma = mm->mmap;
 			pt_next_addr = pt_next_vma->vm_start;
 		}

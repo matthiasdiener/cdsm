@@ -6,7 +6,7 @@ struct task_struct *pt_task;
 unsigned long pt_pf = 0;
 unsigned long pt_addr_conflict;
 unsigned long pt_pf_extra = 0;
-unsigned long pt_num_walks;
+unsigned pt_num_faults;
 int pt_nt = 0;
 
 unsigned pt_num_faults = 3;
@@ -19,10 +19,12 @@ struct task_struct *pt_thr;
 static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
 extern int (*spcd_func)(struct task_struct *, unsigned long);
 
+#include "pagewalk.c"
 #include "pt_pf_thread.c"
 #include "pt_pid.c"
 #include "pt_mem.c"
 #include "pt_dpf.c"
+
 
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
