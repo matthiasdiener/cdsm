@@ -30,14 +30,19 @@ extern void (*spcd_new_process)(struct task_struct *);
 
 void spcd_new_process_new(struct task_struct *task)
 {
+	DEFINE_SPINLOCK(ptl);
+	
 	char name[] = ".x";
 	if (strstr(task->comm, name)) {
+		spin_lock(&ptl);
 		if (pt_task == 0) {
 			printk("pt: start %s (pid %d) \n", task->comm, task->pid);
 			pt_task = task;
 		}
 		pt_add_pid(task->pid, pt_nt++);
+		spin_unlock(&ptl);
 	}
+	
 }
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
