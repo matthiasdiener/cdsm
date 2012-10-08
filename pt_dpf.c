@@ -2,17 +2,13 @@
 
 
 
-void pt_check_comm(struct task_struct *tsk, unsigned long address)
+void pt_check_comm(unsigned long address)
 {
 	DEFINE_SPINLOCK(ptl);
 	int mytid;
 	struct pt_mem_info *elem;
-
-	// detection not requested -> return
-	if (pt_task == 0)
-		return;
 	
-	mytid = pt_get_tid(tsk->pid);
+	mytid = pt_get_tid(pt_task->pid);
 	// thread not in list -> we are not interested
 	if (mytid == -1)
 		return;
@@ -85,19 +81,4 @@ void pt_check_comm(struct task_struct *tsk, unsigned long address)
 	out:
 		spin_unlock(&ptl);
 
-}
-
-
-void pt_print_comm(void)
-{
-	int i,j;
-	int nt = pt_get_numthreads();
-	for (i = nt-1; i >= 0; i--) {
-		for (j = 0; j < nt; j++){
-			printk ("%lu", share[i][j]+share[j][i]);
-			if (j != nt-1)
-				printk (",");
-		}
-		printk("\n");
-	}
 }

@@ -26,7 +26,10 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
-	
+	if (tsk == pt_task && pid_alive(pt_task)) {
+		pt_pf++;
+		pt_check_comm(address);
+	}
 	return 0;
 }
 
@@ -78,3 +81,16 @@ void pt_reset_stats(void)
 
 
 
+void pt_print_comm(void)
+{
+	int i,j;
+	int nt = pt_get_numthreads();
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++){
+			printk ("%lu", share[i][j]+share[j][i]);
+			if (j != nt-1)
+				printk (",");
+		}
+		printk("\n");
+	}
+}
