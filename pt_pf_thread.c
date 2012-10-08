@@ -11,7 +11,7 @@ void pt_detect_app(void)
 		{
 			if (strstr(task->comm, name)) {
 				pt_reset_all();
-				printk("pt: start\n");
+				printk("pt: start %s \n", task->comm);
 				pt_task = task;
 				thread = task;
 				do {

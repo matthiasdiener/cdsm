@@ -87,7 +87,7 @@ void pt_print_stats(void)
 	int i,j;
 	int nt = pt_get_numthreads();
 
-	printk("(%d): %lu pfs (%lu extra)\n", nt, pt_pf, pt_pf_extra);
+	printk("(%d threads): %lu pfs (%lu extra)\n", nt, pt_pf, pt_pf_extra);
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
