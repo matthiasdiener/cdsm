@@ -1,7 +1,5 @@
 #include "pt_comm.h"
 
-
-
 void pt_check_comm(int tid, unsigned long address)
 {
 	DEFINE_SPINLOCK(ptl);
@@ -71,5 +69,4 @@ void pt_check_comm(int tid, unsigned long address)
 
 	out:
 		spin_unlock(&ptl);
-
 }
