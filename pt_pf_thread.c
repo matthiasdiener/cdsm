@@ -44,7 +44,8 @@ int pt_pf_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 		pt_detect_app();
-		pt_check_next_addr(pt_task->mm);
+		if (pt_task && pid_alive(pt_task))
+			pt_check_next_addr(pt_task->mm);
 		msleep(10);
 	}
 	
