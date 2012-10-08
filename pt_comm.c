@@ -29,9 +29,10 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
-	if (pt_get_tid(tsk->pid) > -1) {
+	int tid = pt_get_tid(tsk->pid);
+	if (tid > -1) {
 		pt_pf++;
-		pt_check_comm(address);
+		pt_check_comm(tid, address);
 	}
 	return 0;
 }

@@ -40,7 +40,7 @@ void pt_reset_all(void);
 void pt_reset(void);
 void pt_reset_stats(void);
 
-void pt_check_comm(unsigned long address);
+void pt_check_comm(int tid, unsigned long address);
 
 extern void (*do_page_fault_original)(struct pt_regs *, unsigned long);
 
