@@ -5,6 +5,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/delay.h>
+#include <asm/traps.h>
 #include <linux/hash.h>
 #include <linux/mm.h>
 #include <linux/syscalls.h>
@@ -41,5 +42,6 @@ void pt_reset_stats(void);
 
 void pt_check_comm(struct task_struct *tsk, unsigned long address);
 
+extern void (*do_page_fault_original)(struct pt_regs *, unsigned long);
 
 #endif
