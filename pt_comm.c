@@ -98,6 +98,7 @@ void pt_reset(void)
 void pt_reset_stats(void)
 {
 	pt_pid_clear();
+	pt_mem_clear();
 	pt_nt = 0;
 	pt_num_walks = 0;
 	pt_pf = 0;
