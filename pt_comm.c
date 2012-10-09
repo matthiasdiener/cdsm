@@ -30,10 +30,12 @@ extern void (*spcd_new_process)(struct task_struct *);
 
 void spcd_new_process_new(struct task_struct *task)
 {
+	struct task_struct *s;
 	char name[] = ".x";
 	if (strstr(task->comm, name)) {
 		if (pt_task == 0) {
-			printk("pt: start %s (pid %d), parent %d\n", task->comm, task->pid, task->real_parent->pid);
+			s = list_entry(&task->children, struct task_struct, sibling);
+			printk("pt: start %s (pid %d), parent %d\n", task->comm, task->pid, s->pid);
 			pt_task = task;
 		}
 		pt_add_pid(task->pid, pt_nt++);
