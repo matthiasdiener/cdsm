@@ -3,10 +3,11 @@
 void pt_check_comm(int tid, unsigned long address)
 {
 	DEFINE_SPINLOCK(ptl);
-	struct pt_mem_info *elem = pt_get_mem(address);
-	
+
 	spin_lock(&ptl);
 
+	struct pt_mem_info *elem = pt_get_mem(address);
+	
 	if (elem->pg_addr != (address >> PAGE_SHIFT) ){
 		if (elem->pg_addr !=0 ) {
 			// printk ("XXX conflict, hash = %ld, old = %lu, new = %lu\n", h, elem->pg_addr, (address >> PAGE_SHIFT));

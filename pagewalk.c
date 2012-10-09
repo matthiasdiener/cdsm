@@ -17,24 +17,22 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	if (!page)
 		return 0;
 
-	if (pte_young(*pte) || PageReferenced(page)) {
+	// if (pte_young(*pte) || PageReferenced(page)) {
 		pgd = pgd_offset(walk->mm, addr);
 		pud = pud_offset(pgd, addr);
 		pmd = pmd_offset(pud, addr);
 		pt_next_addr = addr;
 
-		// spin_lock(&walk->mm->page_table_lock);
 		pte = pte_offset_map_lock(walk->mm, pmd, addr, &ptl);
 		*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
-		pte_unmap_unlock(pte, ptl)	;
-		// spin_unlock(&walk->mm->page_table_lock);
+		pte_unmap_unlock(pte, ptl);
 
 		pt_pf_extra++;
 
 		return 1;
-	}
+	// }
 	
-	return 0;
+	// return 0;
 }
 
 static void pt_check_next_addr(struct mm_struct *mm)
