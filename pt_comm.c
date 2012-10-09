@@ -27,19 +27,29 @@ extern void (*spcd_new_process)(struct task_struct *);
 #include "pt_mem.c"
 #include "pt_dpf.c"
 
+int pt_check_name(char *name)
+{
+	const char *bm_names[] = {".x","LU","FFT", "CHOLESKY"};
+	int i = 0, len = sizeof(bm_names)/sizeof(char*);
+
+	for (;i<len;i++) {
+		if (strstr(name, bm_names[i]))
+			return 1;
+	}
+	return 0;
+}
 
 void spcd_new_process_new(struct task_struct *task)
 {
-	char name[] = ".x";
 
-	if (pt_task == 0 && strstr(task->comm, name)) {
+	if (pt_task == 0 && pt_check_name(task->comm)) {
 		printk("pt: start %s (pid %d)\n", task->comm, task->pid);
 		pt_add_pid(task->pid, pt_nt++);
 		pt_task = task;
 		return;
 	}
 
-	if (pt_task != 0 && strstr(task->comm, name)) {
+	if (pt_task != 0 && strstr(task->comm, pt_task->comm)) {
 		pt_add_pid(task->pid, pt_nt++);
 	}
 
