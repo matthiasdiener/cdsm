@@ -32,14 +32,11 @@ void spcd_new_process_new(struct task_struct *task)
 {
 	struct task_struct *s;
 	char name[] = ".x";
-	if (strstr(task->comm, name)) {
-		if (pt_task == 0) {
-			s = list_entry(&task->children, struct task_struct, children);
-			printk("pt: start %s (pid %d), parent %d\n", task->comm, task->pid, s->pid);
+	if (pt_task==0 && strstr(task->comm, name)) {
+			printk("pt: start %s (pid %d), parent %d\n", task->comm, task->pid);
 			pt_task = task;
-		}
-		pt_add_pid(task->pid, pt_nt++);
-	}
+		// pt_add_pid(task->pid, pt_nt++);
+	} else if (pt_task != 0)
 	
 }
 
