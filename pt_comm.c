@@ -21,11 +21,15 @@ extern int (*spcd_func)(struct task_struct *, unsigned long);
 static void (*spcd_new_process_original_ref)(struct task_struct *); 
 extern void (*spcd_new_process)(struct task_struct *);
 
+static void (*spcd_exit_process_original_ref)(struct task_struct *); 
+extern void (*spcd_exit_process)(struct task_struct *);
+
 #include "pagewalk.c"
 #include "pt_pf_thread.c"
 #include "pt_pid.c"
 #include "pt_mem.c"
 #include "pt_dpf.c"
+
 
 int pt_check_name(char *name)
 {
@@ -40,6 +44,18 @@ int pt_check_name(char *name)
 	return 0;
 }
 
+
+void spcd_new_process_new(struct task_struct *task)
+{
+	if (pt_task == task) {
+		printk("pt: stop\n");
+		pt_reset();
+		pt_print_stats();
+		pt_reset_stats();
+	}
+}
+
+
 void spcd_new_process_new(struct task_struct *task)
 {
 
@@ -48,13 +64,6 @@ void spcd_new_process_new(struct task_struct *task)
 		pt_add_pid(task->pid, pt_nt++);
 		pt_task = task;
 		return;
-	}
-
-	if (pt_task == task) {
-		printk("pt: stop\n");
-		pt_reset();
-		pt_print_stats();
-		pt_reset_stats();
 	}
 
 	if (pt_task != 0 && pt_task->parent->pid == task->parent->pid) {
@@ -80,11 +89,15 @@ int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_all();
+
 	spcd_func_original_ref = spcd_func;
 	spcd_func = &spcd_func_new;
 
 	spcd_new_process_original_ref = spcd_new_process;
 	spcd_new_process = &spcd_new_process_new;
+
+	spcd_exit_process_original_ref = spcd_exit_process;
+	spcd_exit_process = &spcd_exit_process_new;
 
 	pt_thr = kthread_create(pt_pf_func, NULL, "pt_pf_func");
 	wake_up_process(pt_thr);
@@ -97,6 +110,7 @@ void cleanup_module(void)
 	kthread_stop(pt_thr);
 	spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
+	spcd_exit_process = spcd_exit_process_original_ref;
 	printk("Bye.....\n");
 }
 
