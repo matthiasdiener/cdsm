@@ -17,7 +17,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	if (!page)
 		return 0;
 
-	// if (pte_young(*pte) || PageReferenced(page)) {
+	if (pte_young(*pte) || PageReferenced(page)) {
 		pgd = pgd_offset(walk->mm, addr);
 		pud = pud_offset(pgd, addr);
 		pmd = pmd_offset(pud, addr);
@@ -30,9 +30,9 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 		pt_pf_extra++;
 
 		return 1;
-	// }
+	}
 	
-	// return 0;
+	return 0;
 }
 
 static void pt_check_next_addr(struct mm_struct *mm)

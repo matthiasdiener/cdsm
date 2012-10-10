@@ -21,6 +21,7 @@
 
 struct pt_mem_info {
 	unsigned long pg_addr;
+	int pte_cleared;
 	unsigned sharer[2];
 };
 
