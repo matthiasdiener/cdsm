@@ -45,7 +45,7 @@ int pt_check_name(char *name)
 }
 
 
-void spcd_new_process_new(struct task_struct *task)
+void spcd_exit_process_new(struct task_struct *task)
 {
 	if (pt_task == task) {
 		printk("pt: stop\n");
