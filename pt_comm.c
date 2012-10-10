@@ -30,9 +30,10 @@ extern void (*spcd_new_process)(struct task_struct *);
 int pt_check_name(char *name)
 {
 	const char *bm_names[] = {".x","LU","FFT", "CHOLESKY"};
-	int i = 0, len = sizeof(bm_names)/sizeof(char*);
+	int i;
+	int len = sizeof(bm_names)/sizeof(char*);
 
-	for (;i<len;i++) {
+	for (i=0; i<len; i++) {
 		if (strstr(name, bm_names[i]))
 			return 1;
 	}
@@ -49,8 +50,15 @@ void spcd_new_process_new(struct task_struct *task)
 		return;
 	}
 
+	if (pt_task == task) {
+		printk("pt: stop\n");
+		pt_reset();
+		pt_print_stats();
+		pt_reset_stats();
+	}
+
 	if (pt_task != 0 && pt_task->parent->pid == task->parent->pid) {
-		printk("%s: %d, parent: %d , pt_task_parent: %d\n", task->comm, task->pid, task->parent->pid, pt_task->parent->pid);
+		// printk("%s: %d, parent: %d , pt_task_parent: %d\n", task->comm, task->pid, task->parent->pid, pt_task->parent->pid);
 		pt_add_pid(task->pid, pt_nt++);
 	}
 
