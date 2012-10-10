@@ -9,6 +9,9 @@ void pt_check_comm(int tid, unsigned long address)
 
 	if (elem->pg_addr != (address >> PAGE_SHIFT) ){
 		if (elem->pg_addr !=0 ) {
+			if (elem->pte_cleared){
+				pt_fix_pte(address);
+			}
 			// printk ("XXX conflict, hash = %ld, old = %lu, new = %lu\n", h, elem->pg_addr, (address >> PAGE_SHIFT));
 			pt_addr_conflict++;
 		}

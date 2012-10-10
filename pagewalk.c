@@ -27,6 +27,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 		*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
 		pte_unmap_unlock(pte, ptl);
 
+		pt_reset_pte(addr);
 		pt_pf_extra++;
 
 		return 1;
