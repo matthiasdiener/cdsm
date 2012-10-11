@@ -47,6 +47,7 @@ void pt_fix_pte(unsigned long addr)
 	pmd = pmd_offset(pud, addr);
 	pte = pte_offset_map_lock(pt_task->mm, pmd, addr, &ptl);
 	*pte = pte_set_flags(*pte, _PAGE_PRESENT);
+	pt_fixes ++;
 	pte_unmap_unlock(pte, ptl);
 }
 
