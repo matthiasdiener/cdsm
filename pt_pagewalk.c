@@ -36,7 +36,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	return 0;
 }
 
-static void pt_pf_pagewalk(struct mm_struct *mm)
+void pt_pf_pagewalk(struct mm_struct *mm)
 {
 	unsigned pt_addr_pbit_changed = 0;
 	int i = 0;
