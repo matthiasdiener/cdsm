@@ -11,7 +11,6 @@ int pt_num_threads = 0;
 
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes = 0;
-unsigned long pt_pte_marks = 0;
 
 unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
@@ -140,7 +139,6 @@ void pt_reset_stats(void)
 	pt_pid_clear();
 	pt_mem_clear();
 	pt_pte_fixes = 0;
-	pt_pte_marks = 0;
 	pt_num_threads = 0;
 	pt_num_walks = 0;
 	pt_pf = 0;
@@ -155,7 +153,7 @@ void pt_print_stats(void)
 {
 	int i,j;
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu marks, %lu fixes), %lu walks\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_marks, pt_pte_fixes, pt_num_walks);
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks);
 
 	for (i = pt_num_threads-1; i >= 0; i--) {
 		for (j = 0; j < pt_num_threads; j++){
