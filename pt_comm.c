@@ -14,7 +14,7 @@ unsigned long pt_pte_fixes = 0;
 
 unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
-struct task_struct *pt_thr;
+struct task_struct *pt_thread;
 
 static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
 extern int (*spcd_func)(struct task_struct *, unsigned long);
@@ -105,15 +105,15 @@ int init_module(void)
 	spcd_exit_process_original_ref = spcd_exit_process;
 	spcd_exit_process = &spcd_exit_process_new;
 
-	pt_thr = kthread_create(pt_pf_func, NULL, "pt_pf_func");
-	wake_up_process(pt_thr);
+	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
+	wake_up_process(pt_thread);
 	return 0;
 }
 
 
 void cleanup_module(void)
 {
-	kthread_stop(pt_thr);
+	kthread_stop(pt_thread);
 	spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;

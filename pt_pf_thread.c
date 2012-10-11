@@ -1,6 +1,6 @@
 #include "pt_comm.h"
 
-int pt_pf_func(void* v)
+static int pt_pf_thread_func(void* v)
 {
 	
 	while (1) {

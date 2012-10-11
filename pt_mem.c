@@ -3,13 +3,13 @@
 static struct pt_mem_info pt_mem[PT_MEM_HASH_SIZE];
 
 
-struct pt_mem_info* pt_get_mem(unsigned long addr)
+static struct pt_mem_info* pt_get_mem(unsigned long addr)
 {
 	unsigned long h = hash_32(addr >> PAGE_SHIFT, PT_MEM_HASH_BITS);
 	return &pt_mem[h];
 }
 
-void pt_mark_pte(unsigned long address)
+static void pt_mark_pte(unsigned long address)
 {
 	struct pt_mem_info *elem = pt_get_mem(address);
 
@@ -34,7 +34,7 @@ void pt_mark_pte(unsigned long address)
 	elem->pte_cleared = 1;
 }
 
-void pt_fix_pte(unsigned long addr)
+static void pt_fix_pte(unsigned long addr)
 {
 	pgd_t *pgd;
 	pud_t *pud;
@@ -51,7 +51,7 @@ void pt_fix_pte(unsigned long addr)
 	pte_unmap_unlock(pte, ptl);
 }
 
-void pt_mem_clear(void)
+static void pt_mem_clear(void)
 {
 	memset(pt_mem, 0, sizeof(pt_mem));
 }
