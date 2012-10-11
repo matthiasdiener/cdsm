@@ -32,6 +32,7 @@ void pt_mark_pte(unsigned long address)
 	}
 
 	elem->pte_cleared = 1;
+	pt_pte_marks ++;
 }
 
 void pt_fix_pte(unsigned long addr)
@@ -47,7 +48,7 @@ void pt_fix_pte(unsigned long addr)
 	pmd = pmd_offset(pud, addr);
 	pte = pte_offset_map_lock(pt_task->mm, pmd, addr, &ptl);
 	*pte = pte_set_flags(*pte, _PAGE_PRESENT);
-	pt_fixes ++;
+	pt_pte_fixes ++;
 	pte_unmap_unlock(pte, ptl);
 }
 
