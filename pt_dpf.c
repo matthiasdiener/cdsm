@@ -12,7 +12,7 @@ void pt_check_comm(int tid, unsigned long address)
 			if (elem->pte_cleared){
 				pt_fix_pte(address);
 			}
-			// printk ("XXX conflict, hash = %ld, old = %lu, new = %lu\n", h, elem->pg_addr, (address >> PAGE_SHIFT));
+			printk ("XXX conflict, hash = %u, old = %lu, new = %lu\n", hash_32(address >> PAGE_SHIFT, PT_MEM_HASH_BITS), elem->pg_addr, (address >> PAGE_SHIFT));
 			pt_addr_conflict++;
 		}
 		elem->sharer[0] = -1;

@@ -43,6 +43,9 @@ void pt_reset_stats(void);
 
 void pt_check_comm(int tid, unsigned long address);
 
+void pt_mark_pte(unsigned long addr);
+void pt_fix_pte(unsigned long addr);
+
 extern void (*do_page_fault_original)(struct pt_regs *, unsigned long);
 
 #endif

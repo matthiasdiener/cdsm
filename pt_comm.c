@@ -77,10 +77,18 @@ void spcd_new_process_new(struct task_struct *task)
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
 	int tid = pt_get_tid(tsk->pid);
+	struct pt_mem_info *elem = pt_get_mem(address);
+
 	if (tid > -1) {
 		pt_pf++;
 		pt_check_comm(tid, address);
 	}
+
+	if (elem->pte_cleared) {
+		pt_fix_pte(address);
+		elem->pte_cleared = 0;
+	}
+
 	return 0;
 }
 

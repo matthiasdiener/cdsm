@@ -9,10 +9,29 @@ struct pt_mem_info* pt_get_mem(unsigned long addr)
 	return &pt_mem[h];
 }
 
-void pt_reset_pte(unsigned long addr)
+void pt_mark_pte(unsigned long address)
 {
-	struct pt_mem_info *elem = pt_get_mem(addr);
-	// elem
+	struct pt_mem_info *elem = pt_get_mem(address);
+
+	if (elem->pg_addr != (address >> PAGE_SHIFT) ){
+		if (elem->pg_addr !=0 ) {
+			if (elem->pte_cleared){
+				pt_fix_pte(address);
+			}
+			printk ("XXX conflict, hash = %u, old = %lu, new = %lu\n", hash_32(address >> PAGE_SHIFT, PT_MEM_HASH_BITS), elem->pg_addr, (address >> PAGE_SHIFT));
+			pt_addr_conflict++;
+		}
+		elem->sharer[0] = -1;
+		elem->sharer[1] = -1;
+		elem->pg_addr = address >> PAGE_SHIFT;
+		elem->pte_cleared = 0;
+	}
+
+	if (elem->pte_cleared){
+		pt_fix_pte(address);
+	}
+
+	elem->pte_cleared = 1;
 }
 
 void pt_fix_pte(unsigned long addr)
