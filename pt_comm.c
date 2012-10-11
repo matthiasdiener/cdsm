@@ -2,11 +2,11 @@
 
 MODULE_LICENSE("GPL");
 
-// unsigned long pt_pf;
-// unsigned long pt_addr_conflict;
-// unsigned long pt_pf_extra;
-// unsigned pt_num_faults;
-// int pt_num_threads;
+unsigned long pt_pf;
+unsigned long pt_addr_conflict;
+unsigned long pt_pf_extra;
+unsigned pt_num_faults;
+int pt_num_threads;
 
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes = 0;

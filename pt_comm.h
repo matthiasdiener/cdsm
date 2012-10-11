@@ -19,11 +19,11 @@
 #define PT_PID_HASH_BITS 10UL
 #define PT_PID_HASH_SIZE (1ULL << PT_PID_HASH_BITS)
 
-unsigned long pt_pf;
-unsigned long pt_addr_conflict;
-unsigned long pt_pf_extra;
-unsigned pt_num_faults;
-int pt_num_threads;
+extern unsigned long pt_pf;
+extern unsigned long pt_addr_conflict;
+extern unsigned long pt_pf_extra;
+extern unsigned pt_num_faults;
+extern int pt_num_threads;
 
 extern struct task_struct *pt_task;
 
