@@ -26,7 +26,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-#include "pagewalk.c"
+#include "pt_pagewalk.c"
 #include "pt_pf_thread.c"
 #include "pt_pid.c"
 #include "pt_mem.c"
@@ -36,8 +36,7 @@ extern void (*spcd_exit_process)(struct task_struct *);
 int pt_check_name(char *name)
 {
 	const char *bm_names[] = {".x","LU","FFT", "CHOLESKY"};
-	int i;
-	int len = sizeof(bm_names)/sizeof(char*);
+	int i, len = sizeof(bm_names)/sizeof(char*);
 
 	for (i=0; i<len; i++) {
 		if (strstr(name, bm_names[i]))
