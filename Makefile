@@ -1,4 +1,4 @@
-obj-m += pt_comm.o
+obj-m := pt_comm.o
 pt_comm-objs := pt_pf_thread.o
 
 all:

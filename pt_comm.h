@@ -46,5 +46,6 @@ void pt_mark_pte(unsigned long addr);
 void pt_fix_pte(unsigned long addr);
 
 void pt_pf_pagewalk(struct mm_struct *mm);
+int pt_pf_thread_func(void* v);
 
 #endif
