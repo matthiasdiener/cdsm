@@ -25,6 +25,8 @@ extern unsigned long pt_pf_extra;
 extern unsigned pt_num_faults;
 extern int pt_num_threads;
 
+extern unsigned long pt_pte_fixes;
+
 extern struct task_struct *pt_task;
 
 struct pt_mem_info {

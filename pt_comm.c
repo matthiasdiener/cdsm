@@ -24,12 +24,6 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-// #include "pt_pagewalk.c"
-// #include "pt_pf_thread.c"
-#include "pt_pid.c"
-#include "pt_mem.c"
-#include "pt_dpf.c"
-
 
 int pt_check_name(char *name)
 {
