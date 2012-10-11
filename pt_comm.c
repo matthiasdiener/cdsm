@@ -7,7 +7,7 @@ unsigned long pt_pf = 0;
 unsigned long pt_addr_conflict;
 unsigned long pt_pf_extra = 0;
 unsigned pt_num_faults;
-int pt_nt = 0;
+int pt_num_threads = 0;
 
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes = 0;
@@ -62,13 +62,13 @@ void spcd_new_process_new(struct task_struct *task)
 
 	if (pt_task == 0 && pt_check_name(task->comm)) {
 		printk("pt: start %s (pid %d)\n", task->comm, task->pid);
-		pt_add_pid(task->pid, pt_nt++);
+		pt_add_pid(task->pid, pt_num_threads++);
 		pt_task = task;
 		return;
 	}
 
 	if (pt_task != 0 && pt_task->parent->pid == task->parent->pid) {
-		pt_add_pid(task->pid, pt_nt++);
+		pt_add_pid(task->pid, pt_num_threads++);
 	}
 
 }
@@ -141,7 +141,7 @@ void pt_reset_stats(void)
 	pt_mem_clear();
 	pt_pte_fixes = 0;
 	pt_pte_marks = 0;
-	pt_nt = 0;
+	pt_num_threads = 0;
 	pt_num_walks = 0;
 	pt_pf = 0;
 	pt_pf_extra = 0;
@@ -154,14 +154,13 @@ void pt_reset_stats(void)
 void pt_print_stats(void)
 {
 	int i,j;
-	int nt = pt_get_numthreads();
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu marks, %lu fixes), %lu walks\n", nt, pt_pf, pt_pf_extra, pt_pte_marks, pt_pte_fixes, pt_num_walks);
+	printk("(%d threads): %lu pfs (%lu extra, %lu marks, %lu fixes), %lu walks\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_marks, pt_pte_fixes, pt_num_walks);
 
-	for (i = nt-1; i >= 0; i--) {
-		for (j = 0; j < nt; j++){
+	for (i = pt_num_threads-1; i >= 0; i--) {
+		for (j = 0; j < pt_num_threads; j++){
 			printk ("%lu", share[i][j]+share[j][i]);
-			if (j != nt-1)
+			if (j != pt_num_threads-1)
 				printk (",");
 		}
 		printk("\n");

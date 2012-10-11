@@ -32,7 +32,6 @@ void pt_mark_pte(unsigned long address)
 	}
 
 	elem->pte_cleared = 1;
-	pt_pte_marks ++;
 }
 
 void pt_fix_pte(unsigned long addr)
