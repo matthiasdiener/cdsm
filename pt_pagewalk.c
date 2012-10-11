@@ -1,3 +1,5 @@
+#include "pt_comm.h"
+
 static unsigned long pt_next_addr = 0;
 static struct vm_area_struct *pt_next_vma = NULL;
 static unsigned long pt_num_walks = 3;

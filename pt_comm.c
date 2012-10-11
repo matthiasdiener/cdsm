@@ -2,11 +2,11 @@
 
 MODULE_LICENSE("GPL");
 
-unsigned long pt_pf = 0;
+unsigned long pt_pf;
 unsigned long pt_addr_conflict;
-unsigned long pt_pf_extra = 0;
+unsigned long pt_pf_extra;
 unsigned pt_num_faults;
-int pt_num_threads = 0;
+int pt_num_threads;
 
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes = 0;
@@ -24,7 +24,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-#include "pt_pagewalk.c"
+// #include "pt_pagewalk.c"
 // #include "pt_pf_thread.c"
 #include "pt_pid.c"
 #include "pt_mem.c"
