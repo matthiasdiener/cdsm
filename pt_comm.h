@@ -25,8 +25,6 @@ struct pt_mem_info {
 	unsigned sharer[2];
 };
 
-extern int pt_do;
-
 int pt_get_tid(int pid);
 int pt_get_numthreads(void);
 int pt_add_pid(int pid, int tid);
@@ -45,7 +43,5 @@ void pt_check_comm(int tid, unsigned long address);
 
 void pt_mark_pte(unsigned long addr);
 void pt_fix_pte(unsigned long addr);
-
-extern void (*do_page_fault_original)(struct pt_regs *, unsigned long);
 
 #endif

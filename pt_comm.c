@@ -68,7 +68,6 @@ void spcd_new_process_new(struct task_struct *task)
 	}
 
 	if (pt_task != 0 && pt_task->parent->pid == task->parent->pid) {
-		// printk("%s: %d, parent: %d , pt_task_parent: %d\n", task->comm, task->pid, task->parent->pid, pt_task->parent->pid);
 		pt_add_pid(task->pid, pt_nt++);
 	}
 
