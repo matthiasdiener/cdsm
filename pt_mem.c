@@ -51,6 +51,7 @@ static void pt_fix_pte(unsigned long addr)
 	pte_unmap_unlock(pte, ptl);
 }
 
+
 static void pt_mem_clear(void)
 {
 	memset(pt_mem, 0, sizeof(pt_mem));

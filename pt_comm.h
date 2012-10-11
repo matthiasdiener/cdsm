@@ -19,28 +19,32 @@
 #define PT_PID_HASH_BITS 10UL
 #define PT_PID_HASH_SIZE (1ULL << PT_PID_HASH_BITS)
 
+struct task_struct *pt_task;
+
 struct pt_mem_info {
 	unsigned long pg_addr;
 	int pte_cleared;
 	unsigned sharer[2];
 };
 
-static int pt_get_tid(int pid); 
-static int pt_add_pid(int pid, int tid);
-static void pt_pid_clear(void);
+int pt_get_tid(int pid); 
+int pt_add_pid(int pid, int tid);
+void pt_pid_clear(void);
 
-static struct pt_mem_info* pt_get_mem(unsigned long addr);
-static void pt_mem_clear(void);
+struct pt_mem_info* pt_get_mem(unsigned long addr);
+void pt_mem_clear(void);
 
-static void pt_print_stats(void);
+void pt_print_stats(void);
 
-static void pt_reset_all(void);
-static void pt_reset(void);
-static void pt_reset_stats(void);
+void pt_reset_all(void);
+void pt_reset(void);
+void pt_reset_stats(void);
 
-static void pt_check_comm(int tid, unsigned long address);
+void pt_check_comm(int tid, unsigned long address);
 
-static void pt_mark_pte(unsigned long addr);
-static void pt_fix_pte(unsigned long addr);
+void pt_mark_pte(unsigned long addr);
+void pt_fix_pte(unsigned long addr);
+
+void pt_pf_pagewalk(struct mm_struct *mm);
 
 #endif
