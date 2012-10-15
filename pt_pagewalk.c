@@ -3,7 +3,7 @@
 static unsigned long pt_next_addr = 0;
 static struct vm_area_struct *pt_next_vma = NULL;
 
-static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
+int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
 	struct page *page;
 	pgd_t *pgd;
@@ -46,6 +46,9 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 		.pte_entry = pt_callback_page_walk,
 		.mm = mm,
 	};
+
+	if (!mm)
+		return;
 	
 	down_write(&mm->mmap_sem);
 
