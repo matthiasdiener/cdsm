@@ -7,6 +7,7 @@ unsigned long pt_addr_conflict;
 unsigned long pt_pf_extra;
 unsigned pt_num_faults;
 int pt_num_threads;
+unsigned long pt_num_walks;
 
 struct task_struct *pt_task;
 
