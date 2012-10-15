@@ -8,6 +8,8 @@ unsigned long pt_pf_extra;
 unsigned pt_num_faults;
 int pt_num_threads;
 
+struct task_struct *pt_task;
+
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes;
 
