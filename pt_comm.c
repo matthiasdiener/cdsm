@@ -30,8 +30,11 @@ extern void (*spcd_exit_process)(struct task_struct *);
 
 int pt_check_name(char *name)
 {
-	const char *bm_names[] = {".x","LU","FFT", "CHOLESKY"};
-	int i, len = sizeof(bm_names)/sizeof(char*);
+	const char *bm_names[] = {".x", /*NAS*/
+	"blackscholes", /*Parsec*/
+	"LU","FFT", "CHOLESKY"};
+	
+	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
 
 	for (i=0; i<len; i++) {
 		if (strstr(name, bm_names[i]))
