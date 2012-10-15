@@ -10,6 +10,7 @@ int pt_add_pid(int pid, int tid)
 	if (pt_pid[h] == -1) {
 		pt_pid[h] = tid;
 		printk ("pt: added mapping: pid=%d -> tid=%d\n", pid, tid);
+		pt_num_threads++;
 		return tid;
 	} else {
 		printk("pt: XXX thread already registered %d->%d\n", pid, tid);

@@ -1,6 +1,6 @@
 #include "pt_comm.h"
 
-void pt_check_comm(int tid, unsigned long address)
+struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 {
 	DEFINE_SPINLOCK(ptl);
 	struct pt_mem_info *elem = pt_get_mem(address);
@@ -15,9 +15,10 @@ void pt_check_comm(int tid, unsigned long address)
 			printk ("XXX conflict, hash = %u, old = %lu, new = %lu\n", hash_32(address >> PAGE_SHIFT, PT_MEM_HASH_BITS), elem->pg_addr, (address >> PAGE_SHIFT));
 			pt_addr_conflict++;
 		}
-		elem->sharer[0] = -1;
+		elem->sharer[0] = tid;
 		elem->sharer[1] = -1;
 		elem->pg_addr = address >> PAGE_SHIFT;
+		goto out;
 	}
 
 	// no sharer present
@@ -71,5 +72,6 @@ void pt_check_comm(int tid, unsigned long address)
 	}
 
 	out:
-		spin_unlock(&ptl);
+	spin_unlock(&ptl);
+	return elem;
 }

@@ -17,7 +17,7 @@
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
 
 #define PT_PID_HASH_BITS 10UL
-#define PT_PID_HASH_SIZE (1ULL << PT_PID_HASH_BITS)
+#define PT_PID_HASH_SIZE (1UL << PT_PID_HASH_BITS)
 
 extern unsigned long pt_pf; //ok
 extern unsigned long pt_addr_conflict;
@@ -49,7 +49,7 @@ void pt_reset_all(void);
 void pt_reset(void);
 void pt_reset_stats(void);
 
-void pt_check_comm(int tid, unsigned long address);
+struct pt_mem_info* pt_check_comm(int tid, unsigned long address);
 
 void pt_mark_pte(unsigned long addr);
 void pt_fix_pte(unsigned long addr);
@@ -57,6 +57,5 @@ void pt_fix_pte(unsigned long addr);
 void pt_pf_pagewalk(struct mm_struct *mm);
 int pt_pf_thread_func(void* v);
 
-void pt_check_comm(int tid, unsigned long address);
 
 #endif

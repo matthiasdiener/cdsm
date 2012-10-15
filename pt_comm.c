@@ -48,8 +48,8 @@ int pt_check_name(char *name)
 void spcd_exit_process_new(struct task_struct *task)
 {
 	if (pt_task == task) {
-		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 		pt_reset();
+		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 		pt_print_stats();
 		pt_reset_stats();
 	}
@@ -59,15 +59,14 @@ void spcd_exit_process_new(struct task_struct *task)
 void spcd_new_process_new(struct task_struct *task)
 {
 
-	if (pt_task == 0 && pt_check_name(task->comm)) {
-		printk("pt: start %s (pid %d)\n", task->comm, task->pid);
-		pt_add_pid(task->pid, pt_num_threads++);
-		pt_task = task;
-		return;
-	}
-
-	if (pt_task != 0 && pt_task->parent->pid == task->parent->pid) {
-		pt_add_pid(task->pid, pt_num_threads++);
+	if (pt_task == 0) {
+		if (pt_check_name(task->comm)) {
+			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
+			pt_add_pid(task->pid, pt_num_threads);
+			pt_task = task;
+		}
+	} else if (pt_task->parent->pid == task->parent->pid) {
+		pt_add_pid(task->pid, pt_num_threads);
 	}
 
 }
@@ -76,11 +75,12 @@ void spcd_new_process_new(struct task_struct *task)
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
 	int tid = pt_get_tid(tsk->pid);
-	struct pt_mem_info *elem = pt_get_mem(address);
+	struct pt_mem_info *elem; 
+	// BUG 
 
 	if (tid > -1) {
 		pt_pf++;
-		pt_check_comm(tid, address);
+		elem = pt_check_comm(tid, address);
 		if (elem->pte_cleared) {
 			pt_fix_pte(address);
 			elem->pte_cleared = 0;
