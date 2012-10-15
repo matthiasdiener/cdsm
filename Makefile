@@ -1,5 +1,5 @@
-obj-m := pt_comm.o
-pt_comm-objs := pt_pf_thread.o pt_pagewalk.o pt_mem.o pt_pid.o pt_mem.o
+obj-m := pt.o
+pt-objs := pt_pf_thread.o pt_pagewalk.o pt_mem.o pt_pid.o pt_mem.o pt_dpf.o pt_comm.o
 
 
 .PHONY: all clean

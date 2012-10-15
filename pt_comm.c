@@ -9,7 +9,7 @@ unsigned pt_num_faults;
 int pt_num_threads;
 
 unsigned pt_num_faults = 3;
-unsigned long pt_pte_fixes = 0;
+unsigned long pt_pte_fixes;
 
 unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 

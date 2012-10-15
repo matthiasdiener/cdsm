@@ -19,15 +19,16 @@
 #define PT_PID_HASH_BITS 10UL
 #define PT_PID_HASH_SIZE (1ULL << PT_PID_HASH_BITS)
 
-extern unsigned long pt_pf;
+extern unsigned long pt_pf; //ok
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
 extern unsigned pt_num_faults;
-extern int pt_num_threads;
-
+extern int pt_num_threads; //ok
 extern unsigned long pt_pte_fixes;
-
 extern struct task_struct *pt_task;
+extern unsigned long pt_num_walks;
+
+extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct pt_mem_info {
 	unsigned long pg_addr;
@@ -55,5 +56,7 @@ void pt_fix_pte(unsigned long addr);
 
 void pt_pf_pagewalk(struct mm_struct *mm);
 int pt_pf_thread_func(void* v);
+
+void pt_check_comm(int tid, unsigned long address);
 
 #endif
