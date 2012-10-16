@@ -2,21 +2,11 @@
 
 struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 {
-	struct pt_mem_info *elem = pt_get_mem(address);
+	struct pt_mem_info *elem;
+	DEFINE_SPINLOCK(ptl);
+	spin_lock(&ptl);
 
-	if (elem->pg_addr != (address >> PAGE_SHIFT) ){
-		if (elem->pg_addr !=0 ) {
-			if (elem->pte_cleared){
-				pt_fix_pte(address);
-			}
-			printk ("XXX conflict, hash = %u, old = %lu, new = %lu\n", hash_32(address >> PAGE_SHIFT, PT_MEM_HASH_BITS), elem->pg_addr, (address >> PAGE_SHIFT));
-			pt_addr_conflict++;
-		}
-		elem->sharer[0] = tid;
-		elem->sharer[1] = -1;
-		elem->pg_addr = address >> PAGE_SHIFT;
-		goto out;
-	}
+	elem = pt_get_mem_init(address);
 
 	// no sharer present
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1) {
@@ -69,6 +59,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 	}
 
 	out:
-	// spin_unlock(&ptl);
+	spin_unlock(&ptl);
 	return elem;
 }
