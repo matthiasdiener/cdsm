@@ -9,6 +9,8 @@ struct pt_mem_info* pt_get_mem(unsigned long addr)
 	return &pt_mem[h];
 }
 
+
+/*mark page as present bit cleared by page walk */
 void pt_mark_pte(unsigned long address)
 {
 	struct pt_mem_info *elem = pt_get_mem(address);
@@ -34,6 +36,8 @@ void pt_mark_pte(unsigned long address)
 	elem->pte_cleared = 1;
 }
 
+
+/* undo articifical clearing of present bit */
 void pt_fix_pte(unsigned long addr)
 {
 	pgd_t *pgd;

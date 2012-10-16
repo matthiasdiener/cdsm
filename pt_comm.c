@@ -27,6 +27,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
+static DEFINE_SPINLOCK(ptl);
 
 int pt_check_name(char *name)
 {
@@ -48,17 +49,19 @@ int pt_check_name(char *name)
 void spcd_exit_process_new(struct task_struct *task)
 {
 	if (pt_task == task) {
+		spin_lock(&ptl);
 		pt_reset();
 		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 		pt_print_stats();
 		pt_reset_stats();
+		spin_unlock(&ptl);
 	}
 }
 
 
 void spcd_new_process_new(struct task_struct *task)
 {
-
+	spin_lock(&ptl);
 	if (pt_task == 0) {
 		if (pt_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
@@ -68,15 +71,14 @@ void spcd_new_process_new(struct task_struct *task)
 	} else if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(task->pid, pt_num_threads);
 	}
-
+	spin_unlock(&ptl);
 }
 
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
 	int tid = pt_get_tid(tsk->pid);
-	struct pt_mem_info *elem; 
-	// BUG 
+	struct pt_mem_info *elem;
 
 	if (tid > -1) {
 		pt_pf++;
@@ -84,6 +86,7 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 		if (elem->pte_cleared) {
 			pt_fix_pte(address);
 			elem->pte_cleared = 0;
+			return 1;
 		}
 	}
 

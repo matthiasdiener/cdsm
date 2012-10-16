@@ -2,10 +2,7 @@
 
 struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 {
-	DEFINE_SPINLOCK(ptl);
 	struct pt_mem_info *elem = pt_get_mem(address);
-	
-	spin_lock(&ptl);
 
 	if (elem->pg_addr != (address >> PAGE_SHIFT) ){
 		if (elem->pg_addr !=0 ) {
@@ -72,6 +69,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 	}
 
 	out:
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	return elem;
 }
