@@ -1,7 +1,7 @@
 obj-m := pt.o
 pt-objs := pt_pagewalk.o pt_mem.o pt_pid.o pt_mem.o pt_dpf.o pt_comm.o
 
-
+EXTRA_CFLAGS=-g -Wall
 .PHONY: all clean
 
 all:

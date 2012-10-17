@@ -11,7 +11,7 @@
 #include <linux/syscalls.h>
 #include <linux/kthread.h>
 
-#define PT_MAXTHREADS 64
+#define PT_MAXTHREADS 256
 
 #define PT_MEM_HASH_BITS 22UL
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
