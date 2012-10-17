@@ -8,6 +8,14 @@ static inline unsigned long addr_to_page(unsigned long address)
 	return (address >> PAGE_SHIFT);
 }
 
+
+struct pt_mem_info* pt_get_mem(unsigned long address)
+{
+	unsigned long h = hash_32(addr_to_page(address), PT_MEM_HASH_BITS);
+	return &pt_mem[h];
+}
+
+
 /* get mem elem, initialize if necessary */
 struct pt_mem_info* pt_get_mem_init(unsigned long address)
 {

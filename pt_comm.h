@@ -40,6 +40,7 @@ int pt_get_tid(int pid);
 int pt_add_pid(int pid, int tid);
 void pt_pid_clear(void);
 
+struct pt_mem_info* pt_get_mem(unsigned long addr);
 struct pt_mem_info* pt_get_mem_init(unsigned long addr);
 void pt_mem_clear(void);
 

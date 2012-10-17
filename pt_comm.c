@@ -27,7 +27,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-static DEFINE_SPINLOCK(ptl);
+// static DEFINE_SPINLOCK(ptl);
 
 int pt_check_name(char *name)
 {
@@ -49,19 +49,16 @@ int pt_check_name(char *name)
 void spcd_exit_process_new(struct task_struct *task)
 {
 	if (pt_task == task) {
-		spin_lock(&ptl);
 		pt_reset();
 		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 		pt_print_stats();
 		pt_reset_stats();
-		spin_unlock(&ptl);
 	}
 }
 
 
 void spcd_new_process_new(struct task_struct *task)
 {
-	spin_lock(&ptl);
 	if (pt_task == 0) {
 		if (pt_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
@@ -71,7 +68,6 @@ void spcd_new_process_new(struct task_struct *task)
 	} else if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(task->pid, pt_num_threads);
 	}
-	spin_unlock(&ptl);
 }
 
 
@@ -80,18 +76,26 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 	int tid = pt_get_tid(tsk->pid);
 	struct pt_mem_info *elem;
 
+	// thread already in list
 	if (tid > -1) {
-		spin_lock(&ptl);
 		pt_pf++;
 		elem = pt_check_comm(tid, address);
 		if (elem->pte_cleared) {
 			pt_fix_pte(address);
 			elem->pte_cleared = 0;
-			spin_unlock(&ptl);
 			return 1;
 		}
-		spin_unlock(&ptl);
+		return 0;
 	}
+
+	elem = pt_get_mem(address);
+
+	if (elem->pte_cleared && tsk->parent->pid == pt_task->parent->pid) {
+		pt_fix_pte(address);
+		elem->pte_cleared = 0;
+		return 1;
+	}
+
 
 	return 0;
 }
@@ -153,6 +157,19 @@ void pt_reset_stats(void)
 	memset(share, 0, sizeof(share));
 }
 
+
+int pt_pf_thread_func(void* v)
+{
+	
+	while (1) {
+		if (kthread_should_stop())
+			return 0;
+		if (pt_task && pid_alive(pt_task) && pt_task->mm)
+			pt_pf_pagewalk(pt_task->mm);
+		msleep(10);
+	}
+	
+}
 
 
 void pt_print_stats(void)
