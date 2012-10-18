@@ -83,6 +83,7 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 	int tid = pt_get_tid(tsk->pid);
 	struct pt_mem_info *elem;
 	spin_lock(&ptl);
+
 	// thread already in list
 	if (tid > -1) {
 		pt_pf++;
@@ -96,7 +97,6 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 		spin_unlock(&ptl);
 		return 0;
 	}
-
 
 	// check in case thread was not registered yet, but already causes a pf
 	elem = pt_get_mem(address);
