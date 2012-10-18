@@ -1,7 +1,5 @@
 #include "pt_comm.h"
 
-static unsigned long pt_next_addr = 0;
-static struct vm_area_struct *pt_next_vma = NULL;
 
 int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {

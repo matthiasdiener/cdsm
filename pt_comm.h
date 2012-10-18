@@ -28,6 +28,9 @@ extern unsigned long pt_pte_fixes;
 extern struct task_struct *pt_task;
 extern unsigned long pt_num_walks;
 
+extern unsigned long pt_next_addr;
+extern struct vm_area_struct *pt_next_vma;
+
 extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct pt_mem_info {

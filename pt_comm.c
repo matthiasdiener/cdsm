@@ -14,6 +14,9 @@ struct task_struct *pt_task;
 unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes;
 
+unsigned long pt_next_addr;
+struct vm_area_struct *pt_next_vma;
+
 unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
@@ -53,7 +56,7 @@ void spcd_exit_process_new(struct task_struct *task)
 	if (pt_task == task) {
 		pt_reset();
 		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
-		pt_print_stats();
+		//pt_print_stats();
 		pt_reset_stats();
 		return;
 	}
@@ -165,6 +168,8 @@ void pt_reset_stats(void)
 	pt_pf = 0;
 	pt_pf_extra = 0;
 	pt_addr_conflict = 0;
+	pt_next_addr = 0;
+	pt_next_vma = NULL;
 	memset(share, 0, sizeof(share));
 }
 
