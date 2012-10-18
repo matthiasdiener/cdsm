@@ -74,6 +74,8 @@ void spcd_new_process_new(struct task_struct *task)
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
 			pt_add_pid(task->pid, pt_num_threads);
 			pt_task = task;
+			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
+			wake_up_process(pt_thread);
 		}
 	} else if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(task->pid, pt_num_threads);
@@ -118,7 +120,7 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 int init_module(void)
 {
 	printk("Welcome.....\n");
-	pt_reset_all();
+	pt_reset_stats();
 
 	spcd_func_original_ref = spcd_func;
 	spcd_func = &spcd_func_new;
@@ -129,15 +131,12 @@ int init_module(void)
 	spcd_exit_process_original_ref = spcd_exit_process;
 	spcd_exit_process = &spcd_exit_process_new;
 
-	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
-	wake_up_process(pt_thread);
 	return 0;
 }
 
 
 void cleanup_module(void)
 {
-	kthread_stop(pt_thread);
 	spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;
@@ -145,15 +144,9 @@ void cleanup_module(void)
 }
 
 
-void pt_reset_all(void)
-{
-	pt_reset();
-	pt_reset_stats();
-}
-
-
 void pt_reset(void)
 {
+	kthread_stop(pt_thread);
 	pt_task = 0;	
 }
 

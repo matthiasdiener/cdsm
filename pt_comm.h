@@ -50,7 +50,6 @@ void pt_mem_clear(void);
 
 void pt_print_stats(void);
 
-void pt_reset_all(void);
 void pt_reset(void);
 void pt_reset_stats(void);
 
