@@ -27,7 +27,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-// static DEFINE_SPINLOCK(ptl);
+static DEFINE_SPINLOCK(ptl);
 
 int pt_check_name(char *name)
 {
@@ -82,7 +82,7 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
 	int tid = pt_get_tid(tsk->pid);
 	struct pt_mem_info *elem;
-
+	spin_lock(&ptl);
 	// thread already in list
 	if (tid > -1) {
 		pt_pf++;
@@ -90,8 +90,10 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 		if (elem->pte_cleared) {
 			pt_fix_pte(address);
 			elem->pte_cleared = 0;
+			spin_unlock(&ptl);
 			return 1;
 		}
+		spin_unlock(&ptl);
 		return 0;
 	}
 
@@ -101,10 +103,11 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 	if (elem->pte_cleared && tsk->parent->pid == pt_task->parent->pid) {
 		pt_fix_pte(address);
 		elem->pte_cleared = 0;
+		spin_unlock(&ptl);
 		return 1;
 	}
 
-
+	spin_unlock(&ptl);
 	return 0;
 }
 
