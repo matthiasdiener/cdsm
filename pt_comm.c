@@ -48,11 +48,18 @@ int pt_check_name(char *name)
 
 void spcd_exit_process_new(struct task_struct *task)
 {
+	int tid;
+
 	if (pt_task == task) {
 		pt_reset();
 		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 		pt_print_stats();
 		pt_reset_stats();
+		return;
+	}
+	tid = pt_get_tid(task->pid);
+	if (tid >-1){
+		pt_delete_pid(task->pid, tid);
 	}
 }
 

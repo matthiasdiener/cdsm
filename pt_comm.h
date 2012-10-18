@@ -11,12 +11,12 @@
 #include <linux/syscalls.h>
 #include <linux/kthread.h>
 
-#define PT_MAXTHREADS 256
+#define PT_MAXTHREADS 1024
 
 #define PT_MEM_HASH_BITS 22UL
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
 
-#define PT_PID_HASH_BITS 10UL
+#define PT_PID_HASH_BITS 12UL
 #define PT_PID_HASH_SIZE (1UL << PT_PID_HASH_BITS)
 
 extern unsigned long pt_pf;
@@ -38,6 +38,7 @@ struct pt_mem_info {
 
 int pt_get_tid(int pid); 
 int pt_add_pid(int pid, int tid);
+void pt_delete_pid(int pid, int tid);
 void pt_pid_clear(void);
 
 struct pt_mem_info* pt_get_mem(unsigned long addr);
