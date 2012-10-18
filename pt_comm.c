@@ -56,7 +56,7 @@ void spcd_exit_process_new(struct task_struct *task)
 	if (pt_task == task) {
 		pt_reset();
 		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
-		//pt_print_stats();
+		pt_print_stats();
 		pt_reset_stats();
 		return;
 	}
@@ -187,12 +187,12 @@ void pt_print_stats(void)
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
 
-	for (i = pt_num_threads-1; i >= 0; i--) {
-		for (j = 0; j < pt_num_threads; j++){
-			printk ("%lu", share[i][j]+share[j][i]);
-			if (j != pt_num_threads-1)
-				printk (",");
-		}
-		printk("\n");
-	}
+	// for (i = pt_num_threads-1; i >= 0; i--) {
+	// 	for (j = 0; j < pt_num_threads; j++){
+	// 		printk ("%lu", share[i][j]+share[j][i]);
+	// 		if (j != pt_num_threads-1)
+	// 			printk (",");
+	// 	}
+	// 	printk("\n");
+	// }
 }
