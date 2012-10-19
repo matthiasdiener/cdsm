@@ -9,14 +9,14 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	pmd_t *pmd;
 	spinlock_t *ptl;
 	
-	if (!pte_present(*pte))
+	if (!pte_present(*pte) || !pte_young(*pte))
 		return 0;
 
 	page = vm_normal_page(pt_next_vma, addr, *pte);
 	if (!page || !page->mapping)
 		return 0;
 
-	if (pte_young(*pte) || PageReferenced(page)) {
+	if (PageReferenced(page)) {
 		pgd = pgd_offset(walk->mm, addr);
 		pud = pud_offset(pgd, addr);
 		pmd = pmd_offset(pud, addr);

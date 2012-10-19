@@ -49,9 +49,9 @@ void pt_mark_pte(unsigned long address)
 	
 	struct pt_mem_info *elem = pt_get_mem_init(address);
 	
-	if (elem->pte_cleared){
-		pt_fix_pte(address);
-	}
+	// if (elem->pte_cleared){
+	// 	pt_fix_pte(address);
+	// }
 
 	elem->pte_cleared = 1;
 }
