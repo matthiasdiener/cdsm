@@ -55,8 +55,8 @@ int pt_pte_fault(struct mm_struct *mm,
 {
 
 	struct pt_mem_info *elem;
-	
-	if (pte_present(*pte) || pt_task->mm != mm)
+
+	if (!pt_task || pte_present(*pte) || pt_task->mm != mm)
 		goto out;
 
 	elem = pt_get_mem(address);
