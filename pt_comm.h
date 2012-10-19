@@ -11,6 +11,9 @@
 #include <linux/syscalls.h>
 #include <linux/kthread.h>
 
+#include <linux/kprobes.h>
+#include <linux/kallsyms.h>
+
 #define PT_MAXTHREADS 4096
 
 #define PT_MEM_HASH_BITS 22UL

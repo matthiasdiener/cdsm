@@ -49,6 +49,19 @@ int pt_check_name(char *name)
 }
 
 
+int pt_pte_fault(struct mm_struct *mm,
+		     struct vm_area_struct *vma, unsigned long address,
+		     pte_t *pte, pmd_t *pmd, unsigned int flags)
+{
+	printk("test\n");
+	jprobe_return();
+	return 0;
+}
+
+struct jprobe pt_jprobe = {
+	.entry = (kprobe_opcode_t *) pt_pte_fault
+};
+
 void spcd_exit_process_new(struct task_struct *task)
 {
 	int tid;
@@ -131,6 +144,9 @@ int init_module(void)
 	spcd_exit_process_original_ref = spcd_exit_process;
 	spcd_exit_process = &spcd_exit_process_new;
 
+	pt_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault");
+	register_jprobe(&pt_jprobe);
+
 	return 0;
 }
 
@@ -183,7 +199,7 @@ int pt_pf_thread_func(void* v)
 
 void pt_print_stats(void)
 {
-	int i,j;
+	// int i,j;
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
 
