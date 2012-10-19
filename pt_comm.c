@@ -63,8 +63,6 @@ int pt_pte_fault(struct mm_struct *mm,
 	if (elem->pte_cleared) {
 		pt_fix_pte(address);
 		elem->pte_cleared = 0;
-		spin_unlock(&ptl);
-		return 1;
 	}
 
 	out:
