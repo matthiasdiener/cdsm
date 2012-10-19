@@ -156,6 +156,7 @@ void cleanup_module(void)
 	spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;
+	unregister_jprobe(&pt_jprobe);
 	printk("Bye.....\n");
 }
 
