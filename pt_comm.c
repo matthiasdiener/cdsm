@@ -53,9 +53,23 @@ int pt_pte_fault(struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
-	printk("test\n");
+
+	struct pt_mem_info *elem;
+	
+	if (pte_present(*pte) || pt_task->mm != mm)
+		goto out;
+
+	elem = pt_get_mem(address);
+	if (elem->pte_cleared) {
+		pt_fix_pte(address);
+		elem->pte_cleared = 0;
+		spin_unlock(&ptl);
+		return 1;
+	}
+
+	out:
 	jprobe_return();
-	return 0;
+	return 0; /* not reached */
 }
 
 struct jprobe pt_jprobe = {
@@ -117,13 +131,13 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 	}
 
 	// check in case thread was not registered yet, but already causes a pf
-	elem = pt_get_mem(address);
-	if (elem->pte_cleared && tsk->parent->pid == pt_task->parent->pid) {
-		pt_fix_pte(address);
-		elem->pte_cleared = 0;
-		spin_unlock(&ptl);
-		return 1;
-	}
+	// elem = pt_get_mem(address);
+	// if (elem->pte_cleared && tsk->parent->pid == pt_task->parent->pid) {
+	// 	pt_fix_pte(address);
+	// 	elem->pte_cleared = 0;
+	// 	spin_unlock(&ptl);
+	// 	return 1;
+	// }
 
 	spin_unlock(&ptl);
 	return 0;
