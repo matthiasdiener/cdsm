@@ -4,8 +4,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 {
 	struct pt_mem_info *elem = pt_get_mem_init(address);
 
-
-
 	// no sharer present
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1) {
 		elem->sharer[0] = tid;
@@ -19,7 +17,7 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 		if (elem->sharer[0] != tid && elem->sharer[1] != tid) {
 			share[tid][elem->sharer[0]] ++;
 			share[tid][elem->sharer[1]] ++;
-			printk(".");
+			
 			elem->sharer[1] = elem->sharer[0];
 			elem->sharer[0] = tid;
 
@@ -29,13 +27,11 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 
 		if (elem->sharer[0] == tid) {
 			share[tid][elem->sharer[1]] ++;
-			printk(".");
 			goto out;
 		}
 
 		if (elem->sharer[1] == tid) {
 			share[tid][elem->sharer[0]] ++;
-			printk(".");
 			goto out;
 		}
 
@@ -48,7 +44,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 		if (elem->sharer[1] != tid) {
 			elem->sharer[0] = tid;
 			share[tid][elem->sharer[1]] ++;
-			printk(".");
 		}
 		goto out;
 	}
@@ -57,7 +52,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 	if (elem->sharer[0] != tid) {
 		elem->sharer[1] = tid;
 		share[tid][elem->sharer[0]] ++;
-		printk(".");
 	}
 
 	out:

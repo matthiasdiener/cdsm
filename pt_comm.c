@@ -46,7 +46,7 @@ int pt_check_name(char *name)
 }
 
 
-int pt_pte_fault(struct mm_struct *mm,
+int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
@@ -63,7 +63,7 @@ int pt_pte_fault(struct mm_struct *mm,
 		elem->pte_cleared = 0;
 	}
 
-	tid = pt_get_tid(mm->owner->pid);
+	tid = pt_get_tid(task->pid); 
 	if (tid > -1) {
 		spin_lock(&ptl);
 		pt_pf++;
@@ -120,7 +120,7 @@ int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_stats();
-	
+
 	spcd_new_process_original_ref = spcd_new_process;
 	spcd_new_process = &spcd_new_process_new;
 
