@@ -64,7 +64,7 @@ int pt_pte_fault(struct mm_struct *mm,
 		pt_fix_pte(address);
 		elem->pte_cleared = 0;
 	}
-
+	// move pt_check_comm here?
 	out:
 	jprobe_return();
 	return 0; /* not reached */
@@ -205,7 +205,7 @@ int pt_pf_thread_func(void* v)
 	while (1) {
 		if (kthread_should_stop())
 			return 0;
-		if (pt_task && pid_alive(pt_task) && pt_task->mm)
+		// if (pt_task && pid_alive(pt_task) && pt_task->mm)
 			pt_pf_pagewalk(pt_task->mm);
 		msleep(10);
 	}
