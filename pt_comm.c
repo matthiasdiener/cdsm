@@ -35,7 +35,7 @@ static DEFINE_SPINLOCK(ptl);
 int pt_check_name(char *name)
 {
 	const char *bm_names[] = {".x", /*NAS*/
-	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "raytrace", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
+	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU","FFT", "CHOLESKY" /*Splash2*/
 	};
 	
