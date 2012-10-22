@@ -116,48 +116,11 @@ void spcd_new_process_new(struct task_struct *task)
 }
 
 
-int spcd_func_new(struct task_struct *tsk, unsigned long address)
-{
-	// int tid = pt_get_tid(tsk->pid);
-	// struct pt_mem_info *elem;
-	
-	// // thread already in list
-	// if (tid > -1) {
-	// 	spin_lock(&ptl);
-	// 	pt_pf++;
-	// 	elem = pt_check_comm(tid, address);
-	// 	// if (elem->pte_cleared) {
-	// 	// 	pt_fix_pte(address);
-	// 	// 	elem->pte_cleared = 0;
-	// 	// 	spin_unlock(&ptl);
-	// 	// 	return 1;
-	// 	// }
-	// 	spin_unlock(&ptl);
-	// 	return 0;
-	// }
-
-	// check in case thread was not registered yet, but already causes a pf
-	// elem = pt_get_mem(address);
-	// if (elem->pte_cleared && tsk->parent->pid == pt_task->parent->pid) {
-	// 	pt_fix_pte(address);
-	// 	elem->pte_cleared = 0;
-	// 	spin_unlock(&ptl);
-	// 	return 1;
-	// }
-
-	// spin_unlock(&ptl);
-	return 0;
-}
-
-
 int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_stats();
-
-	// spcd_func_original_ref = spcd_func;
-	// spcd_func = &spcd_func_new;
-
+	
 	spcd_new_process_original_ref = spcd_new_process;
 	spcd_new_process = &spcd_new_process_new;
 
@@ -173,7 +136,6 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	// spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;
 	unregister_jprobe(&pt_jprobe);
