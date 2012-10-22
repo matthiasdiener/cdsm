@@ -127,7 +127,7 @@ int init_module(void)
 	spcd_exit_process_original_ref = spcd_exit_process;
 	spcd_exit_process = &spcd_exit_process_new;
 
-	pt_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault");
+	pt_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
 	register_jprobe(&pt_jprobe);
 
 	return 0;
