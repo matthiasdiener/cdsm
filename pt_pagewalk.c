@@ -16,23 +16,19 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	if (!page || !page->mapping)
 		return 0;
 
-	if (PageReferenced(page)) {
-		pgd = pgd_offset(walk->mm, addr);
-		pud = pud_offset(pgd, addr);
-		pmd = pmd_offset(pud, addr);
-		pt_next_addr = addr;
+	pgd = pgd_offset(walk->mm, addr);
+	pud = pud_offset(pgd, addr);
+	pmd = pmd_offset(pud, addr);
+	pt_next_addr = addr;
 
-		pte = pte_offset_map_lock(walk->mm, pmd, addr, &ptl);
-		*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
-		pte_unmap_unlock(pte, ptl);
+	pte = pte_offset_map_lock(walk->mm, pmd, addr, &ptl);
+	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
+	pte_unmap_unlock(pte, ptl);
 
-		pt_mark_pte(addr);
-		pt_pf_extra++;
+	pt_mark_pte(addr);
 
-		return 1;
-	}
-	
-	return 0;
+	return 1;
+
 }
 
 void pt_pf_pagewalk(struct mm_struct *mm)
