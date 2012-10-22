@@ -120,12 +120,12 @@ int spcd_func_new(struct task_struct *tsk, unsigned long address)
 		spin_lock(&ptl);
 		pt_pf++;
 		elem = pt_check_comm(tid, address);
-		if (elem->pte_cleared) {
-			pt_fix_pte(address);
-			elem->pte_cleared = 0;
-			spin_unlock(&ptl);
-			return 1;
-		}
+		// if (elem->pte_cleared) {
+		// 	pt_fix_pte(address);
+		// 	elem->pte_cleared = 0;
+		// 	spin_unlock(&ptl);
+		// 	return 1;
+		// }
 		spin_unlock(&ptl);
 		return 0;
 	}
