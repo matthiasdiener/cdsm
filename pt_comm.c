@@ -55,6 +55,7 @@ int pt_pte_fault(struct mm_struct *mm,
 {
 
 	struct pt_mem_info *elem;
+	int tid;
 
 	if (!pt_task || pte_present(*pte) || pt_task->mm != mm)
 		goto out;
@@ -65,6 +66,15 @@ int pt_pte_fault(struct mm_struct *mm,
 		elem->pte_cleared = 0;
 	}
 	// move pt_check_comm here?
+
+	tid = pt_get_tid(mm->owner->pid);
+	if (tid > -1) {
+		spin_lock(&ptl);
+		pt_pf++;
+		elem = pt_check_comm(tid, address);
+		spin_unlock(&ptl);
+	}
+
 	out:
 	jprobe_return();
 	return 0; /* not reached */
@@ -112,23 +122,23 @@ void spcd_new_process_new(struct task_struct *task)
 
 int spcd_func_new(struct task_struct *tsk, unsigned long address)
 {
-	int tid = pt_get_tid(tsk->pid);
-	struct pt_mem_info *elem;
+	// int tid = pt_get_tid(tsk->pid);
+	// struct pt_mem_info *elem;
 	
-	// thread already in list
-	if (tid > -1) {
-		spin_lock(&ptl);
-		pt_pf++;
-		elem = pt_check_comm(tid, address);
-		// if (elem->pte_cleared) {
-		// 	pt_fix_pte(address);
-		// 	elem->pte_cleared = 0;
-		// 	spin_unlock(&ptl);
-		// 	return 1;
-		// }
-		spin_unlock(&ptl);
-		return 0;
-	}
+	// // thread already in list
+	// if (tid > -1) {
+	// 	spin_lock(&ptl);
+	// 	pt_pf++;
+	// 	elem = pt_check_comm(tid, address);
+	// 	// if (elem->pte_cleared) {
+	// 	// 	pt_fix_pte(address);
+	// 	// 	elem->pte_cleared = 0;
+	// 	// 	spin_unlock(&ptl);
+	// 	// 	return 1;
+	// 	// }
+	// 	spin_unlock(&ptl);
+	// 	return 0;
+	// }
 
 	// check in case thread was not registered yet, but already causes a pf
 	// elem = pt_get_mem(address);
@@ -214,16 +224,16 @@ int pt_pf_thread_func(void* v)
 
 void pt_print_stats(void)
 {
-	// int i,j;
+	int i,j;
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
 
-	// for (i = pt_num_threads-1; i >= 0; i--) {
-	// 	for (j = 0; j < pt_num_threads; j++){
-	// 		printk ("%lu", share[i][j]+share[j][i]);
-	// 		if (j != pt_num_threads-1)
-	// 			printk (",");
-	// 	}
-	// 	printk("\n");
-	// }
+	for (i = pt_num_threads-1; i >= 0; i--) {
+		for (j = 0; j < pt_num_threads; j++){
+			printk ("%lu", share[i][j] + share[j][i]);
+			if (j != pt_num_threads-1)
+				printk (",");
+		}
+		printk("\n");
+	}
 }
