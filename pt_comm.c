@@ -21,9 +21,6 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
 
-static int (*spcd_func_original_ref)(struct task_struct *, unsigned long); 
-extern int (*spcd_func)(struct task_struct *, unsigned long);
-
 static void (*spcd_new_process_original_ref)(struct task_struct *); 
 extern void (*spcd_new_process)(struct task_struct *);
 
@@ -57,7 +54,7 @@ int pt_pte_fault(struct mm_struct *mm,
 	struct pt_mem_info *elem;
 	int tid;
 
-	if (!pt_task || pte_present(*pte) || pt_task->mm != mm)
+	if (!pt_task || pt_task->mm != mm)
 		goto out;
 
 	elem = pt_get_mem(address);
@@ -65,7 +62,6 @@ int pt_pte_fault(struct mm_struct *mm,
 		pt_fix_pte(address);
 		elem->pte_cleared = 0;
 	}
-	// move pt_check_comm here?
 
 	tid = pt_get_tid(mm->owner->pid);
 	if (tid > -1) {
@@ -159,8 +155,8 @@ int init_module(void)
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
-	spcd_func_original_ref = spcd_func;
-	spcd_func = &spcd_func_new;
+	// spcd_func_original_ref = spcd_func;
+	// spcd_func = &spcd_func_new;
 
 	spcd_new_process_original_ref = spcd_new_process;
 	spcd_new_process = &spcd_new_process_new;
@@ -177,7 +173,7 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	spcd_func = spcd_func_original_ref;
+	// spcd_func = spcd_func_original_ref;
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;
 	unregister_jprobe(&pt_jprobe);
