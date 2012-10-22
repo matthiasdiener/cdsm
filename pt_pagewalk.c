@@ -13,7 +13,7 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 		return 0;
 
 	page = vm_normal_page(pt_next_vma, addr, *pte);
-	if (!page || !page->mapping || !PageReferenced(page))
+	if (!page || !page->mapping )
 		return 0;
 
 	pgd = pgd_offset(walk->mm, addr);
