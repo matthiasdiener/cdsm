@@ -3,8 +3,8 @@
 struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 {
 	struct pt_mem_info *elem;
-	DEFINE_SPINLOCK(ptl);
-	spin_lock(&ptl);
+	// DEFINE_SPINLOCK(ptl);
+	// spin_lock(&ptl);
 
 	elem = pt_get_mem_init(address);
 
@@ -59,6 +59,6 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 	}
 
 	out:
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	return elem;
 }
