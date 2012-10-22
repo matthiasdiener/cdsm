@@ -11,15 +11,15 @@ struct pt_mem_info* pt_check_comm(int tid, unsigned long address)
 		elem->sharer[0] = tid;
 		goto out;
 	}
-printk(".");
+
 	// two sharers present
 	if (elem->sharer[0] != -1 && elem->sharer[1] != -1) {
-		
+
 		// both different from myself
 		if (elem->sharer[0] != tid && elem->sharer[1] != tid) {
 			share[tid][elem->sharer[0]] ++;
 			share[tid][elem->sharer[1]] ++;
-			
+			printk(".");
 			elem->sharer[1] = elem->sharer[0];
 			elem->sharer[0] = tid;
 
@@ -29,11 +29,13 @@ printk(".");
 
 		if (elem->sharer[0] == tid) {
 			share[tid][elem->sharer[1]] ++;
+			printk(".");
 			goto out;
 		}
 
 		if (elem->sharer[1] == tid) {
 			share[tid][elem->sharer[0]] ++;
+			printk(".");
 			goto out;
 		}
 
@@ -46,6 +48,7 @@ printk(".");
 		if (elem->sharer[1] != tid) {
 			elem->sharer[0] = tid;
 			share[tid][elem->sharer[1]] ++;
+			printk(".");
 		}
 		goto out;
 	}
@@ -54,6 +57,7 @@ printk(".");
 	if (elem->sharer[0] != tid) {
 		elem->sharer[1] = tid;
 		share[tid][elem->sharer[0]] ++;
+		printk(".");
 	}
 
 	out:
