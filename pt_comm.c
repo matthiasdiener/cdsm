@@ -76,9 +76,12 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 	if (!pt_thread || !pt_task || pt_task->mm != mm)
 		jprobe_return();
 
+	spin_lock(&ptl);
 	elem = pt_get_mem(address);
 	if (elem->pte_cleared)
 		pt_fix_pte(elem, address);
+
+	spin_unlock(&ptl);
 
 	jprobe_return();
 	return 0; /* not reached */
@@ -117,9 +120,9 @@ void spcd_new_process_new(struct task_struct *task)
 	} else if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(task->pid, pt_num_threads);
 		if (!pt_thread) {
+			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 			register_kprobe(&pt_dpf_probe);
 			register_jprobe(&pt_ptef_jprobe);
-			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 			wake_up_process(pt_thread);
 		}
 	}
