@@ -73,6 +73,10 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 
 	struct pt_mem_info *elem;
 
+	if (pt_thread) {
+		printk ("P pte_fault: %08llx , address: %lx N\n", (long long)pte_val(*pte), address);
+	}
+
 	if (!pt_thread || !pt_task || pt_task->mm != mm)
 		jprobe_return();
 
