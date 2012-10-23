@@ -66,11 +66,12 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	pgd = pgd_offset(pt_task->mm, address);
 	pud = pud_offset(pgd, address);
 	pmd = pmd_offset(pud, address);
+
 	pte = pte_offset_map_lock(pt_task->mm, pmd, address, &ptl);
 	*pte = pte_set_flags(*pte, _PAGE_PRESENT);
-
 	pte_unmap_unlock(pte, ptl);
-	printk ("restored pte: %08llx\n", (long long)pte_val(*pte));
+
+	printk ("X restored pte: %08llx , address: %lu Y\n", (long long)pte_val(*pte), address);
 	pt_pte_fixes++;
 }
 
