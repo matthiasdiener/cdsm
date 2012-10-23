@@ -49,7 +49,7 @@ int pt_check_name(char *name)
 
 void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
 {
-	printk (".");
+	
 }
 
 static struct kprobe pt_dpf_probe = {
