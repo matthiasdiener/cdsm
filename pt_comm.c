@@ -73,7 +73,7 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 
 	struct pt_mem_info *elem;
 
-	if (!pt_pf_thread || !pt_task || pt_task->mm != mm)
+	if (!pt_thread || !pt_task || pt_task->mm != mm)
 		jprobe_return();
 
 	elem = pt_get_mem(address);

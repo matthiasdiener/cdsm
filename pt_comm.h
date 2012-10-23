@@ -36,6 +36,8 @@ extern struct vm_area_struct *pt_next_vma;
 
 extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
+extern struct task_struct *pt_thread;
+
 struct pt_mem_info {
 	unsigned long pg_addr;
 	int pte_cleared;
@@ -59,7 +61,7 @@ void pt_reset_stats(void);
 struct pt_mem_info* pt_check_comm(int tid, unsigned long address);
 
 void pt_mark_pte(unsigned long addr);
-void pt_fix_pte(unsigned long addr);
+void pt_fix_pte(struct pt_mem_info *elem, unsigned long addr);
 
 void pt_pf_pagewalk(struct mm_struct *mm);
 int pt_pf_thread_func(void* v);
