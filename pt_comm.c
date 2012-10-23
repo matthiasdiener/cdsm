@@ -46,6 +46,16 @@ int pt_check_name(char *name)
 }
 
 
+
+void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
+{
+	printk (".");
+}
+
+static struct kprobe pt_dpf_probe = {
+	.post_handler = pt_dpf_handler
+};
+
 int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
@@ -128,6 +138,9 @@ int init_module(void)
 	spcd_exit_process = &spcd_exit_process_new;
 
 	pt_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
+	pt_dpf_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5D;
+
+	register_kprobe(&pt_dpf_probe);
 	register_jprobe(&pt_jprobe);
 
 	return 0;
