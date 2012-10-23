@@ -70,7 +70,7 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 
 	pte_unmap_unlock(pte, ptl);
-
+	printk ("restored pte: %08llx", (long long)pte_val(*pte));
 	pt_pte_fixes++;
 }
 
