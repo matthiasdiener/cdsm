@@ -49,11 +49,19 @@ int pt_check_name(char *name)
 
 void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
 {
-	struct task_struct *task;
-	unsigned long address;
+	struct task_struct *task = current;
+	unsigned long address = read_cr2();
+	int tid = pt_get_tid(task->pid);
 
-	asm volatile ("movl -0xe8(%%rbp), %0": "=r" (address));
-	printk("addr=%lx, pid=%lu\n", address, 0);
+	if (tid > -1){
+		spin_lock(&ptl);
+		pt_pf++;
+		pt_check_comm(tid, address);
+		spin_unlock(&ptl);
+	}	
+
+
+//	printk("addr=%lx, pid=%d\n", address, task->pid);
 }
 
 static struct kprobe pt_dpf_probe = {
@@ -66,7 +74,7 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 {
 
 	struct pt_mem_info *elem;
-	int tid;
+//	int tid;
 
 	if (!pt_task || pt_task->mm != mm)
 		goto out;
@@ -77,13 +85,13 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 		elem->pte_cleared = 0;
 	}
 
-	tid = pt_get_tid(task->pid); 
-	if (tid > -1) {
-		spin_lock(&ptl);
-		pt_pf++;
-		elem = pt_check_comm(tid, address);
-		spin_unlock(&ptl);
-	}
+//	tid = pt_get_tid(task->pid); 
+//	if (tid > -1) {
+//		spin_lock(&ptl);
+//		pt_pf++;
+//		elem = pt_check_comm(tid, address);
+//		spin_unlock(&ptl);
+//	}
 
 	out:
 	jprobe_return();
