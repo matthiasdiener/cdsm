@@ -8,7 +8,7 @@ void pt_delete_pid(int pid, int tid)
 	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
 	if (pt_pid[h] != -1) {
 		printk("pt: thread %d stop (tid %d)\n", pid, tid);
-		pt_pid[h] = -1;
+		// pt_pid[h] = -1;
 	}
 
 }
