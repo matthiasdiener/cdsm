@@ -117,6 +117,8 @@ void spcd_new_process_new(struct task_struct *task)
 	} else if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(task->pid, pt_num_threads);
 		if (!pt_thread) {
+			register_kprobe(&pt_dpf_probe);
+			register_jprobe(&pt_ptef_jprobe);
 			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 			wake_up_process(pt_thread);
 		}
@@ -138,9 +140,6 @@ int init_module(void)
 	pt_ptef_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
 	pt_dpf_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5D;
 
-	register_kprobe(&pt_dpf_probe);
-	register_jprobe(&pt_ptef_jprobe);
-
 	return 0;
 }
 
@@ -149,8 +148,6 @@ void cleanup_module(void)
 {
 	spcd_new_process = spcd_new_process_original_ref;
 	spcd_exit_process = spcd_exit_process_original_ref;
-	unregister_jprobe(&pt_ptef_jprobe);
-	unregister_kprobe(&pt_dpf_probe);
 	printk("Bye.....\n");
 }
 
@@ -158,6 +155,8 @@ void cleanup_module(void)
 void pt_reset(void)
 {
 	kthread_stop(pt_thread);
+	unregister_jprobe(&pt_ptef_jprobe);
+	unregister_kprobe(&pt_dpf_probe);
 	pt_task = 0;
 	pt_thread = 0;
 }
