@@ -60,8 +60,6 @@ void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags
 		spin_unlock(&ptl);
 	}	
 
-
-//	printk("addr=%lx, pid=%d\n", address, task->pid);
 }
 
 static struct kprobe pt_dpf_probe = {
@@ -74,26 +72,14 @@ int pt_pte_fault(struct task_struct *task, struct mm_struct *mm,
 {
 
 	struct pt_mem_info *elem;
-//	int tid;
 
-	if (!pt_task || pt_task->mm != mm)
-		goto out;
+	if (!pt_pf_thread || !pt_task || pt_task->mm != mm)
+		jprobe_return();
 
 	elem = pt_get_mem(address);
-	if (elem->pte_cleared) {
-		pt_fix_pte(address);
-		elem->pte_cleared = 0;
-	}
+	if (elem->pte_cleared)
+		pt_fix_pte(elem, address);
 
-//	tid = pt_get_tid(task->pid); 
-//	if (tid > -1) {
-//		spin_lock(&ptl);
-//		pt_pf++;
-//		elem = pt_check_comm(tid, address);
-//		spin_unlock(&ptl);
-//	}
-
-	out:
 	jprobe_return();
 	return 0; /* not reached */
 }
