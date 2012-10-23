@@ -30,7 +30,7 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	
 	pt_mark_pte(addr);
 
-	printk ("cleared pte: %08llx\n", (long long)pte_val(*pte));
+	printk ("Ccleared pte: %08llx , address: %lx L\n", (long long)pte_val(*pte), addr);
 
 	return 1;
 
