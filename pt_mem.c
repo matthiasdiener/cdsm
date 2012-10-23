@@ -48,6 +48,7 @@ void pt_mark_pte(unsigned long address)
 	
 	struct pt_mem_info *elem = pt_get_mem_init(address);
 	elem->pte_cleared = 1;
+	printk ("cleared pte: %08llx\n", (long long)pte_val(*pte));
 	pt_pf_extra++;
 }
 
