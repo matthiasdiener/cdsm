@@ -128,6 +128,7 @@ void spcd_new_process_new(struct task_struct *task)
 			wake_up_process(pt_thread);
 		}
 	}
+	
 }
 
 
