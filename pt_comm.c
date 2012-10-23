@@ -49,7 +49,11 @@ int pt_check_name(char *name)
 
 void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
 {
-	
+	struct task_struct *task;
+	unsigned long address;
+
+	asm volatile ("movl -0xe8(%%rbp), %0": "=r" (address));
+	printk("addr=%lx, pid=%lu\n", address, 0);
 }
 
 static struct kprobe pt_dpf_probe = {
