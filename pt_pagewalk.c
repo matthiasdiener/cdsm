@@ -12,7 +12,7 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	if (pte_none(*pte) || !pte_present(*pte) || !pte_young(*pte) || pte_special(*pte))
 		return 0;
 
-	if (!pt_next_vma->vm_ops || !pt_next_vma->vm_ops->nopage)
+	if (!pt_next_vma->vm_ops /*|| !pt_next_vma->vm_ops->nopage*/)
 		return 0;
 
 	page = vm_normal_page(pt_next_vma, addr, *pte);
