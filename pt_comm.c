@@ -194,9 +194,10 @@ void cleanup_module(void)
 
 void pt_reset(void)
 {
-	kthread_stop(pt_thread);
+	if (pt_thread)
+		kthread_stop(pt_thread);
 	pt_task = 0;
-	pt_thread = 0;
+	pt_thread = NULL;
 }
 
 
