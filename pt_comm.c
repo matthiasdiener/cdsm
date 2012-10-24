@@ -21,9 +21,6 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
 
-static void (*spcd_new_process_original_ref)(struct task_struct *); 
-extern void (*spcd_new_process)(struct task_struct *);
-
 DEFINE_SPINLOCK(ptl);
 
 DEFINE_SPINLOCK(ptl2);
@@ -46,7 +43,7 @@ int spcd_check_name(char *name)
 
 
 
-void spcd_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
+void spcd_page_fault_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
 {
 	struct task_struct *task = current;
 	unsigned long address = read_cr2();
@@ -62,7 +59,7 @@ void spcd_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long fla
 }
 
 
-int spcd_pte_fault(struct task_struct *task, struct mm_struct *mm,
+int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
@@ -104,25 +101,11 @@ void spcd_exit_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned
 }
 
 
-static struct jprobe spcd_ptef_jprobe = {
-	.entry =  spcd_pte_fault
-};
-
-
-static struct kprobe spcd_dpf_probe = {
-	.post_handler = spcd_dpf_handler
-};
-
-
-static struct kprobe spcd_exit_process_probe = {
-	.post_handler = spcd_exit_process_handler
-};
-
-
-
-
-void spcd_new_process_new(struct task_struct *task)
+void spcd_new_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
 {
+
+	struct task_struct *task = current;
+
 	if (pt_task == 0) {
 		if (spcd_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
@@ -140,23 +123,42 @@ void spcd_new_process_new(struct task_struct *task)
 }
 
 
+static struct jprobe spcd_pte_fault_jprobe = {
+	.entry =  spcd_pte_fault_handler
+};
+
+
+static struct kprobe spcd_page_fault_probe = {
+	.post_handler = spcd_page_fault_handler
+};
+
+
+static struct kprobe spcd_exit_process_probe = {
+	.post_handler = spcd_exit_process_handler
+};
+
+static struct kprobe spcd_new_process_probe = {
+	.post_handler = spcd_new_process_handler
+};
+
+
 int init_module(void)
 {
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
-	spcd_new_process_original_ref = spcd_new_process;
-	spcd_new_process = &spcd_new_process_new;
+	spcd_pte_fault_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
 
-	spcd_ptef_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
-	
-	spcd_dpf_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
+	spcd_page_fault_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
 
 	spcd_exit_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_exit") + 0x16;
 
-	register_jprobe(&spcd_ptef_jprobe);
-	register_kprobe(&spcd_dpf_probe);
+	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common") + 0x2dd;
+
+	register_jprobe(&spcd_pte_fault_jprobe);
+	register_kprobe(&spcd_page_fault_probe);
 	register_kprobe(&spcd_exit_process_probe);
+	register_kprobe(&spcd_new_process_probe);
 
 	return 0;
 }
@@ -164,9 +166,11 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	spcd_new_process = spcd_new_process_original_ref;
-	unregister_jprobe(&spcd_ptef_jprobe);
-	unregister_kprobe(&spcd_dpf_probe);
+	unregister_jprobe(&spcd_pte_fault_jprobe);
+	unregister_kprobe(&spcd_page_fault_probe);
+	unregister_kprobe(&spcd_exit_process_probe);
+	unregister_kprobe(&spcd_new_process_probe);
+
 	printk("Bye.....\n");
 }
 
