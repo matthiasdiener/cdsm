@@ -29,6 +29,8 @@ extern void (*spcd_exit_process)(struct task_struct *);
 
 DEFINE_SPINLOCK(ptl);
 
+DEFINE_SPINLOCK(ptl2);
+
 int pt_check_name(char *name)
 {
 	const char *bm_names[] = {".x", /*NAS*/
@@ -54,10 +56,10 @@ void pt_dpf_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags
 	int tid = pt_get_tid(task->pid);
 
 	if (tid > -1){
-		spin_lock(&ptl);
+		spin_lock(&ptl2);
 		pt_pf++;
 		pt_check_comm(tid, address);
-		spin_unlock(&ptl);
+		spin_unlock(&ptl2);
 	}	
 
 }
