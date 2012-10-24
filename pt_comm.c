@@ -160,8 +160,10 @@ int init_module(void)
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
-	spcd_pte_fault_jprobe.kp.addr = (kprobe_opcode_t *) kallsyms_lookup_name("handle_pte_fault"); //not necessary
+	//put this earlier:
+	spcd_pte_fault_jprobe.kp.symbol_name = "handle_pte_fault"; 
 
+	// check if we can use jprobes/kretprobes here:
 	spcd_page_fault_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
 
 	spcd_exit_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_exit") + 0x16;
