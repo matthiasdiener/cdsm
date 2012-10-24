@@ -112,16 +112,25 @@ void spcd_new_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned 
 			pt_add_pid(task->pid, pt_num_threads);
 			pt_task = task;
 		}
-	} else if (pt_task->parent->pid == task->parent->pid) {
-		pt_add_pid(task->pid, pt_num_threads);
+	}
+}
+
+int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+{
+	int pid = regs_return_value(regs);
+	struct pid *pids = find_get_pid(pid);
+	struct task_struct *task = pid_task(pids, PIDTYPE_PID);
+
+	if (pt_task && task && pt_task->parent->pid == task->parent->pid) {
+		pt_add_pid(pid, pt_num_threads);
 		if (!pt_thread) {
 			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 			wake_up_process(pt_thread);
 		}
 	}
 
+	return 0;
 }
-
 
 static struct jprobe spcd_pte_fault_jprobe = {
 	.entry =  spcd_pte_fault_handler
@@ -141,8 +150,8 @@ static struct kprobe spcd_new_process_probe = {
 	.post_handler = spcd_new_process_handler
 };
 
-static struct kprobe spcd_fork_probe = {
-	.post_handler = spcd_new_process_handler
+static struct kretprobe spcd_fork_probe = {
+	.handler = spcd_fork_handler
 };
 
 
@@ -159,13 +168,13 @@ int init_module(void)
 
 	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
 
-	spcd_fork_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_fork") + 0x153;
+	spcd_fork_probe.kp.symbol_name = "do_fork";
 
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
 	register_kprobe(&spcd_exit_process_probe);
 	register_kprobe(&spcd_new_process_probe);
-	register_kprobe(&spcd_fork_probe);
+	register_kretprobe(&spcd_fork_probe);
 
 	return 0;
 }
@@ -177,7 +186,7 @@ void cleanup_module(void)
 	unregister_kprobe(&spcd_page_fault_probe);
 	unregister_kprobe(&spcd_exit_process_probe);
 	unregister_kprobe(&spcd_new_process_probe);
-	unregister_kprobe(&spcd_fork_probe);
+	unregister_kretprobe(&spcd_fork_probe);
 
 	printk("Bye.....\n");
 }
