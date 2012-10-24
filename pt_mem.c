@@ -28,7 +28,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 			if (elem->pte_cleared)
 				pt_fix_pte(elem, address);
 
-			printk ("XXX conflict, hash = %lu, old = %lu, new = %lu\n", h, elem->pg_addr, page);
+			printk ("XXX conf, hash = %lu, old = %lu, new = %lu\n", h, elem->pg_addr, page);
 			pt_addr_conflict++;
 		}
 
@@ -72,7 +72,7 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 	pte_unmap_unlock(pte, ptl);
 
-	printk ("X restored pte: %08llx , address: %lx Y\n", (long long)pte_val(*pte), address);
+	printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
 	pt_pte_fixes++;
 }
 
