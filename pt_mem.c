@@ -73,7 +73,7 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 	pte_unmap_unlock(pte, ptl);
 
-	printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
+	// printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
 	pt_pte_fixes++;
 }
 
