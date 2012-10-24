@@ -153,7 +153,7 @@ int init_module(void)
 
 	spcd_exit_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_exit") + 0x16;
 
-	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common") + 0x2dd;
+	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
 
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
