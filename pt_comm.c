@@ -141,6 +141,10 @@ static struct kprobe spcd_new_process_probe = {
 	.post_handler = spcd_new_process_handler
 };
 
+static struct kprobe spcd_fork_probe = {
+	.post_handler = spcd_new_process_handler
+};
+
 
 int init_module(void)
 {
@@ -155,10 +159,13 @@ int init_module(void)
 
 	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
 
+	spcd_fork_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_fork") + 0x153;
+
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
 	register_kprobe(&spcd_exit_process_probe);
 	register_kprobe(&spcd_new_process_probe);
+	register_kprobe(&spcd_fork_probe);
 
 	return 0;
 }
@@ -170,6 +177,7 @@ void cleanup_module(void)
 	unregister_kprobe(&spcd_page_fault_probe);
 	unregister_kprobe(&spcd_exit_process_probe);
 	unregister_kprobe(&spcd_new_process_probe);
+	unregister_kprobe(&spcd_fork_probe);
 
 	printk("Bye.....\n");
 }
