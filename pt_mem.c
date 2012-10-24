@@ -11,8 +11,7 @@ static inline unsigned long addr_to_page(unsigned long address)
 
 struct pt_mem_info* pt_get_mem(unsigned long address)
 {
-	unsigned long h = hash_32(addr_to_page(address), PT_MEM_HASH_BITS);
-	return &pt_mem[h];
+	return &pt_mem[hash_32(addr_to_page(address), PT_MEM_HASH_BITS)];
 }
 
 
@@ -20,17 +19,17 @@ struct pt_mem_info* pt_get_mem(unsigned long address)
 struct pt_mem_info* pt_get_mem_init(unsigned long address)
 {
 	unsigned long page = addr_to_page(address);
-	unsigned long h = hash_32(addr_to_page(address), PT_MEM_HASH_BITS);
+	struct pt_mem_info *elem;
 
 	spin_lock(&ptl);
-	struct pt_mem_info *elem = &pt_mem[h];
+	elem = pt_get_mem(address);
 
 	if (elem->pg_addr != page) { /* new elem */
 		if (elem->pg_addr != 0) { /* delete old elem */
 			if (elem->pte_cleared)
 				pt_fix_pte(elem, address);
 
-			printk ("XXX conf, hash = %lu, old = %lx, new = %lx\n", h, elem->pg_addr, page);
+			printk ("XXX conf, hash: %x, old: %lx, new: %lx, pte_fixed: %d\n", hash_32(page, PT_MEM_HASH_BITS), elem->pg_addr, page, elem->pte_cleared ? 1 : 0);
 			pt_addr_conflict++;
 		}
 
