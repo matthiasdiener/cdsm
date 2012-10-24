@@ -1,0 +1,13 @@
+#### TODO
+
+- crash when hash table conflict
+- large mem usage
+- kprobes for begin and end process
+- locks necessary?
+- fix pte in dpf?
+- reduce size of mem hash table to 32 bits?
+
+
+#### Performance
+
+- pttest, 8T, parsec, native: with: 1481 secs; without: 1451 secs
