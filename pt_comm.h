@@ -16,7 +16,7 @@
 
 #define PT_MAXTHREADS 4096
 
-#define PT_MEM_HASH_BITS 22UL
+#define PT_MEM_HASH_BITS 26UL
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
 
 #define PT_PID_HASH_BITS 12UL
@@ -42,8 +42,8 @@ extern struct task_struct *pt_thread;
 
 struct pt_mem_info {
 	unsigned long pg_addr;
-	int pte_cleared;
-	unsigned sharer[2];
+	u8 pte_cleared;
+	u8 sharer[2];
 };
 
 int pt_get_tid(int pid); 

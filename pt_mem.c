@@ -18,8 +18,8 @@ struct pt_mem_info* pt_get_mem(unsigned long address)
 /* get mem elem, initialize if necessary */
 struct pt_mem_info* pt_get_mem_init(unsigned long address)
 {
-	unsigned long page = addr_to_page(address);
 	struct pt_mem_info *elem;
+	unsigned long page = addr_to_page(address);
 
 	spin_lock(&ptl);
 	elem = pt_get_mem(address);
