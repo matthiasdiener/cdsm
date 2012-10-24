@@ -22,7 +22,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 	unsigned long h = hash_32(addr_to_page(address), PT_MEM_HASH_BITS);
 	struct pt_mem_info *elem = &pt_mem[h];
 	unsigned long page = addr_to_page(address);
-
+	spin_lock(&ptl);
 	if (elem->pg_addr != page) { /* new elem */
 		if (elem->pg_addr != 0) { /* delete old elem */
 			if (elem->pte_cleared)
@@ -37,7 +37,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 		elem->pg_addr = page;
 		elem->pte_cleared = 0;
 	}
-
+	spin_unlock(&ptl);
 	return elem;
 }
 

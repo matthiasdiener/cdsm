@@ -27,7 +27,7 @@ extern void (*spcd_new_process)(struct task_struct *);
 static void (*spcd_exit_process_original_ref)(struct task_struct *); 
 extern void (*spcd_exit_process)(struct task_struct *);
 
-static DEFINE_SPINLOCK(ptl);
+DEFINE_SPINLOCK(ptl);
 
 int pt_check_name(char *name)
 {
@@ -128,7 +128,7 @@ void spcd_new_process_new(struct task_struct *task)
 			wake_up_process(pt_thread);
 		}
 	}
-	
+
 }
 
 
