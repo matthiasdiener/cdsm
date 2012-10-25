@@ -109,13 +109,13 @@ int spcd_new_process_handler(const char *filename,
 
 	struct task_struct *task = current;
 	printk("name: %s, filename: %s\n", task->comm, filename);
-	if (pt_task == 0) {
-		if (spcd_check_name(task->comm)) {
-			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
-			pt_add_pid(task->pid, pt_num_threads);
-			pt_task = task;
-		}
-	}
+	// if (pt_task == 0) {
+	// 	if (spcd_check_name(task->comm)) {
+	// 		printk("pt: start %s (pid %d)\n", task->comm, task->pid);
+	// 		pt_add_pid(task->pid, pt_num_threads);
+	// 		pt_task = task;
+	// 	}
+	// }
 
 	return 0;
 }
