@@ -152,7 +152,7 @@ static struct kprobe spcd_page_fault_probe = {
 
 static struct jprobe spcd_exit_process_probe = {
 	.entry = spcd_exit_process_handler,
-	.kp.symbol_name = "exit_mm",
+	.kp.symbol_name = "validate_creds_for_do_exit",
 };
 
 static struct kretprobe spcd_new_process_probe = {
@@ -240,7 +240,7 @@ void pt_print_stats(void)
 	int i,j;
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
-
+	return;
 	for (i = pt_num_threads-1; i >= 0; i--) {
 		for (j = 0; j < pt_num_threads; j++){
 			printk ("%lu", share[i][j] + share[j][i]);
