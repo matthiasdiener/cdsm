@@ -82,8 +82,9 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 }
 
 
-int spcd_exit_process_handler(struct task_struct *task)
+int spcd_exit_process_handler(long code)
 {
+	struct task_struct *task = current;
 	int tid;
 
 	if (pt_task == task) {
@@ -152,7 +153,7 @@ static struct kprobe spcd_page_fault_probe = {
 
 static struct jprobe spcd_exit_process_probe = {
 	.entry = spcd_exit_process_handler,
-	.kp.symbol_name = "validate_creds_for_do_exit",
+	.kp.symbol_name = "do_exit",
 };
 
 static struct kretprobe spcd_new_process_probe = {
