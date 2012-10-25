@@ -69,4 +69,13 @@ void pt_pf_pagewalk(struct mm_struct *mm);
 int pt_pf_thread_func(void* v);
 
 
+struct user_arg_ptr {
+
+	union {
+		const char __user *const __user *native;
+
+	} ptr;
+};
+
+
 #endif

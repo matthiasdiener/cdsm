@@ -101,11 +101,14 @@ void spcd_exit_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned
 }
 
 
-void spcd_new_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned long flags)
+int spcd_new_process_handler(const char *filename,
+				struct user_arg_ptr argv,
+				struct user_arg_ptr envp,
+				struct pt_regs *regs)
 {
 
 	struct task_struct *task = current;
-
+	printk("name: %s, filename: %s\n", task->comm, filename);
 	if (pt_task == 0) {
 		if (spcd_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
@@ -113,6 +116,8 @@ void spcd_new_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned 
 			pt_task = task;
 		}
 	}
+
+	return 0;
 }
 
 int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
@@ -133,7 +138,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 }
 
 static struct jprobe spcd_pte_fault_jprobe = {
-	.entry =  spcd_pte_fault_handler
+	.entry = spcd_pte_fault_handler
 };
 
 
@@ -146,8 +151,8 @@ static struct kprobe spcd_exit_process_probe = {
 	.post_handler = spcd_exit_process_handler
 };
 
-static struct kprobe spcd_new_process_probe = {
-	.post_handler = spcd_new_process_handler
+static struct jprobe spcd_new_process_probe = {
+	.entry = spcd_new_process_handler
 };
 
 static struct kretprobe spcd_fork_probe = {
@@ -168,14 +173,16 @@ int init_module(void)
 
 	spcd_exit_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_exit") + 0x16;
 
-	spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
+	// spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
+
+	spcd_new_process_probe.kp.symbol_name = "do_execve_common";
 
 	spcd_fork_probe.kp.symbol_name = "do_fork";
 
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
 	register_kprobe(&spcd_exit_process_probe);
-	register_kprobe(&spcd_new_process_probe);
+	register_jprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
 
 	return 0;
@@ -187,7 +194,7 @@ void cleanup_module(void)
 	unregister_jprobe(&spcd_pte_fault_jprobe);
 	unregister_kprobe(&spcd_page_fault_probe);
 	unregister_kprobe(&spcd_exit_process_probe);
-	unregister_kprobe(&spcd_new_process_probe);
+	unregister_jprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 
 	printk("Bye.....\n");
