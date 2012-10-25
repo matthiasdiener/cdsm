@@ -11,7 +11,7 @@ unsigned long pt_num_walks;
 
 struct task_struct *pt_task;
 
-unsigned pt_num_faults = 3;
+unsigned pt_num_faults = 0;
 unsigned long pt_pte_fixes;
 
 unsigned long pt_next_addr;
@@ -65,6 +65,7 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 {
 
 	struct pt_mem_info *elem;
+	int tid;
 
 	if (!pt_thread || !pt_task || pt_task->mm != mm)
 		jprobe_return();
@@ -76,6 +77,15 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		pt_fix_pte(elem, address);
 
 	spin_unlock(&ptl);
+
+	tid = pt_get_tid(task->pid);
+
+	if (tid > -1){
+		spin_lock(&ptl2);
+		pt_pf++;
+		pt_check_comm(tid, address);
+		spin_unlock(&ptl2);
+	}
 
 	jprobe_return();
 	return 0; /* not reached */
@@ -109,14 +119,17 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 {
 	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
-	
-	if (pt_task == 0 && ret == 0) {
-		if (spcd_check_name(task->comm)) {
-			printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
-			pt_add_pid(task->pid, pt_num_threads);
-			pt_task = task;
-		}
+
+	if (pt_task || ret)
+		return 0;
+
+
+	if (spcd_check_name(task->comm)) {
+		printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
+		pt_add_pid(task->pid, pt_num_threads);
+		pt_task = task;
 	}
+
 
 	return 0;
 }
@@ -173,11 +186,11 @@ int init_module(void)
 	pt_reset_stats();
 
 	// check if we can use jprobes/kretprobes here:
-	spcd_page_fault_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
+	// spcd_page_fault_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
 
 
 	register_jprobe(&spcd_pte_fault_jprobe);
-	register_kprobe(&spcd_page_fault_probe);
+	// register_kprobe(&spcd_page_fault_probe);
 	register_jprobe(&spcd_exit_process_probe);
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
@@ -189,7 +202,7 @@ int init_module(void)
 void cleanup_module(void)
 {
 	unregister_jprobe(&spcd_pte_fault_jprobe);
-	unregister_kprobe(&spcd_page_fault_probe);
+	// unregister_kprobe(&spcd_page_fault_probe);
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
@@ -202,7 +215,7 @@ void pt_reset(void)
 {
 	if (pt_thread)
 		kthread_stop(pt_thread);
-	pt_task = 0;
+	pt_task = NULL;
 	pt_thread = NULL;
 }
 
