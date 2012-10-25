@@ -105,8 +105,10 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 {
 	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
-	printk("name: %s, ret:%d\n", task->comm, ret);
-	if (0 && pt_task == 0) {
+	
+	// printk("name: %s, ret:%d\n", task->comm, ret);
+
+	if (pt_task == 0 && ret == 0) {
 		if (spcd_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
 			pt_add_pid(task->pid, pt_num_threads);
@@ -114,7 +116,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 		}
 	}
 
-	return 0; /* not reached */
+	return 0;
 }
 
 int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
