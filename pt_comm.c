@@ -107,7 +107,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 	struct task_struct *task = current;
 	printk("name: %s, ret:%d\n", task->comm, ret);
 	if (0 && pt_task == 0) {
-		if (spcd_check_name(filename)) {
+		if (spcd_check_name(task->comm)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
 			pt_add_pid(task->pid, pt_num_threads);
 			pt_task = task;
