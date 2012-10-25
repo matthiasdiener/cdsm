@@ -11,7 +11,7 @@ unsigned long pt_num_walks;
 
 struct task_struct *pt_task;
 
-unsigned pt_num_faults = 0;
+unsigned pt_num_faults = 3;
 unsigned long pt_pte_fixes;
 
 unsigned long pt_next_addr;
