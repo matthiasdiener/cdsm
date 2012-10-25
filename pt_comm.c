@@ -101,22 +101,19 @@ void spcd_exit_process_handler(struct kprobe *kp, struct pt_regs *regs, unsigned
 }
 
 
-int spcd_new_process_handler(const char *filename,
-				struct user_arg_ptr argv,
-				struct user_arg_ptr envp,
-				struct pt_regs *regs)
+int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-
+	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
-	// printk("name: %s, filename: %s\n", task->comm, filename);
-	if (pt_task == 0) {
+	printk("name: %s, ret:%d\n", task->comm, ret);
+	if (0 && pt_task == 0) {
 		if (spcd_check_name(filename)) {
 			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
 			pt_add_pid(task->pid, pt_num_threads);
 			pt_task = task;
 		}
 	}
-	jprobe_return();
+
 	return 0; /* not reached */
 }
 
@@ -151,8 +148,8 @@ static struct kprobe spcd_exit_process_probe = {
 	.post_handler = spcd_exit_process_handler
 };
 
-static struct jprobe spcd_new_process_probe = {
-	.entry = spcd_new_process_handler
+static struct kretprobe spcd_new_process_probe = {
+	.handler = spcd_new_process_handler
 };
 
 static struct kretprobe spcd_fork_probe = {
