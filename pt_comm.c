@@ -179,7 +179,7 @@ int init_module(void)
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
 	register_kprobe(&spcd_exit_process_probe);
-	register_jprobe(&spcd_new_process_probe);
+	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
 
 	return 0;
@@ -191,7 +191,7 @@ void cleanup_module(void)
 	unregister_jprobe(&spcd_pte_fault_jprobe);
 	unregister_kprobe(&spcd_page_fault_probe);
 	unregister_kprobe(&spcd_exit_process_probe);
-	unregister_jprobe(&spcd_new_process_probe);
+	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 
 	printk("Bye.....\n");
