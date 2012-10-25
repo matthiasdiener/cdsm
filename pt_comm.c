@@ -79,7 +79,6 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	spin_unlock(&ptl);
 
 	tid = pt_get_tid(task->pid);
-
 	if (tid > -1){
 		spin_lock(&ptl2);
 		pt_pf++;
@@ -144,8 +143,8 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (pt_task && task && pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(pid, pt_num_threads);
 		if (!pt_thread) {
-			// pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
-			// wake_up_process(pt_thread);
+			pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
+			wake_up_process(pt_thread);
 		}
 	}
 
