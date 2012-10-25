@@ -116,7 +116,7 @@ int spcd_new_process_handler(const char *filename,
 	// 		pt_task = task;
 	// 	}
 	// }
-
+	jprobe_return();
 	return 0;
 }
 
@@ -175,7 +175,7 @@ int init_module(void)
 
 	// spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
 
-	spcd_new_process_probe.kp.symbol_name = "do_execve_common";
+	spcd_new_process_probe.kp.symbol_name = "do_execve";
 
 	spcd_fork_probe.kp.symbol_name = "do_fork";
 
