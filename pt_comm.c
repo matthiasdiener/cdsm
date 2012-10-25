@@ -140,7 +140,8 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 
 static struct jprobe spcd_pte_fault_jprobe = {
-	.entry = spcd_pte_fault_handler
+	.entry = spcd_pte_fault_handler,
+	.kp.symbol_name = "handle_pte_fault",
 };
 
 
@@ -150,15 +151,18 @@ static struct kprobe spcd_page_fault_probe = {
 
 
 static struct jprobe spcd_exit_process_probe = {
-	.entry = spcd_exit_process_handler
+	.entry = spcd_exit_process_handler,
+	.kp.symbol_name = "exit_mm",
 };
 
 static struct kretprobe spcd_new_process_probe = {
-	.handler = spcd_new_process_handler
+	.handler = spcd_new_process_handler,
+	.kp.symbol_name = "do_execve",
 };
 
 static struct kretprobe spcd_fork_probe = {
-	.handler = spcd_fork_handler
+	.handler = spcd_fork_handler,
+	.kp.symbol_name = "do_fork",
 };
 
 
@@ -167,21 +171,9 @@ int init_module(void)
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
-	//put this earlier:
-	spcd_pte_fault_jprobe.kp.symbol_name = "handle_pte_fault"; 
-
 	// check if we can use jprobes/kretprobes here:
 	spcd_page_fault_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_page_fault") + 0x5d;
 
-	// spcd_exit_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_exit") + 0x16;
-
-	spcd_exit_process_probe.kp.symbol_name = "exit_mm";
-
-	// spcd_new_process_probe.addr = (kprobe_opcode_t *) kallsyms_lookup_name("do_execve_common.isra.26") + 0x2dd;
-
-	spcd_new_process_probe.kp.symbol_name = "do_execve";
-
-	spcd_fork_probe.kp.symbol_name = "do_fork";
 
 	register_jprobe(&spcd_pte_fault_jprobe);
 	register_kprobe(&spcd_page_fault_probe);
