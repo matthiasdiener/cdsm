@@ -108,16 +108,16 @@ int spcd_new_process_handler(const char *filename,
 {
 
 	struct task_struct *task = current;
-	printk("name: %s, filename: %s\n", task->comm, filename);
-	// if (pt_task == 0) {
-	// 	if (spcd_check_name(task->comm)) {
-	// 		printk("pt: start %s (pid %d)\n", task->comm, task->pid);
-	// 		pt_add_pid(task->pid, pt_num_threads);
-	// 		pt_task = task;
-	// 	}
-	// }
+	// printk("name: %s, filename: %s\n", task->comm, filename);
+	if (pt_task == 0) {
+		if (spcd_check_name(task->comm)) {
+			printk("pt: start %s (pid %d)\n", task->comm, task->pid);
+			pt_add_pid(task->pid, pt_num_threads);
+			pt_task = task;
+		}
+	}
 	jprobe_return();
-	return 0;
+	return 0; /* not reached */
 }
 
 int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
@@ -179,11 +179,11 @@ int init_module(void)
 
 	spcd_fork_probe.kp.symbol_name = "do_fork";
 
-	// register_jprobe(&spcd_pte_fault_jprobe);
-	// register_kprobe(&spcd_page_fault_probe);
-	// register_kprobe(&spcd_exit_process_probe);
+	register_jprobe(&spcd_pte_fault_jprobe);
+	register_kprobe(&spcd_page_fault_probe);
+	register_kprobe(&spcd_exit_process_probe);
 	register_jprobe(&spcd_new_process_probe);
-	// register_kretprobe(&spcd_fork_probe);
+	register_kretprobe(&spcd_fork_probe);
 
 	return 0;
 }
@@ -191,11 +191,11 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	// unregister_jprobe(&spcd_pte_fault_jprobe);
-	// unregister_kprobe(&spcd_page_fault_probe);
-	// unregister_kprobe(&spcd_exit_process_probe);
+	unregister_jprobe(&spcd_pte_fault_jprobe);
+	unregister_kprobe(&spcd_page_fault_probe);
+	unregister_kprobe(&spcd_exit_process_probe);
 	unregister_jprobe(&spcd_new_process_probe);
-	// unregister_kretprobe(&spcd_fork_probe);
+	unregister_kretprobe(&spcd_fork_probe);
 
 	printk("Bye.....\n");
 }
