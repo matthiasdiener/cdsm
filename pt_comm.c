@@ -50,7 +50,11 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	struct pt_mem_info *elem;
 	int tid;
 
-	if (!pt_thread || !pt_task || pt_task->mm != mm)
+	if (!pt_task)
+		jprobe_return();
+	//printk("handler pt_task: %d, addr: %lu\n", pt_task->pid, address);
+	//printk(".");
+	if (pt_task->mm != mm)
 		jprobe_return();
 
 	spin_lock(&ptl);
@@ -195,7 +199,7 @@ void cleanup_module(void)
 void pt_reset(void)
 {
 	pt_task = NULL;
-	pt_thread = NULL;
+	//pt_thread = NULL;
 }
 
 
