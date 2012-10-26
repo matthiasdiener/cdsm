@@ -41,6 +41,17 @@ int spcd_check_name(char *name)
 	return 0;
 }
 
+void pt_maybe_fix_pte(unsigned long address)
+{
+	spin_lock(&ptl);
+
+	elem = pt_get_mem(address);
+	if (elem->pte_cleared)
+		pt_fix_pte(elem, address);
+
+	spin_unlock(&ptl);
+}
+
 
 int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
@@ -50,20 +61,10 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	struct pt_mem_info *elem;
 	int tid;
 
-	if (!pt_task)
-		jprobe_return();
-	//printk("handler pt_task: %d, addr: %lu\n", pt_task->pid, address);
-	//printk(".");
-	if (pt_task->mm != mm)
+	if (!pt_task || pt_task->mm != mm)
 		jprobe_return();
 
-	spin_lock(&ptl);
-
-	elem = pt_get_mem(address);
-	if (elem->pte_cleared)
-		pt_fix_pte(elem, address);
-
-	spin_unlock(&ptl);
+	pt_maybe_fix_pte(address);
 
 	tid = pt_get_tid(task->pid);
 	if (tid > -1){
