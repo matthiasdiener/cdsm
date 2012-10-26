@@ -137,11 +137,17 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
 	int pid = regs_return_value(regs);
-	struct task_struct *task;
+	struct pid *pids;
+	struct task_struct *task = NULL;
 
 	rcu_read_lock();
-	task = find_task_by_vpid(pid);
+	pids = find_vpid(pid);
+	if (pids)
+		task = pid_task(pids, PIDTYPE_PID);
 	rcu_read_unlock();
+
+	if (!task)
+		return 0;
 
 	if (pt_task && task && pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(pid, pt_num_threads);
