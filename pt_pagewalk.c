@@ -87,6 +87,7 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 			}
 		}
 	}
+
 	up_write(&mm->mmap_sem);
 }
 
