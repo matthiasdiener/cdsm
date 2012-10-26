@@ -43,6 +43,8 @@ int spcd_check_name(char *name)
 
 void pt_maybe_fix_pte(unsigned long address)
 {
+	struct pt_mem_info *elem;
+
 	spin_lock(&ptl);
 
 	elem = pt_get_mem(address);
@@ -57,8 +59,6 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
-
-	struct pt_mem_info *elem;
 	int tid;
 
 	if (!pt_task || pt_task->mm != mm)
