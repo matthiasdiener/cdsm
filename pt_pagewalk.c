@@ -7,7 +7,7 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	pgd_t *pgd;
 	pud_t *pud;
 	pmd_t *pmd;
-	spinlock_t *ptl;
+	spinlock_t *myptl;
 	
 	if (pte_none(*pte) || !pte_present(*pte) || !pte_young(*pte) || pte_special(*pte))
 		return 0;
@@ -21,9 +21,9 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	pmd = pmd_offset(pud, addr);
 	pt_next_addr = addr;
 
-	pte = pte_offset_map_lock(walk->mm, pmd, addr, &ptl);
+	pte = pte_offset_map_lock(walk->mm, pmd, addr, &myptl);
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
-	pte_unmap_unlock(pte, ptl);
+	pte_unmap_unlock(pte, myptl);
 	
 	pt_mark_pte(addr, pte);
 

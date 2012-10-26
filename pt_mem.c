@@ -61,7 +61,7 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	pud_t *pud;
 	pmd_t *pmd;
 	pte_t *pte;
-	spinlock_t *ptl;
+	spinlock_t *myptl;
 
 	elem->pte_cleared = 0;
 
@@ -69,10 +69,10 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	pud = pud_offset(pgd, address);
 	pmd = pmd_offset(pud, address);
 
-	pte = pte_offset_map_lock(pt_task->mm, pmd, address, &ptl);
+	pte = pte_offset_map_lock(pt_task->mm, pmd, address, &myptl);
 	if (!pte_none(*pte))
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
-	pte_unmap_unlock(pte, ptl);
+	pte_unmap_unlock(pte, myptl);
 
 	pt_pte_fixes++;
 
