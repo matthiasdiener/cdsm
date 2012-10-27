@@ -48,7 +48,7 @@ struct pt_mem_info {
 };
 
 int pt_get_tid(int pid); 
-int pt_add_pid(int pid, int tid);
+void pt_add_pid(int pid, int tid);
 void pt_delete_pid(int pid, int tid);
 void pt_pid_clear(void);
 
