@@ -26,7 +26,8 @@ extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
 extern unsigned pt_num_faults;
-extern int pt_num_threads;
+extern atomic_t pt_num_threads;
+extern atomic_t pt_active_threads;
 extern unsigned long pt_pte_fixes;
 extern struct task_struct *pt_task;
 extern unsigned long pt_num_walks;
@@ -67,15 +68,6 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long addr);
 
 void pt_pf_pagewalk(struct mm_struct *mm);
 int pt_pf_thread_func(void* v);
-
-
-struct user_arg_ptr {
-
-	union {
-		const char __user *const __user *native;
-
-	} ptr;
-};
 
 
 #endif

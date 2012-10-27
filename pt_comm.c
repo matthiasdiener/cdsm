@@ -6,7 +6,8 @@ unsigned long pt_pf;
 unsigned long pt_addr_conflict;
 unsigned long pt_pf_extra;
 unsigned pt_num_faults;
-int pt_num_threads;
+atomic_t pt_num_threads = ATOMIC_INIT(0);
+atomic_t pt_active_threads = ATOMIC_INIT(0);
 unsigned long pt_num_walks;
 
 struct task_struct *pt_task;
@@ -23,7 +24,7 @@ struct task_struct *pt_thread;
 
 DEFINE_SPINLOCK(ptl);
 
-DEFINE_SPINLOCK(ptl2);
+DEFINE_SPINLOCK(ptl_check_comm);
 
 int spcd_check_name(char *name)
 {
@@ -68,10 +69,10 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 
 	tid = pt_get_tid(task->pid);
 	if (tid > -1){
-		spin_lock(&ptl2);
+		spin_lock(&ptl_check_comm);
 		pt_pf++;
 		pt_check_comm(tid, address);
-		spin_unlock(&ptl2);
+		spin_unlock(&ptl_check_comm);
 	}
 
 	jprobe_return();
@@ -113,7 +114,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 
 	if (spcd_check_name(task->comm)) {
 		printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
-		pt_add_pid(task->pid, pt_num_threads);
+		pt_add_pid(task->pid, atomic_read(&pt_num_threads));
 		pt_task = task;
 	}
 
@@ -138,7 +139,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 		return 0;
 
 	if (pt_task && pt_task->parent->pid == task->parent->pid) {
-		pt_add_pid(pid, pt_num_threads);
+		pt_add_pid(pid, atomic_read(&pt_num_threads));
 	}
 
 	return 0;
@@ -209,7 +210,8 @@ void pt_reset_stats(void)
 	pt_pid_clear();
 	pt_mem_clear();
 	pt_pte_fixes = 0;
-	pt_num_threads = 0;
+	atomic_set(&pt_num_threads, 0);
+	atomic_set(&pt_active_threads, 0);
 	pt_num_walks = 0;
 	pt_pf = 0;
 	pt_pf_extra = 0;
@@ -236,14 +238,15 @@ int pt_pf_thread_func(void* v)
 
 void pt_print_stats(void)
 {
-	int i,j;
+	int i, j;
+	int nt = atomic_read(&pt_num_threads);
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", pt_num_threads, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
 	return;
-	for (i = pt_num_threads-1; i >= 0; i--) {
-		for (j = 0; j < pt_num_threads; j++){
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++){
 			printk ("%lu", share[i][j] + share[j][i]);
-			if (j != pt_num_threads-1)
+			if (j != nt-1)
 				printk (",");
 		}
 		printk("\n");
