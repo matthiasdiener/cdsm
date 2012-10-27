@@ -43,7 +43,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 }
 
 
-/*mark page as present bit cleared by page walk */
+/* mark page as present bit cleared by page walk */
 void pt_mark_pte(unsigned long address, pte_t *pte)
 {
 	struct pt_mem_info *elem = pt_get_mem_init(address);
