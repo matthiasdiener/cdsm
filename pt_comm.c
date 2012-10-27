@@ -26,6 +26,7 @@ DEFINE_SPINLOCK(ptl);
 
 DEFINE_SPINLOCK(ptl_check_comm);
 
+
 int spcd_check_name(char *name)
 {
 	const char *bm_names[] = {".x", /*NAS*/
@@ -41,6 +42,7 @@ int spcd_check_name(char *name)
 	}
 	return 0;
 }
+
 
 void pt_maybe_fix_pte(unsigned long address)
 {
@@ -86,7 +88,7 @@ int spcd_exit_process_handler(long code)
 	int tid = pt_get_tid(task->pid);
 
 	if (tid > -1) {
-		pt_delete_pid(task->pid, tid);
+		pt_delete_pid(task->pid);
 		if (atomic_read(&pt_active_threads) == 0) {
 			pt_reset();
 			printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
@@ -111,7 +113,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 
 	if (spcd_check_name(task->comm)) {
 		printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
-		pt_add_pid(task->pid, atomic_read(&pt_num_threads));
+		pt_add_pid(task->pid);
 		pt_task = task;
 	}
 
@@ -126,6 +128,9 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	struct pid *pids;
 	struct task_struct *task = NULL;
 
+	if (!pt_task)
+		return 0;
+
 	rcu_read_lock();
 	pids = find_vpid(pid);
 	if (pids)
@@ -135,8 +140,8 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (!task)
 		return 0;
 
-	if (pt_task && pt_task->parent->pid == task->parent->pid) {
-		pt_add_pid(pid, atomic_read(&pt_num_threads));
+	if (pt_task->parent->pid == task->parent->pid) {
+		pt_add_pid(pid);
 	}
 
 	return 0;
@@ -198,7 +203,6 @@ void cleanup_module(void)
 void pt_reset(void)
 {
 	pt_task = NULL;
-	//pt_thread = NULL;
 }
 
 
