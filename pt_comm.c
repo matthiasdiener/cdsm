@@ -83,23 +83,20 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 int spcd_exit_process_handler(long code)
 {
 	struct task_struct *task = current;
-	int tid;
+	int tid = pt_get_tid(task->pid);
 
-	if (pt_task == task) {
-		pt_reset();
-		printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
-		pt_print_stats();
-		pt_reset_stats();
-		jprobe_return();
-	}
-
-	tid = pt_get_tid(task->pid);
-	if (tid >-1){
+	if (tid > -1) {
 		pt_delete_pid(task->pid, tid);
+		if (atomic_read(&pt_active_threads) == 0) {
+			pt_reset();
+			printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
+			pt_print_stats();
+			pt_reset_stats();
+		}
 	}
 
 	jprobe_return();
-	return 0;
+	return 0; /* not reached */
 }
 
 
