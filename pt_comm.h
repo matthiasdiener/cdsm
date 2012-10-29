@@ -35,7 +35,7 @@ extern unsigned long pt_num_walks;
 extern unsigned long pt_next_addr;
 extern struct vm_area_struct *pt_next_vma;
 
-extern spinlock_t ptl;
+// extern spinlock_t ptl;
 
 extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 

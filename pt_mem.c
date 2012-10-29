@@ -21,7 +21,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 	struct pt_mem_info *elem;
 	unsigned long page = addr_to_page(address);
 
-	spin_lock(&ptl);
+	// spin_lock(&ptl);
 	elem = pt_get_mem(address);
 
 	if (elem->pg_addr != page) { /* new elem */
@@ -38,7 +38,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 		elem->pg_addr = page;
 		elem->pte_cleared = 0;
 	}
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	return elem;
 }
 

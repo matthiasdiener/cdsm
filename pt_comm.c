@@ -48,13 +48,13 @@ void pt_maybe_fix_pte(unsigned long address)
 {
 	struct pt_mem_info *elem;
 
-	spin_lock(&ptl);
+	// spin_lock(&ptl);
 
 	elem = pt_get_mem(address);
 	if (elem->pte_cleared)
 		pt_fix_pte(elem, address);
 
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 }
 
 
@@ -67,16 +67,17 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	if (!pt_task || pt_task->mm != mm)
 		jprobe_return();
 
+	spin_lock(&ptl);
 	pt_maybe_fix_pte(address);
 
 	tid = pt_get_tid(task->pid);
 	if (tid > -1){
-		spin_lock(&ptl_check_comm);
+		// spin_lock(&ptl_check_comm);
 		pt_pf++;
 		pt_check_comm(tid, address);
-		spin_unlock(&ptl_check_comm);
+		// spin_unlock(&ptl_check_comm);
 	}
-
+	spin_unlock(&ptl);
 	jprobe_return();
 	return 0; /* not reached */
 }
@@ -86,7 +87,7 @@ int spcd_exit_process_handler(long code)
 {
 	struct task_struct *task = current;
 	int tid = pt_get_tid(task->pid);
-
+	spin_lock(&ptl);
 	if (tid > -1) {
 		pt_delete_pid(task->pid);
 		if (atomic_read(&pt_active_threads) == 0) {
@@ -96,7 +97,7 @@ int spcd_exit_process_handler(long code)
 			pt_reset_stats();
 		}
 	}
-
+	spin_unlock(&ptl);
 	jprobe_return();
 	return 0; /* not reached */
 }
@@ -130,20 +131,22 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 	if (!pt_task)
 		return 0;
-
-	// rcu_read_lock();
+	spin_lock(&ptl);
+	
+	rcu_read_lock();
 	pids = find_vpid(pid);
 	if (pids)
 		task = pid_task(pids, PIDTYPE_PID);
-	// rcu_read_unlock();
+	rcu_read_unlock();
 
-	if (!task)
+	if (!task) {
+		spin_unlock(&ptl);
 		return 0;
-
+	}
 	if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(pid);
 	}
-
+	spin_unlock(&ptl);
 	return 0;
 }
 
