@@ -22,9 +22,9 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
 
-DEFINE_SPINLOCK(ptl);
+// DEFINE_SPINLOCK(ptl);
 
-DEFINE_SPINLOCK(ptl_check_comm);
+// DEFINE_SPINLOCK(ptl_check_comm);
 
 
 int spcd_check_name(char *name)
@@ -67,7 +67,7 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	if (!pt_task || pt_task->mm != mm)
 		jprobe_return();
 
-	spin_lock(&ptl);
+	// spin_lock(&ptl);
 	pt_maybe_fix_pte(address);
 
 	tid = pt_get_tid(task->pid);
@@ -77,7 +77,7 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		pt_check_comm(tid, address);
 		// spin_unlock(&ptl_check_comm);
 	}
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	jprobe_return();
 	return 0; /* not reached */
 }
@@ -141,7 +141,6 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	rcu_read_unlock();
 
 	if (!task) {
-		spin_unlock(&ptl);
 		return 0;
 	}
 	if (pt_task->parent->pid == task->parent->pid) {
