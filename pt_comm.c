@@ -131,11 +131,11 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (!pt_task)
 		return 0;
 
-	rcu_read_lock();
+	// rcu_read_lock();
 	pids = find_vpid(pid);
 	if (pids)
 		task = pid_task(pids, PIDTYPE_PID);
-	rcu_read_unlock();
+	// rcu_read_unlock();
 
 	if (!task)
 		return 0;
