@@ -68,11 +68,13 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	pmd = pmd_offset(pud, address);
 
 	pte = pte_offset_map_lock(pt_task->mm, pmd, address, &myptl);
-	if (!pte_none(*pte))
+	if (!pte_none(*pte)) {
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
+		elem->pte_cleared = 0; //atomic_t
+	}
 	pte_unmap_unlock(pte, myptl);
 
-	elem->pte_cleared = 0;
+	
 	pt_pte_fixes++;
 
 //	printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
