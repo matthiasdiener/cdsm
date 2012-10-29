@@ -50,7 +50,7 @@ void pt_mark_pte(unsigned long address, pte_t *pte)
 	elem->pte_cleared = 1;
 	pt_pf_extra++;
 
-//	printk ("clear pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
+	//	printk ("clear pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
 }
 
 
@@ -71,13 +71,12 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	if (!pte_none(*pte)) {
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 		elem->pte_cleared = 0; //atomic_t
+		pt_pte_fixes++;
 	}
 	pte_unmap_unlock(pte, myptl);
 
-	
-	pt_pte_fixes++;
 
-//	printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
+	//	printk ("rest pte: %08llx , addr: %lx\n", (long long)pte_val(*pte), address);
 }
 
 
