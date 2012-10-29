@@ -233,8 +233,11 @@ int pt_pf_thread_func(void* v)
 	while (1) {
 		if (kthread_should_stop())
 			return 0;
-		if (pt_task)
+		if (pt_task) {
+			spin_lock(&ptl);
 			pt_pf_pagewalk(pt_task->mm);
+			spin_unlock(&ptl);
+		}
 		msleep(10);
 	}
 	
