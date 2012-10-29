@@ -70,8 +70,8 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long address)
 	pmd = pmd_offset(pud, address);
 
 	pte = pte_offset_map_lock(pt_task->mm, pmd, address, &myptl);
-	if (!pte_none(*pte))
-		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
+	// if (!pte_none(*pte))
+	// 	*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 	pte_unmap_unlock(pte, myptl);
 
 	pt_pte_fixes++;
