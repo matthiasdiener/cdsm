@@ -87,7 +87,7 @@ int spcd_exit_process_handler(long code)
 {
 	struct task_struct *task = current;
 	int tid = pt_get_tid(task->pid);
-	spin_lock(&ptl);
+	// spin_lock(&ptl);
 	if (tid > -1) {
 		pt_delete_pid(task->pid);
 		if (atomic_read(&pt_active_threads) == 0) {
@@ -97,7 +97,7 @@ int spcd_exit_process_handler(long code)
 			pt_reset_stats();
 		}
 	}
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	jprobe_return();
 	return 0; /* not reached */
 }
@@ -132,7 +132,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (!pt_task)
 		return 0;
 	
-	spin_lock(&ptl);
+	// spin_lock(&ptl);
 
 	rcu_read_lock();
 	pids = find_vpid(pid);
@@ -147,7 +147,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (pt_task->parent->pid == task->parent->pid) {
 		pt_add_pid(pid);
 	}
-	spin_unlock(&ptl);
+	// spin_unlock(&ptl);
 	return 0;
 }
 
@@ -234,9 +234,9 @@ int pt_pf_thread_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 		if (pt_task) {
-			spin_lock(&ptl);
+			// spin_lock(&ptl);
 			pt_pf_pagewalk(pt_task->mm);
-			spin_unlock(&ptl);
+			// spin_unlock(&ptl);
 		}
 		msleep(10);
 	}
