@@ -70,11 +70,11 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 
 	pt_maybe_fix_pte(pmd, pte);
 
-	tid = pt_get_tid(task->pid);
-	if (tid > -1){
-		pt_pf++;
-		pt_check_comm(tid, address);
-	}
+	// tid = pt_get_tid(task->pid);
+	// if (tid > -1){
+	// 	pt_pf++;
+	// 	pt_check_comm(tid, address);
+	// }
 
 	jprobe_return();
 	return 0; /* not reached */
@@ -147,11 +147,10 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	return 0;
 }
 
-int spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
+void spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
 {
 	printk(".");
 	jprobe_return();
-	return 0;
 }
 
 
@@ -184,6 +183,7 @@ static struct jprobe spcd_dpf_probe = {
 
 int init_module(void)
 {
+	int ret;
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
@@ -192,7 +192,8 @@ int init_module(void)
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
 
-	register_jprobe(&spcd_dpf_probe);
+	ret = register_jprobe(&spcd_dpf_probe);
+	printk("ret: %d\n", ret);
 
 	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 	wake_up_process(pt_thread);
