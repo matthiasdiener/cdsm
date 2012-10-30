@@ -46,13 +46,13 @@ int spcd_check_name(char *name)
 
 void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 {
-	spinlock_t *lock;
+	// spinlock_t *lock;
 
 	if (!pte_present(*pte) && !pte_none(*pte)) {
-		lock = pte_lockptr(pt_task->mm, pmd);
-		spin_lock(lock);
+		// lock = pte_lockptr(pt_task->mm, pmd);
+		// spin_lock(lock);
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
-		spin_unlock(lock);
+		// spin_unlock(lock);
 		pt_pte_fixes++;
 	}
 
