@@ -44,15 +44,24 @@ int spcd_check_name(char *name)
 }
 
 
-void pt_maybe_fix_pte(unsigned long address)
+void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 {
-	struct pt_mem_info *elem;
+	// struct pt_mem_info *elem;
+	spinlock_t *lock;
 
 	// spin_lock(&ptl);
 
-	elem = pt_get_mem(address);
-	if (elem->pte_cleared)
-		pt_fix_pte(elem, address);
+	// elem = pt_get_mem(address);
+	// if (elem->pte_cleared)
+	// 	pt_fix_pte(elem, address);
+
+	if (!pte_present(*pte) && !pte_none(*pte)) {
+		lock = pte_lockptr(pt_task->mm, pmd);
+		spin_lock(lock);
+		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
+		spin_unlock(lock);
+		pt_pte_fixes++;
+	}
 
 	// spin_unlock(&ptl);
 }
@@ -68,7 +77,7 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 		jprobe_return();
 
 	// spin_lock(&ptl);
-	pt_maybe_fix_pte(address);
+	pt_maybe_fix_pte(pmd, pte);
 
 	tid = pt_get_tid(task->pid);
 	if (tid > -1){

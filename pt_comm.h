@@ -43,7 +43,7 @@ extern struct task_struct *pt_thread;
 
 struct pt_mem_info {
 	unsigned long pg_addr;
-	u8 pte_cleared;
+	// u8 pte_cleared;
 	u8 sharer[2];
 };
 
