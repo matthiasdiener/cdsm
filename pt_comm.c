@@ -150,6 +150,8 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 int spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
 {
 	printk(".");
+	jprobe_return();
+	return 0;
 }
 
 
@@ -240,11 +242,13 @@ void pt_reset_stats(void)
 
 int pt_pf_thread_func(void* v)
 {
-	
+	int nt;
+
 	while (1) {
 		if (kthread_should_stop())
 			return 0;
-		if (pt_task) {
+		nt = atomic_read(&pt_active_threads);
+		if (nt >= 2) {
 			// spin_lock(&ptl);
 			pt_pf_pagewalk(pt_task->mm);
 			// spin_unlock(&ptl);
