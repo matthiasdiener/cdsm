@@ -46,14 +46,7 @@ int spcd_check_name(char *name)
 
 void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 {
-	// struct pt_mem_info *elem;
 	spinlock_t *lock;
-
-	// spin_lock(&ptl);
-
-	// elem = pt_get_mem(address);
-	// if (elem->pte_cleared)
-	// 	pt_fix_pte(elem, address);
 
 	if (!pte_present(*pte) && !pte_none(*pte)) {
 		lock = pte_lockptr(pt_task->mm, pmd);
@@ -63,7 +56,6 @@ void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 		pt_pte_fixes++;
 	}
 
-	// spin_unlock(&ptl);
 }
 
 
@@ -76,27 +68,23 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	if (!pt_task || pt_task->mm != mm)
 		jprobe_return();
 
-	// spin_lock(&ptl);
 	pt_maybe_fix_pte(pmd, pte);
 
 	tid = pt_get_tid(task->pid);
 	if (tid > -1){
-		// spin_lock(&ptl_check_comm);
 		pt_pf++;
 		pt_check_comm(tid, address);
-		// spin_unlock(&ptl_check_comm);
 	}
-	// spin_unlock(&ptl);
+
 	jprobe_return();
 	return 0; /* not reached */
 }
 
 
-int spcd_exit_process_handler(long code)
+int spcd_exit_process_handler(struct task_struct *task)
 {
-	struct task_struct *task = current;
 	int tid = pt_get_tid(task->pid);
-	// spin_lock(&ptl);
+
 	if (tid > -1) {
 		pt_delete_pid(task->pid);
 		if (atomic_read(&pt_active_threads) == 0) {
@@ -106,7 +94,7 @@ int spcd_exit_process_handler(long code)
 			pt_reset_stats();
 		}
 	}
-	// spin_unlock(&ptl);
+
 	jprobe_return();
 	return 0; /* not reached */
 }
@@ -159,6 +147,11 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	return 0;
 }
 
+int spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
+{
+	printk(".");
+}
+
 
 static struct jprobe spcd_pte_fault_jprobe = {
 	.entry = spcd_pte_fault_handler,
@@ -167,7 +160,7 @@ static struct jprobe spcd_pte_fault_jprobe = {
 
 static struct jprobe spcd_exit_process_probe = {
 	.entry = spcd_exit_process_handler,
-	.kp.symbol_name = "do_exit",
+	.kp.symbol_name = "perf_event_exit_task",
 };
 
 static struct kretprobe spcd_new_process_probe = {
@@ -180,6 +173,12 @@ static struct kretprobe spcd_fork_probe = {
 	.kp.symbol_name = "do_fork",
 };
 
+static struct jprobe spcd_dpf_probe = {
+	.entry = spcd_dpf_handler,
+	.kp.symbol_name = "check_v8086_mode",
+};
+
+
 
 int init_module(void)
 {
@@ -190,6 +189,8 @@ int init_module(void)
 	register_jprobe(&spcd_exit_process_probe);
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
+
+	register_jprobe(&spcd_dpf_probe);
 
 	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 	wake_up_process(pt_thread);
@@ -207,6 +208,8 @@ void cleanup_module(void)
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
+
+	unregister_jprobe(&spcd_dpf_probe);
 
 	printk("Bye.....\n");
 }
