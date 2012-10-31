@@ -152,11 +152,12 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	return 0;
 }
 
-void spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
+// void spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
+int spcd_dpf_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
 	printk("ddd\n");
-	jprobe_return();
-	return;
+	// jprobe_return();
+	return 0;
 }
 
 
@@ -180,8 +181,8 @@ static struct kretprobe spcd_fork_probe = {
 	.kp.symbol_name = "do_fork",
 };
 
-static struct jprobe spcd_dpf_probe = {
-	.entry = spcd_dpf_handler,
+static struct kretprobe spcd_dpf_probe = {
+	.handler = spcd_dpf_handler,
 	.kp.symbol_name = "check_v8086_mode",
 };
 
@@ -198,7 +199,7 @@ int init_module(void)
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
 
-	ret = register_jprobe(&spcd_dpf_probe);
+	ret = register_kretprobe(&spcd_dpf_probe);
 	printk("ret: %d\n", ret);
 
 	vm_normal_page_p = kallsyms_lookup_name("vm_normal_page");
@@ -221,7 +222,7 @@ void cleanup_module(void)
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 
-	unregister_jprobe(&spcd_dpf_probe);
+	unregister_kretprobe(&spcd_dpf_probe);
 
 	printk("Bye.....\n");
 }
