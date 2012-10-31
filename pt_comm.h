@@ -43,6 +43,9 @@ extern struct task_struct *pt_thread;
 
 extern struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
 
+extern int (*walk_page_range_p)(unsigned long addr, unsigned long end,
+		    struct mm_walk *walk);
+
 struct pt_mem_info {
 	unsigned long pg_addr;
 	// u8 pte_cleared;

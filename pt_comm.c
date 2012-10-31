@@ -24,6 +24,9 @@ struct task_struct *pt_thread;
 
 struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
 
+int (*walk_page_range_p)(unsigned long addr, unsigned long end,
+		    struct mm_walk *walk);
+
 // DEFINE_SPINLOCK(ptl);
 
 // DEFINE_SPINLOCK(ptl_check_comm);
@@ -198,6 +201,7 @@ int init_module(void)
 	printk("ret: %d\n", ret);
 
 	vm_normal_page_p = kallsyms_lookup_name("vm_normal_page");
+	walk_page_range_p = kallsyms_lookup_name("walk_page_range");
 
 	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 	wake_up_process(pt_thread);

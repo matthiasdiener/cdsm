@@ -67,7 +67,7 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 				continue;
 			}
 
-			pt_addr_pbit_changed = walk_page_range(pt_next_addr, pt_next_vma->vm_end, &walk);
+			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
 			if (pt_addr_pbit_changed) {
 				pt_next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
