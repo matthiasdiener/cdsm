@@ -195,6 +195,8 @@ int init_module(void)
 	ret = register_jprobe(&spcd_dpf_probe);
 	printk("ret: %d\n", ret);
 
+	vm_normal_page_p = kallsyms_lookup_name("vm_normal_page");
+
 	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 	wake_up_process(pt_thread);
 

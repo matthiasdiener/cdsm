@@ -41,6 +41,8 @@ extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 extern struct task_struct *pt_thread;
 
+extern struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
+
 struct pt_mem_info {
 	unsigned long pg_addr;
 	// u8 pte_cleared;
