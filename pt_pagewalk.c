@@ -1,5 +1,6 @@
 #include "pt_comm.h"
 
+
 int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
 	struct page *page;
@@ -30,6 +31,42 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 
 }
 
+struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+{
+	struct vm_area_struct *tmp = prev_vma;
+
+	while (1) {
+		tmp=tmp->vm_next;
+
+		if (tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso) 
+			continue;
+		
+
+		if ((tmp->vm_flags & VM_WRITE) 
+			|| (tmp->vm_start <= mm->brk && tmp->vm_end >= mm->start_brk)
+			// || vm_is_stack(mm->owner, tmp, 1) 
+			)
+		{
+			return tmp;
+		}
+		
+
+		
+		
+	}
+
+}
+
+
+void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+{
+	if (prev_vma == NULL) 
+		pt_num_walks ++;
+	
+	pt_next_vma = pt_find_vma(mm, prev_vma ? prev_vma : mm->mmap);
+	pt_next_addr = pt_next_vma->vm_start;
+}
+
 
 void pt_pf_pagewalk(struct mm_struct *mm)
 {
@@ -53,9 +90,7 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 		pt_addr_pbit_changed = 0;
 
 		if (pt_next_vma == NULL) {
-			pt_num_walks ++;
-			pt_next_vma = mm->mmap;
-			pt_next_addr = pt_next_vma->vm_start;
+			find_next_vma(mm, NULL);
 		}
 		
 		while (pt_addr_pbit_changed == 0 && pt_next_vma != NULL) {

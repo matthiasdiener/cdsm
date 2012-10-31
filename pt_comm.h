@@ -19,7 +19,7 @@
 #define PT_MEM_HASH_BITS 26UL
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
 
-#define PT_PID_HASH_BITS 12UL
+#define PT_PID_HASH_BITS 14UL
 #define PT_PID_HASH_SIZE (1UL << PT_PID_HASH_BITS)
 
 extern unsigned long pt_pf;
