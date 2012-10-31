@@ -260,8 +260,8 @@ int pt_pf_thread_func(void* v)
 		nt = atomic_read(&pt_active_threads);
 		if (nt >= 2) {
 			// spin_lock(&ptl);
-			int ratio = pt_pf / pt_pf_extra;
-			if (ratio > 500)
+			int ratio = pt_pf / (pt_pf_extra + 1);
+			if (ratio > 500 && pt_num_faults < 10)
 				pt_num_faults++;
 			else if (ratio < 50 && pt_num_faults > 1)
 				pt_num_faults--;
@@ -280,7 +280,7 @@ void pt_print_stats(void)
 	int nt = atomic_read(&pt_num_threads);
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
-	return;
+	// return;
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
 			printk ("%lu", share[i][j] + share[j][i]);
