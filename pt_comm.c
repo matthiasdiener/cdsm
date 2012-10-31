@@ -200,8 +200,8 @@ int init_module(void)
 	ret = register_jprobe(&spcd_dpf_probe);
 	printk("ret: %d\n", ret);
 
-	vm_normal_page_p = kallsyms_lookup_name("vm_normal_page");
-	walk_page_range_p = kallsyms_lookup_name("walk_page_range");
+	vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
+	walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
 
 	pt_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
 	wake_up_process(pt_thread);
@@ -261,10 +261,11 @@ int pt_pf_thread_func(void* v)
 		if (nt >= 2) {
 			// spin_lock(&ptl);
 			int ratio = pt_pf / (pt_pf_extra + 1);
-			if (ratio > 500 && pt_num_faults < 10)
+			if (ratio > 150 && pt_num_faults < 4)
 				pt_num_faults++;
-			else if (ratio < 50 && pt_num_faults > 1)
+			else if (ratio < 100 && pt_num_faults > 1)
 				pt_num_faults--;
+			printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
 			pt_pf_pagewalk(pt_task->mm);
 			// spin_unlock(&ptl);
 		}
