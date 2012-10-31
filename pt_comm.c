@@ -245,6 +245,7 @@ void pt_reset_stats(void)
 	pt_addr_conflict = 0;
 	pt_next_addr = 0;
 	pt_next_vma = NULL;
+	pt_num_faults = 3;
 	memset(share, 0, sizeof(share));
 }
 
@@ -259,6 +260,11 @@ int pt_pf_thread_func(void* v)
 		nt = atomic_read(&pt_active_threads);
 		if (nt >= 2) {
 			// spin_lock(&ptl);
+			int ratio = pt_pf / pt_pf_extra;
+			if (ratio > 500)
+				pt_num_faults++;
+			else if (ratio < 50)
+				pt_num_faults--;
 			pt_pf_pagewalk(pt_task->mm);
 			// spin_unlock(&ptl);
 		}
