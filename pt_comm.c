@@ -71,10 +71,10 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	pt_maybe_fix_pte(pmd, pte);
 	pt_pf++;
 
-	// tid = pt_get_tid(task->pid);
-	// if (tid > -1){
-	// 	pt_check_comm(tid, address);
-	// }
+	tid = pt_get_tid(task->pid);
+	if (tid > -1){
+		pt_check_comm(tid, address);
+	}
 
 	jprobe_return();
 	return 0; /* not reached */
