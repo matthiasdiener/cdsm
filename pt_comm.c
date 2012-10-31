@@ -22,6 +22,8 @@ unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
 
+struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
+
 // DEFINE_SPINLOCK(ptl);
 
 // DEFINE_SPINLOCK(ptl_check_comm);
