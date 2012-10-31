@@ -154,8 +154,9 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 void spcd_dpf_handler(struct pt_regs *regs, unsigned long address, struct task_struct *tsk)
 {
-	printk(".");
+	printk("ddd\n");
 	jprobe_return();
+	return;
 }
 
 
