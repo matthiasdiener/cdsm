@@ -263,7 +263,7 @@ int pt_pf_thread_func(void* v)
 			int ratio = pt_pf / pt_pf_extra;
 			if (ratio > 500)
 				pt_num_faults++;
-			else if (ratio < 50)
+			else if (ratio < 50 && pt_num_faults > 1)
 				pt_num_faults--;
 			pt_pf_pagewalk(pt_task->mm);
 			// spin_unlock(&ptl);
