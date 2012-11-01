@@ -61,7 +61,10 @@ struct pt_mem_info* pt_get_mem(unsigned long addr);
 struct pt_mem_info* pt_get_mem_init(unsigned long addr);
 void pt_mem_clear(void);
 
+void pt_share_clear(void);
+
 void pt_print_stats(void);
+void pt_print_share(void);
 
 void pt_reset(void);
 void pt_reset_stats(void);

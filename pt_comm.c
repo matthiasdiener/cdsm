@@ -246,17 +246,25 @@ void pt_reset_stats(void)
 	pt_next_addr = 0;
 	pt_next_vma = NULL;
 	pt_num_faults = 3;
-	memset(share, 0, sizeof(share));
+	pt_share_clear();
 }
 
 
 int pt_pf_thread_func(void* v)
 {
 	int nt;
+	static int iter = 0;
 
 	while (1) {
 		if (kthread_should_stop())
 			return 0;
+		iter++;
+		
+		if (iter % 100) {
+			pt_print_share();
+			pt_share_clear();
+		}
+
 		nt = atomic_read(&pt_active_threads);
 		if (nt >= 2) {
 			// spin_lock(&ptl);
@@ -275,13 +283,11 @@ int pt_pf_thread_func(void* v)
 }
 
 
-void pt_print_stats(void)
+void pt_print_share(void)
 {
 	int i, j;
 	int nt = atomic_read(&pt_num_threads);
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
-	// return;
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
 			printk ("%lu", share[i][j] + share[j][i]);
@@ -290,4 +296,14 @@ void pt_print_stats(void)
 		}
 		printk("\n");
 	}
+}
+
+
+void pt_print_stats(void)
+{
+	int nt = atomic_read(&pt_num_threads);
+
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
+
+	pt_print_share();
 }
