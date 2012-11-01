@@ -260,7 +260,7 @@ int pt_pf_thread_func(void* v)
 			return 0;
 		iter++;
 		
-		if (iter % 100) {
+		if (iter % 100 == 0) {
 			pt_print_share();
 			pt_share_clear();
 		}
