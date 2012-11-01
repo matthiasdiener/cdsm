@@ -1,5 +1,6 @@
 #include "pt_comm.h"
 
+static int factor_walk = 61;
 
 int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
@@ -30,6 +31,10 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	return 1;
 
 }
+static inline unsigned long pt_vma_size(struct vm_area_struct *vma)
+{
+	return vma->vm_end - vma->vm_start;
+}
 
 struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
@@ -38,7 +43,9 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 	while (1) {
 		tmp=tmp->vm_next;
 
-		if (tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso) 
+		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
+		    || pt_vma_size(tmp) <= 8096
+		   )
 			continue;
 		
 
@@ -65,6 +72,8 @@ void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 	
 	pt_next_vma = pt_find_vma(mm, prev_vma ? prev_vma : mm->mmap);
 	pt_next_addr = pt_next_vma->vm_start;
+	factor_walk = pt_vma_size(pt_next_vma) / 102;
+	printk ("Size:%lu, Factor: %d\n", pt_vma_size(pt_next_vma), factor_walk);
 }
 
 
@@ -105,7 +114,7 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
 			if (pt_addr_pbit_changed) {
-				pt_next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
+				pt_next_addr += PAGE_SIZE*((get_cycles()%factor_walk+1) + 1); //Magic
 				if (pt_next_addr >= pt_next_vma->vm_end) {
 					pt_next_vma = pt_next_vma->vm_next;
 					if (pt_next_vma) {

@@ -260,7 +260,7 @@ int pt_pf_thread_func(void* v)
 			return 0;
 		iter++;
 		
-		if (iter % 100 == 0) {
+		if (iter % 1000 == 0) {
 			pt_print_share();
 			pt_share_clear();
 		}
@@ -269,7 +269,7 @@ int pt_pf_thread_func(void* v)
 		if (nt >= 2) {
 			// spin_lock(&ptl);
 			int ratio = pt_pf / (pt_pf_extra + 1);
-			if (ratio > 150 && pt_num_faults < 4)
+			if (ratio > 150 && pt_num_faults < 9)
 				pt_num_faults++;
 			else if (ratio < 100 && pt_num_faults > 1)
 				pt_num_faults--;
