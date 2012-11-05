@@ -64,7 +64,7 @@ void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 }
 
 
-int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
+int spcd_pte_fault_handler(struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
@@ -76,7 +76,7 @@ int spcd_pte_fault_handler(struct task_struct *task, struct mm_struct *mm,
 	pt_maybe_fix_pte(pmd, pte);
 	pt_pf++;
 
-	tid = pt_get_tid(task->pid);
+	tid = pt_get_tid(current->pid);
 	if (tid > -1){
 		pt_check_comm(tid, address);
 	}
