@@ -273,7 +273,7 @@ int pt_pf_thread_func(void* v)
 				pt_num_faults++;
 			else if (ratio < 100 && pt_num_faults > 1)
 				pt_num_faults--;
-			printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
+			//printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
 			pt_pf_pagewalk(pt_task->mm);
 			// spin_unlock(&ptl);
 		}

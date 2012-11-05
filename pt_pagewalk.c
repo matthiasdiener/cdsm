@@ -40,8 +40,18 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 {
 	struct vm_area_struct *tmp = prev_vma;
 
+	if (!tmp) {
+		pt_num_walks++;
+		tmp=mm->mmap;
+	}
 	while (1) {
 		tmp=tmp->vm_next;
+
+		if (!tmp) {
+			pt_num_walks++;
+			tmp=mm->mmap;
+		}
+		printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
 
 		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
 		    || pt_vma_size(tmp) <= 8096
@@ -67,10 +77,7 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 
 void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
-	if (prev_vma == NULL) 
-		pt_num_walks ++;
-	
-	pt_next_vma = pt_find_vma(mm, prev_vma ? prev_vma : mm->mmap);
+	pt_next_vma = pt_find_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
 	factor_walk = pt_vma_size(pt_next_vma) / 102;
 	printk ("Size:%lu, Factor: %d\n", pt_vma_size(pt_next_vma), factor_walk);
