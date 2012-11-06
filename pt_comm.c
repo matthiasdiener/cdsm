@@ -176,7 +176,6 @@ static struct kretprobe spcd_fork_probe = {
 
 int init_module(void)
 {
-	int ret;
 	printk("Welcome.....\n");
 	pt_reset_stats();
 
