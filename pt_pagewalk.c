@@ -55,6 +55,7 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 
 		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
 		    || pt_vma_size(tmp) <= 8096
+		    || tmp->vm_file
 		   )
 			continue;
 		
