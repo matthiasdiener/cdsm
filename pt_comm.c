@@ -106,7 +106,7 @@ void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
 	pte_t *start_pte, *pte;
 	spinlock_t *ptl;
 
-	if (pt_task->mm != mm)
+	if (!pt_task || pt_task->mm != mm)
 		jprobe_return();
 
 	start_pte = pte_offset_map_lock(mm, pmd, addr, &ptl);
