@@ -41,6 +41,9 @@ int spcd_check_name(char *name)
 	
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
 
+	if (pt_task)
+		return 0;
+
 	for (i=0; i<len; i++) {
 		if (strstr(name, bm_names[i]))
 			return 1;
@@ -83,6 +86,15 @@ int spcd_pte_fault_handler(struct mm_struct *mm,
 
 	jprobe_return();
 	return 0; /* not reached */
+}
+
+
+void spcd_del_page_handler(struct page *page)
+{
+	if (page_mapped(page))
+		atomic_set(&(page)->_mapcount, -1);
+
+	jprobe_return();
 }
 
 
@@ -173,6 +185,11 @@ static struct kretprobe spcd_fork_probe = {
 	.kp.symbol_name = "do_fork",
 };
 
+static struct jprobe spcd_del_page_probe = {
+	.entry = spcd_del_page_handler,
+	.kp.symbol_name = "__delete_from_page_cache",
+};
+
 
 int init_module(void)
 {
@@ -183,6 +200,7 @@ int init_module(void)
 	register_jprobe(&spcd_exit_process_probe);
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
+	register_jprobe(&spcd_del_page_probe);
 
 	vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
 	walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
@@ -203,6 +221,7 @@ void cleanup_module(void)
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
+	unregister_jprobe(&spcd_del_page_probe);
 
 
 	printk("Bye.....\n");
