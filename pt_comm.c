@@ -117,6 +117,7 @@ void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
 	} while (pte++);
 
 	pte_unmap_unlock(start_pte, ptl);
+	jprobe_return();
 }
 
 
