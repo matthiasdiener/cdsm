@@ -52,7 +52,7 @@ int spcd_check_name(char *name)
 }
 
 
-void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
+static inline void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 {
 	// spinlock_t *lock;
 
@@ -95,6 +95,28 @@ void spcd_del_page_handler(struct page *page)
 		atomic_set(&(page)->_mapcount, -1);
 
 	jprobe_return();
+}
+
+void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
+				struct vm_area_struct *vma, pmd_t *pmd,
+				unsigned long addr, unsigned long end,
+				struct zap_details *details)
+{
+	struct mm_struct *mm = tlb->mm;
+	pte_t *start_pte, *pte;
+	spinlock_t *ptl;
+
+	if (pt_task->mm != mm)
+		jprobe_return();
+
+	start_pte = pte_offset_map_lock(mm, pmd, addr, &ptl);
+	pte = start_pte;
+
+	do {
+		pt_maybe_fix_pte(pmd, pte);
+	} while (pte++);
+
+	pte_unmap_unlock(start_pte, ptl);
 }
 
 
@@ -190,6 +212,12 @@ static struct jprobe spcd_del_page_probe = {
 	.kp.symbol_name = "__delete_from_page_cache",
 };
 
+static struct jprobe spcd_zap_pte_range_probe = {
+	.entry = spcd_zap_pte_range_handler,
+	.kp.symbol_name = "zap_pte_range",
+};
+
+
 
 int init_module(void)
 {
@@ -201,6 +229,7 @@ int init_module(void)
 	register_kretprobe(&spcd_new_process_probe);
 	register_kretprobe(&spcd_fork_probe);
 	register_jprobe(&spcd_del_page_probe);
+	register_jprobe(&spcd_zap_pte_range_probe);
 
 	vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
 	walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
@@ -222,6 +251,7 @@ void cleanup_module(void)
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 	unregister_jprobe(&spcd_del_page_probe);
+	unregister_jprobe(&spcd_zap_pte_range_probe);
 
 
 	printk("Bye.....\n");

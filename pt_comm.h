@@ -14,6 +14,8 @@
 #include <linux/kprobes.h>
 #include <linux/kallsyms.h>
 
+#include <asm-generic/tlb.h>
+
 #define PT_MAXTHREADS 4096
 
 #define PT_MEM_HASH_BITS 26UL
