@@ -51,7 +51,7 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 			pt_num_walks++;
 			tmp=mm->mmap;
 		}
-		printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
+		//printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
 
 		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
 		    || pt_vma_size(tmp) <= 8096

@@ -106,15 +106,18 @@ void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
 	pte_t *start_pte, *pte;
 	spinlock_t *ptl;
 
-	if (!pt_task || pt_task->mm != mm)
+
+
+	if (!pt_task)
 		jprobe_return();
 
 	start_pte = pte_offset_map_lock(mm, pmd, addr, &ptl);
 	pte = start_pte;
 
 	do {
+		//printk("hit: %lu\n", pte_val(*pte));
 		pt_maybe_fix_pte(pmd, pte);
-	} while (pte++);
+	} while (pte++, addr += PAGE_SIZE, addr != end);
 
 	pte_unmap_unlock(start_pte, ptl);
 	jprobe_return();
@@ -294,8 +297,8 @@ int pt_pf_thread_func(void* v)
 		iter++;
 		
 		if (iter % 1000 == 0) {
-			pt_print_share();
-			pt_share_clear();
+			//pt_print_share();
+			//pt_share_clear();
 		}
 
 		nt = atomic_read(&pt_active_threads);
