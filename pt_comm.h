@@ -71,7 +71,7 @@ void pt_print_share(void);
 void pt_reset(void);
 void pt_reset_stats(void);
 
-struct pt_mem_info* pt_check_comm(int tid, unsigned long address);
+void pt_check_comm(int tid, unsigned long address);
 
 void pt_mark_pte(unsigned long addr, pte_t *pte);
 void pt_fix_pte(struct pt_mem_info *elem, unsigned long addr);

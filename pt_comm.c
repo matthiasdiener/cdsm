@@ -67,7 +67,7 @@ static inline void pt_maybe_fix_pte(pmd_t *pmd, pte_t *pte)
 }
 
 
-int spcd_pte_fault_handler(struct mm_struct *mm,
+void spcd_pte_fault_handler(struct mm_struct *mm,
 		     struct vm_area_struct *vma, unsigned long address,
 		     pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
@@ -85,7 +85,6 @@ int spcd_pte_fault_handler(struct mm_struct *mm,
 	}
 
 	jprobe_return();
-	return 0; /* not reached */
 }
 
 
@@ -124,7 +123,7 @@ void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
 }
 
 
-int spcd_exit_process_handler(struct task_struct *task)
+void spcd_exit_process_handler(struct task_struct *task)
 {
 	int tid = pt_get_tid(task->pid);
 
@@ -139,7 +138,6 @@ int spcd_exit_process_handler(struct task_struct *task)
 	}
 
 	jprobe_return();
-	return 0; /* not reached */
 }
 
 
