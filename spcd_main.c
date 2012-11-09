@@ -18,7 +18,7 @@ unsigned long pt_pte_fixes;
 unsigned long pt_next_addr;
 struct vm_area_struct *pt_next_vma;
 
-unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
+unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 struct task_struct *pt_thread;
 
@@ -324,7 +324,7 @@ void pt_print_share(void)
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++){
-			printk ("%lu", share[i][j] + share[j][i]);
+			printk ("%u", share[i][j] + share[j][i]);
 			if (j != nt-1)
 				printk (",");
 		}

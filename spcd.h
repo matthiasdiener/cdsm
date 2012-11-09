@@ -39,7 +39,7 @@ extern struct vm_area_struct *pt_next_vma;
 
 // extern spinlock_t ptl;
 
-extern unsigned long share [PT_MAXTHREADS][PT_MAXTHREADS];
+extern unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 extern struct task_struct *pt_thread;
 
