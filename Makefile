@@ -1,5 +1,5 @@
 obj-m := spcd.o
-spcd-objs := pagewalk.o mem.o pid.o mem.o check_comm.o spcd_main.o
+spcd-objs := pagefault_thread.o mem.o pid.o mem.o sharing.o utility.o spcd_main.o
 
 
 .PHONY: all clean

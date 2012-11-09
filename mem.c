@@ -42,9 +42,5 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 void pt_mem_clear(void)
 {
 	memset(pt_mem, 0, sizeof(pt_mem));
-}
-
-void pt_share_clear(void)
-{
-	memset(share, 0, sizeof(share));
+	pt_addr_conflict = 0;
 }

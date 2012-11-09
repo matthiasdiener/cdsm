@@ -1,8 +1,45 @@
 #include "spcd.h"
 
 static int factor_walk = 61;
+static struct vm_area_struct *pt_next_vma = NULL;
+static unsigned long pt_next_addr = 0;
+static unsigned pt_num_faults = 3;
 
-int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
+static void pt_pf_pagewalk(struct mm_struct *mm);
+
+
+int pt_pf_thread_func(void* v)
+{
+	int nt;
+	static int iter = 0;
+
+	while (1) {
+		if (kthread_should_stop())
+			return 0;
+		iter++;
+
+		if (iter % 1000 == 0) {
+			//pt_print_share();
+			//pt_share_clear();
+		}
+
+		nt = spcd_get_active_threads();
+		if (nt >= 2) {
+			int ratio = pt_pf / (pt_pf_extra + 1);
+			if (ratio > 150 && pt_num_faults < 9)
+				pt_num_faults++;
+			else if (ratio < 100 && pt_num_faults > 1)
+				pt_num_faults--;
+			//printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
+			pt_pf_pagewalk(pt_task->mm);
+		}
+		msleep(10);
+	}
+
+}
+
+
+static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
 	struct page *page;
 	pgd_t *pgd;
@@ -31,12 +68,15 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	return 1;
 
 }
+
+
 static inline unsigned long pt_vma_size(struct vm_area_struct *vma)
 {
 	return vma->vm_end - vma->vm_start;
 }
 
-struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+
+static struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 
@@ -68,15 +108,12 @@ struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* 
 			return tmp;
 		}
 		
-
-		
-		
 	}
 
 }
 
 
-void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	pt_next_vma = pt_find_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
@@ -85,7 +122,7 @@ void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 }
 
 
-void pt_pf_pagewalk(struct mm_struct *mm)
+static void pt_pf_pagewalk(struct mm_struct *mm)
 {
 	unsigned pt_addr_pbit_changed = 0;
 	int i = 0;
@@ -140,4 +177,15 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 	}
 
 	up_write(&mm->mmap_sem);
+}
+
+
+inline void spcd_pf_thread_clear(void)
+{
+	factor_walk = 61;
+	pt_num_walks = 0;
+	pt_next_addr = 0;
+	pt_next_vma = NULL;
+	pt_num_faults = 3;
+	pt_pf_extra = 0;
 }

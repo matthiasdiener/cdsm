@@ -1,6 +1,8 @@
 #include "spcd.h"
 
 static int pt_pid[PT_PID_HASH_SIZE];
+static atomic_t pt_num_threads = ATOMIC_INIT(0);
+static atomic_t pt_active_threads = ATOMIC_INIT(0);
 
 
 void pt_delete_pid(int pid)
@@ -36,10 +38,22 @@ void pt_add_pid(int pid)
 void pt_pid_clear(void)
 {
 	memset(pt_pid, -1, sizeof(pt_pid));
+	atomic_set(&pt_num_threads, 0);
+	atomic_set(&pt_active_threads, 0);
 }
 
 
 int pt_get_tid(int pid)
 {
 	return pt_pid[hash_32(pid, PT_PID_HASH_BITS)];
+}
+
+
+int spcd_get_num_threads(void) {
+	return atomic_read(&pt_num_threads);
+}
+
+
+int spcd_get_active_threads(void) {
+	return atomic_read(&pt_active_threads);
 }
