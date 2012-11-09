@@ -1,4 +1,4 @@
-#include "pt_comm.h"
+#include "spcd.h"
 
 static struct pt_mem_info pt_mem[PT_MEM_HASH_SIZE];
 

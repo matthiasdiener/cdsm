@@ -1,4 +1,4 @@
-#include "pt_comm.h"
+#include "spcd.h"
 
 static int factor_walk = 61;
 

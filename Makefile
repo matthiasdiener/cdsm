@@ -1,5 +1,5 @@
-obj-m := pt.o
-pt-objs := pt_pagewalk.o pt_mem.o pt_pid.o pt_mem.o pt_dpf.o pt_comm.o
+obj-m := spcd.o
+spcd-objs := pagewalk.o mem.o pid.o mem.o check_comm.o spcd_main.o
 
 
 .PHONY: all clean

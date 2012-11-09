@@ -1,4 +1,4 @@
-#include "pt_comm.h"
+#include "spcd.h"
 
 static int pt_pid[PT_PID_HASH_SIZE];
 

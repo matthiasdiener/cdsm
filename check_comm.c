@@ -1,4 +1,4 @@
-#include "pt_comm.h"
+#include "spcd.h"
 
 
 static inline int get_num_sharers(struct pt_mem_info *elem)
