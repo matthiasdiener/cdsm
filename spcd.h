@@ -64,6 +64,27 @@ void pt_fix_pte(struct pt_mem_info *elem, unsigned long addr);
 int pt_pf_thread_func(void* v);
 void spcd_pf_thread_clear(void);
 
+/* utility */
 int spcd_check_name(char *name);
+void register_probes(void);
+void unregister_probes(void);
+
+/* Probes: */
+void spcd_pte_fault_handler(struct mm_struct *mm,
+			struct vm_area_struct *vma, unsigned long address,
+			pte_t *pte, pmd_t *pmd, unsigned int flags);
+void spcd_del_page_handler(struct page *page);
+// void spcd_zap_pte_range_handler(struct mmu_gather *tlb,
+				// struct vm_area_struct *vma, pmd_t *pmd,
+				// unsigned long addr, unsigned long end,
+				// struct zap_details *details);
+void spcd_unmap_handler(struct mmu_gather *tlb,
+						struct vm_area_struct *vma,
+						unsigned long addr, unsigned long end,
+						struct zap_details *details);
+void spcd_exit_process_handler(struct task_struct *task);
+int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
+int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
+
 
 #endif
