@@ -120,7 +120,7 @@ unsigned long zap_pud_range(struct mmu_gather *tlb,
 	return addr;
 }
 
-void spcd_unmap_handler(struct mmu_gather *tlb,
+void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 						struct vm_area_struct *vma,
 						unsigned long addr, unsigned long end,
 						struct zap_details *details)

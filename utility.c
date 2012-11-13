@@ -45,12 +45,9 @@ static struct jprobe spcd_del_page_probe = {
 	.kp.symbol_name = "__delete_from_page_cache",
 };
 
-static struct jprobe spcd_zap_pte_range_probe = {
-	// .entry = spcd_zap_pte_range_handler,
-	.entry = spcd_unmap_handler,
-	// .kp.symbol_name = "zap_pte_range",
+static struct jprobe spcd_unmap_page_range_probe = {
+	.entry = spcd_unmap_page_range_handler,
 	.kp.symbol_name = "unmap_page_range",
-	// .kp.addr = (void*) 0xFFFFFFFF81148B2A,
 };
 
 
@@ -72,7 +69,7 @@ void register_probes(void)
 	if ((ret=register_jprobe(&spcd_del_page_probe))){
 		printk("spcd_del_page_probe failed, %d\n", ret);
 	}
-	if ((ret=register_jprobe(&spcd_zap_pte_range_probe))){
+	if ((ret=register_jprobe(&spcd_unmap_page_range_probe))){
 		printk("spcd_zap_pte_range_probe failed, %d\n", ret);
 	}
 }
@@ -84,5 +81,5 @@ void unregister_probes(void)
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 	unregister_jprobe(&spcd_del_page_probe);
-	unregister_jprobe(&spcd_zap_pte_range_probe);
+	unregister_jprobe(&spcd_unmap_page_range_probe);
 }

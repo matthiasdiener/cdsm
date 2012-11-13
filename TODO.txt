@@ -1,10 +1,10 @@
 #### TODO
 
-- crash when hash table conflict
+- crash when hash table conflict - ok
 - large mem usage
-- kprobes for begin and end process
-- locks necessary?
-- fix pte in dpf?
+- kprobes for begin and end process - ok
+- locks necessary? - ok
+- fix pte in dpf? - ok
 - reduce size of mem hash table to 32 bits?
 
 
