@@ -75,11 +75,30 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 }
 
 
-static inline unsigned long pt_vma_size(struct vm_area_struct *vma)
+static inline unsigned long vma_size(struct vm_area_struct *vma)
 {
 	return vma->vm_end - vma->vm_start;
 }
 
+static inline int is_heap(struct mm_struct *mm, struct vm_area_struct *vma)
+{
+	return (vma->vm_start <= mm->brk && vma->vm_end >= mm->start_brk);
+}
+
+static inline int is_writable(struct vm_area_struct *vma)
+{
+	return vma->vm_flags & VM_WRITE;
+}
+
+static inline int is_vdso(struct vm_area_struct *vma)
+{
+	return (vma->vm_mm && vma->vm_start == (long)vma->vm_mm->context.vdso);
+}
+
+static inline int is_file(struct vm_area_struct *vma)
+{
+	return vma->vm_file ? 1 : 0;
+}
 
 static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
@@ -87,34 +106,25 @@ static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm
 
 	if (!tmp) {
 		pt_num_walks++;
-		tmp=mm->mmap;
+		tmp = mm->mmap;
 	}
+
 	while (1) {
-		tmp=tmp->vm_next;
+		tmp = tmp->vm_next;
 
 		if (!tmp) {
 			pt_num_walks++;
-			tmp=mm->mmap;
+			tmp = mm->mmap;
 		}
-		printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
 
-		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
-		    || pt_vma_size(tmp) <= 8096
-		    || tmp->vm_file
-		   )
+		printk("tmp: %p, size: %lu, writeable: %d, is_vdso: %d, is_file: %d, is_heap: %d\n", tmp, vma_size(tmp), is_writable(tmp), is_vdso(tmp), is_file(tmp), is_heap(mm, tmp));
+
+		if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp))
 			continue;
 		
-
-		if ((tmp->vm_flags & VM_WRITE) 
-			|| (tmp->vm_start <= mm->brk && tmp->vm_end >= mm->start_brk)
-			// || vm_is_stack(mm->owner, tmp, 1) 
-			)
-		{
+		if (is_writable(tmp) || is_heap(mm, tmp))
 			return tmp;
-		}
-		
 	}
-
 }
 
 
@@ -122,8 +132,8 @@ static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* pr
 {
 	pt_next_vma = pt_find_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
-	factor_walk = pt_vma_size(pt_next_vma) / 102;
-	printk ("Size:%lu, Factor: %d\n", pt_vma_size(pt_next_vma), factor_walk);
+	factor_walk = vma_size(pt_next_vma) / 102;
+	printk ("Size:%lu, Factor: %d\n", vma_size(pt_next_vma), factor_walk);
 }
 
 
