@@ -96,7 +96,7 @@ static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm
 			pt_num_walks++;
 			tmp=mm->mmap;
 		}
-		//printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
+		printk("tmp: %p, size: %lu\n", tmp, pt_vma_size(tmp));
 
 		if ((tmp->vm_mm && tmp->vm_start == (long)tmp->vm_mm->context.vdso)
 		    || pt_vma_size(tmp) <= 8096
@@ -141,47 +141,33 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 	if (!mm)
 		return;
 	
-	down_write(&mm->mmap_sem);
+	down_read(&mm->mmap_sem);
 
-	// mod_walk = n / 1024;
+	for (i = 0; i < pt_num_faults; i++) {
 
-	for (i=0; i<pt_num_faults; i++) {
 		pt_addr_pbit_changed = 0;
 
 		if (pt_next_vma == NULL) {
 			find_next_vma(mm, NULL);
 		}
 		
-		while (pt_addr_pbit_changed == 0 && pt_next_vma != NULL) {
-			if ((pt_next_vma->vm_flags & VM_WRITE) == 0) {
-				pt_next_vma = pt_next_vma->vm_next;
-				if (pt_next_vma) {
-					pt_next_addr = pt_next_vma->vm_start;
-				}
-				continue;
-			}
+		while (pt_addr_pbit_changed == 0) {
 
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
 			if (pt_addr_pbit_changed) {
 				pt_next_addr += PAGE_SIZE*((get_cycles()%factor_walk+1) + 1); //Magic
 				if (pt_next_addr >= pt_next_vma->vm_end) {
-					pt_next_vma = pt_next_vma->vm_next;
-					if (pt_next_vma) {
-						pt_next_addr = pt_next_vma->vm_start;
-					}
+					find_next_vma(mm, pt_next_vma);
 				}
 			}
 			else {
-				pt_next_vma = pt_next_vma->vm_next;
-				if (pt_next_vma) {
-					pt_next_addr = pt_next_vma->vm_start;
-				}
+				find_next_vma(mm, pt_next_vma);
 			}
 		}
 	}
 
-	up_write(&mm->mmap_sem);
+	up_read(&mm->mmap_sem);
 }
 
 
