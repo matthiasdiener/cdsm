@@ -12,6 +12,9 @@ static struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned lon
 static int (*walk_page_range_p)(unsigned long addr, unsigned long end,
 			struct mm_walk *walk) = NULL;
 
+static pid_t (*vm_is_stack_p)(struct task_struct *task,
+							struct vm_area_struct *vma, int in_group) = NULL;
+
 
 int pt_pf_thread_func(void* v)
 {
@@ -87,7 +90,7 @@ static inline int is_heap(struct mm_struct *mm, struct vm_area_struct *vma)
 
 static inline int is_writable(struct vm_area_struct *vma)
 {
-	return vma->vm_flags & VM_WRITE;
+	return vma->vm_flags & VM_WRITE ? 1 : 0;
 }
 
 static inline int is_vdso(struct vm_area_struct *vma)
@@ -100,7 +103,13 @@ static inline int is_file(struct vm_area_struct *vma)
 	return vma->vm_file ? 1 : 0;
 }
 
-static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
+{
+	return (*vm_is_stack_p)(mm->owner, vma, 1) ? 1 : 0;
+}
+
+
+static inline struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 
@@ -117,9 +126,9 @@ static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm
 			tmp = mm->mmap;
 		}
 
-		printk("tmp: %p, size: %lu, writeable: %d, is_vdso: %d, is_file: %d, is_heap: %d\n", tmp, vma_size(tmp), is_writable(tmp), is_vdso(tmp), is_file(tmp), is_heap(mm, tmp));
+		// printk("tmp: %p, size: %10lu, writeable: %d, is_vdso: %d, is_file: %d, is_heap: %d, is_stack: %d\n", tmp, vma_size(tmp), is_writable(tmp), is_vdso(tmp), is_file(tmp), is_heap(mm, tmp), is_stack(mm, tmp));
 
-		if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp))
+		if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp) || is_stack(mm, tmp))
 			continue;
 		
 		if (is_writable(tmp) || is_heap(mm, tmp))
@@ -130,9 +139,9 @@ static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm
 
 static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
-	pt_next_vma = pt_find_vma(mm, prev_vma);
+	pt_next_vma = find_good_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
-	factor_walk = vma_size(pt_next_vma) / 102;
+	factor_walk = vma_size(pt_next_vma) / 1024;
 	printk ("Size:%lu, Factor: %d\n", vma_size(pt_next_vma), factor_walk);
 }
 
@@ -191,6 +200,7 @@ inline void spcd_pf_thread_clear(void)
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
+		vm_is_stack_p = (void*) kallsyms_lookup_name("vm_is_stack");
 		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
 	}
 }
