@@ -7,6 +7,11 @@ static unsigned pt_num_faults = 3;
 
 static void pt_pf_pagewalk(struct mm_struct *mm);
 
+static struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte) = NULL;
+
+static int (*walk_page_range_p)(unsigned long addr, unsigned long end,
+			struct mm_walk *walk) = NULL;
+
 
 int pt_pf_thread_func(void* v)
 {
@@ -76,7 +81,7 @@ static inline unsigned long pt_vma_size(struct vm_area_struct *vma)
 }
 
 
-static struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static inline struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 
@@ -113,7 +118,7 @@ static struct vm_area_struct *pt_find_vma(struct mm_struct *mm, struct vm_area_s
 }
 
 
-static void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	pt_next_vma = pt_find_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
@@ -188,4 +193,8 @@ inline void spcd_pf_thread_clear(void)
 	pt_next_vma = NULL;
 	pt_num_faults = 3;
 	pt_pf_extra = 0;
+	if (!walk_page_range_p) {
+		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
+		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
+	}
 }

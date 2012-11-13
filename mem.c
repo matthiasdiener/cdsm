@@ -9,7 +9,7 @@ static inline unsigned long addr_to_page(unsigned long address)
 }
 
 
-struct pt_mem_info* pt_get_mem(unsigned long address)
+static inline struct pt_mem_info* pt_get_mem(unsigned long address)
 {
 	return &pt_mem[hash_32(addr_to_page(address), PT_MEM_HASH_BITS)];
 }
@@ -21,7 +21,6 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 	struct pt_mem_info *elem;
 	unsigned long page = addr_to_page(address);
 
-	// spin_lock(&ptl);
 	elem = pt_get_mem(address);
 
 	if (elem->pg_addr != page) { /* new elem */
@@ -34,7 +33,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 		elem->sharer[1] = -1;
 		elem->pg_addr = page;
 	}
-	// spin_unlock(&ptl);
+
 	return elem;
 }
 

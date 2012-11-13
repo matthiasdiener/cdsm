@@ -22,17 +22,14 @@ struct pt_mem_info {
 	u8 sharer[2];
 };
 
+extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
 extern struct task_struct *pt_task;
 extern unsigned long pt_num_walks;
 
-extern struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte);
-
-extern int (*walk_page_range_p)(unsigned long addr, unsigned long end,
-			struct mm_walk *walk);
-
+extern void reset_stats(void);
 
 /* PID/TID functions */
 int pt_get_tid(int pid); 
@@ -56,23 +53,7 @@ int pt_pf_thread_func(void* v);
 void spcd_pf_thread_clear(void);
 
 /* Utility */
-int spcd_check_name(char *name);
 void register_probes(void);
 void unregister_probes(void);
-
-/* Probes: */
-void spcd_pte_fault_handler(struct mm_struct *mm,
-							struct vm_area_struct *vma, unsigned long address,
-							pte_t *pte, pmd_t *pmd, unsigned int flags);
-void spcd_del_page_handler(struct page *page);
-void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
-								   struct vm_area_struct *vma,
-								   unsigned long addr,
-								   unsigned long end,
-								   struct zap_details *details);
-void spcd_exit_process_handler(struct task_struct *task);
-int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
-int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
-
 
 #endif
