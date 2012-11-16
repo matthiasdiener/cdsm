@@ -141,8 +141,8 @@ static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* pr
 {
 	pt_next_vma = find_good_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
-	factor_walk = vma_size(pt_next_vma) / 1024;
-	printk ("Size:%lu, Factor: %d\n", vma_size(pt_next_vma), factor_walk);
+	// factor_walk = vma_size(pt_next_vma) / 1024;
+	// printk ("Size:%lu, Factor: %d\n", vma_size(pt_next_vma), factor_walk);
 }
 
 
