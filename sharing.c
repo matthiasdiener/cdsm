@@ -60,7 +60,7 @@ void pt_print_share(void)
 	int nt = spcd_get_num_threads();
 
 	for (i = nt-1; i >= 0; i--) {
-		for (j = 0; j < nt; j++){
+		for (j = 0; j < nt; j++) {
 			printk ("%u", share[i][j] + share[j][i]);
 			if (j != nt-1)
 				printk (",");

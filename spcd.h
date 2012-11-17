@@ -11,7 +11,7 @@
 
 #define PT_MAXTHREADS 4096
 
-#define PT_MEM_HASH_BITS 26UL
+#define PT_MEM_HASH_BITS 22UL
 #define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
 
 #define PT_PID_HASH_BITS 14UL
@@ -21,6 +21,8 @@ struct pt_mem_info {
 	unsigned long pg_addr;
 	u8 sharer[2];
 };
+
+extern unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
 
 extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;

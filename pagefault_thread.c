@@ -16,6 +16,31 @@ static pid_t (*vm_is_stack_p)(struct task_struct *task,
 							struct vm_area_struct *vma, int in_group) = NULL;
 
 
+unsigned listgetmax(void)
+{
+	unsigned res = 0;
+	int i, j;
+	int nt = spcd_get_num_threads();
+
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++) {
+			printk ("%u", share[i][j] + share[j][i]);
+			if (j != nt-1)
+				printk (",");
+			if (share[i][j] + share[j][i] > res)
+				res = share[i][j]+share[j][i];
+		}
+		printk("\n");
+	}
+	return res;
+}
+
+void check_map(void)
+{
+	printk("check_map: max: %d\n", listgetmax());
+
+}
+
 int pt_pf_thread_func(void* v)
 {
 	int nt;
@@ -25,14 +50,15 @@ int pt_pf_thread_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 		iter++;
+		nt = spcd_get_active_threads();
 
-		if (iter % 1000 == 0) {
-			//pt_print_share();
+		if (iter % 10 == 0 && nt > 1) {
+			// pt_print_share();
+			check_map();
 			//pt_share_clear();
 		}
 
-		nt = spcd_get_active_threads();
-		if (nt >= 2) {
+		if (nt > 1) {
 			int ratio = pt_pf / (pt_pf_extra + 1);
 			if (ratio > 150 && pt_num_faults < 9)
 				pt_num_faults++;
@@ -59,8 +85,10 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 		return 0;
 
 	page = (*vm_normal_page_p)(pt_next_vma, addr, *pte);
-	if (!page || !page->mapping )
+	if (!page || !page->mapping) {
+		printk("page: %p", page);
 		return 0;
+	}
 
 	pgd = pgd_offset(walk->mm, addr);
 	pud = pud_offset(pgd, addr);
@@ -203,12 +231,12 @@ inline void spcd_pf_thread_clear(void)
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
 		if (!vm_normal_page_p)
-			printk("vm_normal_page_p\n");
+			printk("vm_normal_page_p missing\n");
 		vm_is_stack_p = (void*) kallsyms_lookup_name("vm_is_stack");
 		if (!vm_is_stack_p)
-			printk("vm_is_stack_p\n");
+			printk("vm_is_stack_p missing\n");
 		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
 		if (!walk_page_range_p)
-			printk("walk_page_range_p\n");
+			printk("walk_page_range_p missing\n");
 	}
 }
