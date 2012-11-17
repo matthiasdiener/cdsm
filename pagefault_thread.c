@@ -105,7 +105,9 @@ static inline int is_file(struct vm_area_struct *vma)
 
 static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
 {
-	return (*vm_is_stack_p)(mm->owner, vma, 1) ? 1 : 0;
+	if (vm_is_stack_p)
+		return (*vm_is_stack_p)(mm->owner, vma, 1) ? 1 : 0;
+	else return 0;
 }
 
 
