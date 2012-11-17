@@ -200,7 +200,13 @@ inline void spcd_pf_thread_clear(void)
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
+		if (!vm_normal_page_p)
+			printk("vm_normal_page_p\n");
 		vm_is_stack_p = (void*) kallsyms_lookup_name("vm_is_stack");
+		if (!vm_is_stack_p)
+			printk("vm_is_stack_p\n");
 		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
+		if (!walk_page_range_p)
+			printk("walk_page_range_p\n");
 	}
 }
