@@ -16,7 +16,21 @@ static pid_t (*vm_is_stack_p)(struct task_struct *task,
 							struct vm_area_struct *vma, int in_group) = NULL;
 
 
-unsigned listgetmax(void)
+static void clear(int x, int y)
+{
+	int nt = spcd_get_num_threads();
+	int i,j;
+
+	for (i = 0; i<nt; i++) {
+		share[x][i] = 0;
+		share[i][j] = 0;
+	}
+}
+
+
+static int pos_x, pos_y;
+
+static unsigned listgetmax(void)
 {
 	unsigned res = 0;
 	int i, j;
@@ -24,20 +38,27 @@ unsigned listgetmax(void)
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			printk ("%u", share[i][j] + share[j][i]);
-			if (j != nt-1)
-				printk (",");
-			if (share[i][j] + share[j][i] > res)
+			if (share[i][j] + share[j][i] > res) {
 				res = share[i][j]+share[j][i];
+				pos_x = i;
+				pos_y = j;
+			}
 		}
-		printk("\n");
 	}
+	clear(pos_x, pos_y);
 	return res;
 }
 
 void check_map(void)
 {
-	printk("check_map: max: %d\n", listgetmax());
+	unsigned max;
+
+	while (1) {
+		max = listgetmax();
+		if (max == 0)
+			break;
+		printk("Max %d at %d,%d", max, pos_x, pos_y);
+	}
 
 }
 
@@ -75,7 +96,6 @@ int pt_pf_thread_func(void* v)
 
 static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
-	struct page *page;
 	pgd_t *pgd;
 	pud_t *pud;
 	pmd_t *pmd;
@@ -83,12 +103,6 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	
 	if (pte_none(*pte) || !pte_present(*pte) || !pte_young(*pte) || pte_special(*pte))
 		return 0;
-
-	page = (*vm_normal_page_p)(pt_next_vma, addr, *pte);
-	if (!page || !page->mapping) {
-		printk("page: %p", page);
-		return 0;
-	}
 
 	pgd = pgd_offset(walk->mm, addr);
 	pud = pud_offset(pgd, addr);
