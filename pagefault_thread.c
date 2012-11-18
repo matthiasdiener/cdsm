@@ -60,9 +60,9 @@ void check_map(void)
 		max = listgetmax();
 		if (max == 0)
 			break;
-		printk("Max %d at %d,%d\n", max, pos_x, pos_y);
+		printk("(%d,%d) ", pos_x, pos_y);
 	}
-
+	printk("\n");
 }
 
 int pt_pf_thread_func(void* v)
