@@ -26,6 +26,8 @@ static void clear(int x, int y)
 
 	for (i = 0; i<nt; i++) {
 		sharecp[x][i] = 0;
+		sharecp[y][i] = 0;
+		sharecp[i][x] = 0;
 		sharecp[i][y] = 0;
 	}
 }
