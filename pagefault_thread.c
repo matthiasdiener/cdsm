@@ -16,19 +16,19 @@ static pid_t (*vm_is_stack_p)(struct task_struct *task,
 							struct vm_area_struct *vma, int in_group) = NULL;
 
 
+static unsigned sharecp [PT_MAXTHREADS][PT_MAXTHREADS];
+static int pos_x, pos_y;
+
 static void clear(int x, int y)
 {
 	int nt = spcd_get_num_threads();
-	int i,j;
+	int i;
 
 	for (i = 0; i<nt; i++) {
-		share[x][i] = 0;
-		share[i][j] = 0;
+		sharecp[x][i] = 0;
+		sharecp[i][y] = 0;
 	}
 }
-
-
-static int pos_x, pos_y;
 
 static unsigned listgetmax(void)
 {
@@ -38,8 +38,8 @@ static unsigned listgetmax(void)
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			if (share[i][j] + share[j][i] > res) {
-				res = share[i][j]+share[j][i];
+			if (sharecp[i][j] + sharecp[j][i] > res) {
+				res = sharecp[i][j]+sharecp[j][i];
 				pos_x = i;
 				pos_y = j;
 			}
@@ -52,12 +52,13 @@ static unsigned listgetmax(void)
 void check_map(void)
 {
 	unsigned max;
+	memcpy(sharecp, share, sizeof(share));
 
 	while (1) {
 		max = listgetmax();
 		if (max == 0)
 			break;
-		printk("Max %d at %d,%d", max, pos_x, pos_y);
+		printk("Max %d at %d,%d\n", max, pos_x, pos_y);
 	}
 
 }
