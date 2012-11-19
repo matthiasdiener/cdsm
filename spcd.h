@@ -9,6 +9,9 @@
 #include <linux/kallsyms.h>
 #include <asm-generic/tlb.h>
 
+#define SPCD_SHIFT PAGE_SHIFT
+// #define SPCD_SHIFT 0
+
 #define PT_MAXTHREADS 4096
 
 #define PT_MEM_HASH_BITS 22UL

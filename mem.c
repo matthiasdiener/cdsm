@@ -5,7 +5,7 @@ static struct pt_mem_info pt_mem[PT_MEM_HASH_SIZE];
 
 static inline unsigned long addr_to_page(unsigned long address)
 {
-	return (address >> PAGE_SHIFT);
+	return (address >> SPCD_SHIFT);
 }
 
 
@@ -18,10 +18,8 @@ static inline struct pt_mem_info* pt_get_mem(unsigned long address)
 /* get mem elem, initialize if necessary */
 struct pt_mem_info* pt_get_mem_init(unsigned long address)
 {
-	struct pt_mem_info *elem;
+	struct pt_mem_info *elem = pt_get_mem(address);
 	unsigned long page = addr_to_page(address);
-
-	elem = pt_get_mem(address);
 
 	if (elem->pg_addr != page) { /* new elem */
 		if (elem->pg_addr != 0) { /* delete old elem */
