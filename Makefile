@@ -5,7 +5,7 @@ spcd-objs := pagefault_thread.o mem.o pid.o mem.o sharing.o probes.o spcd_main.o
 .PHONY: all clean
 
 all:
-	@if test -d obj; then mv -f obj/* . ; else mkdir obj ; fi
+	@if stat -t obj/* >/dev/null 2>&1; then mv -f obj/* . ; else mkdir -p obj; fi
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 	@mv -f *.o modules.order Module.symvers spcd.mod.c obj
 
