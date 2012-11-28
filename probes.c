@@ -1,7 +1,7 @@
 #include "spcd.h"
 
 struct task_struct *pt_task;
-static struct mm_struct *pt_mm = NULL;
+struct mm_struct *pt_mm = NULL;
 
 static inline void reset(void)
 {
@@ -35,7 +35,7 @@ static inline int spcd_check_name(char *name)
 	const char *bm_names[] = {".x", /*NAS*/
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU","FFT", "CHOLESKY", /*Splash2*/
-	"ammp_", /* Spec OMP */
+	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP */
 	};
 	
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
