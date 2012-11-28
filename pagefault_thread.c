@@ -67,29 +67,27 @@ void check_map(void)
 
 int pt_pf_thread_func(void* v)
 {
-	int nt;
 	static int iter = 0;
 
 	while (1) {
 		if (kthread_should_stop())
 			return 0;
 		iter++;
-		nt = spcd_get_active_threads();
 
-		if (iter % 10 == 0 && nt > 1) {
+		if (iter % 10 == 0 && spcd_get_active_threads() > 1) {
 			// pt_print_share();
 			check_map();
 			//pt_share_clear();
 		}
 
-		if (nt > 1) {
+		if (spcd_get_active_threads() > 1) {
 			// int ratio = pt_pf / (pt_pf_extra + 1);
 			// if (ratio > 150 && pt_num_faults < 9)
 			// 	pt_num_faults++;
 			// else if (ratio < 100 && pt_num_faults > 2)
 			// 	pt_num_faults--;
 			// printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
-			pt_pf_pagewalk(pt_task->mm);
+			pt_pf_pagewalk(pt_mm);
 		}
 		msleep(10);
 	}
@@ -203,9 +201,6 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 		.pte_entry = pt_callback_page_walk,
 		.mm = mm,
 	};
-
-	if (!mm)
-		return;
 	
 	down_read(&mm->mmap_sem);
 

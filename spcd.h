@@ -35,6 +35,8 @@ extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
 extern struct task_struct *pt_task;
+extern struct mm_struct *pt_mm;
+
 extern unsigned long pt_num_walks;
 
 extern void reset_stats(void);
