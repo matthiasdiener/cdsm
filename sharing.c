@@ -12,11 +12,18 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 }
 
 
+static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
+{
+	if (new_tsc-old_tsc <= TSC_DELTA) {
+		share[first][second] ++;
+	}
+}
+
 void pt_check_comm(int tid, unsigned long address)
 {
 	struct pt_mem_info *elem = pt_get_mem_init(address);
-
 	int sh = get_num_sharers(elem);
+	unsigned new_tsc = get_cycles();
 
 	switch (sh) {
 		case 0:
@@ -27,30 +34,30 @@ void pt_check_comm(int tid, unsigned long address)
 			if (elem->sharer[0] == -1) {
 				if (elem->sharer[1] != tid) {
 					elem->sharer[0] = tid;
-					share[tid][elem->sharer[1]] ++;
+					maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
 				}
 			} else if (elem->sharer[0] != tid) {
 				elem->sharer[1] = tid;
-				share[tid][elem->sharer[0]] ++;
+				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
 			}
 			break;
 
 		case 2:
 			if (elem->sharer[0] != tid && elem->sharer[1] != tid) {
-				share[tid][elem->sharer[0]] ++;
-				share[tid][elem->sharer[1]] ++;
-
+				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
+				maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
 				elem->sharer[0] = tid;
 			} else if (elem->sharer[0] == tid) {
-				share[tid][elem->sharer[1]] ++;
+				maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
 			} else if (elem->sharer[1] == tid) {
-				share[tid][elem->sharer[0]] ++;
+				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
 			}
 
 			break;
 	}
 
+	elem->tsc = new_tsc;
 }
 
 

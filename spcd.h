@@ -12,6 +12,8 @@
 #define SPCD_SHIFT PAGE_SHIFT
 // #define SPCD_SHIFT 0
 
+#define TSC_DELTA 100000*1000*1000UL
+
 #define PT_MAXTHREADS 4096
 
 #define PT_MEM_HASH_BITS 22UL
@@ -22,6 +24,7 @@
 
 struct pt_mem_info {
 	unsigned long pg_addr;
+	unsigned long tsc;
 	u8 sharer[2];
 };
 
