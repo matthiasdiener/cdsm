@@ -54,10 +54,39 @@ void pt_check_comm(int tid, unsigned long address)
 }
 
 
+static int avg(unsigned share[PT_MAXTHREADS][PT_MAXTHREADS], int nt)
+{
+	int i, j;
+	int sum = 0;
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++) {
+			sum += share[i][j] + share[j][i];
+		}
+	}
+	return sum / nt / nt;
+}
+
+
+static int var(unsigned share[PT_MAXTHREADS][PT_MAXTHREADS], int nt, int avg)
+{
+	int i, j;
+	int sum = 0;
+
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++) {
+			int diff = avg - (share[i][j] + share[j][i]);
+			sum += diff*diff;
+		}
+	}
+	return sum / nt / nt;
+}
+
+
 void pt_print_share(void)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
+	int av, va;
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
@@ -67,6 +96,11 @@ void pt_print_share(void)
 		}
 		printk("\n");
 	}
+	
+	av = avg(share, nt);
+	va = var(share, nt, av);
+
+	printk ("avg: %d, var: %d, hf: %d\n", av, va, va/av);
 }
 
 
