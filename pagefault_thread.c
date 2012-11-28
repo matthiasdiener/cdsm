@@ -83,12 +83,12 @@ int pt_pf_thread_func(void* v)
 		}
 
 		if (nt > 1) {
-			int ratio = pt_pf / (pt_pf_extra + 1);
-			if (ratio > 150 && pt_num_faults < 9)
-				pt_num_faults++;
-			else if (ratio < 100 && pt_num_faults > 1)
-				pt_num_faults--;
-			//printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
+			// int ratio = pt_pf / (pt_pf_extra + 1);
+			// if (ratio > 150 && pt_num_faults < 9)
+			// 	pt_num_faults++;
+			// else if (ratio < 100 && pt_num_faults > 2)
+			// 	pt_num_faults--;
+			// printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
 			pt_pf_pagewalk(pt_task->mm);
 		}
 		msleep(10);
@@ -156,7 +156,7 @@ static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
 }
 
 
-static inline struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 
@@ -175,16 +175,16 @@ static inline struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct 
 
 		// printk("tmp: %p, size: %10lu, writeable: %d, is_vdso: %d, is_file: %d, is_heap: %d, is_stack: %d\n", tmp, vma_size(tmp), is_writable(tmp), is_vdso(tmp), is_file(tmp), is_heap(mm, tmp), is_stack(mm, tmp));
 
-		if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp) || is_stack(mm, tmp))
-			continue;
+		// if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp) || is_stack(mm, tmp))
+		// 	continue;
 		
-		if (is_writable(tmp) || is_heap(mm, tmp))
+		if (is_writable(tmp))
 			return tmp;
 	}
 }
 
 
-static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	pt_next_vma = find_good_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
@@ -222,7 +222,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
 			if (pt_addr_pbit_changed) {
-				pt_next_addr += PAGE_SIZE*((get_cycles()%factor_walk+1) + 1); //Magic
+				pt_next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
 				if (pt_next_addr >= pt_next_vma->vm_end) {
 					find_next_vma(mm, pt_next_vma);
 				}

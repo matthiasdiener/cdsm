@@ -1,6 +1,7 @@
 #include "spcd.h"
 
 struct task_struct *pt_task;
+static struct mm_struct *pt_mm = NULL;
 
 static inline void reset(void)
 {
@@ -34,6 +35,7 @@ static inline int spcd_check_name(char *name)
 	const char *bm_names[] = {".x", /*NAS*/
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU","FFT", "CHOLESKY", /*Splash2*/
+	"ammp_", /* Spec OMP */
 	};
 	
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
@@ -64,7 +66,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
-	if (!pt_task || pt_task->mm != mm)
+	if (pt_mm != mm)
 		jprobe_return();
 
 	fix_pte(pmd, pte);
@@ -100,7 +102,6 @@ static unsigned long zap_pte_range(struct mmu_gather *tlb,
 	pte = start_pte;
 
 	do {
-		//printk("hit: %lu\n", pte_val(*pte));
 		fix_pte(pmd, pte);
 	} while (pte++, addr += PAGE_SIZE, addr != end);
 
@@ -196,6 +197,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 		printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
 		pt_add_pid(task->pid);
 		pt_task = task;
+		pt_mm = pt_task->mm;
 	}
 
 	return 0;
