@@ -3,11 +3,6 @@
 struct task_struct *pt_task;
 struct mm_struct *pt_mm = NULL;
 
-static inline void reset(void)
-{
-	pt_task = NULL;
-}
-
 
 inline void reset_stats(void)
 {
@@ -172,7 +167,7 @@ void spcd_exit_process_handler(struct task_struct *task)
 	if (tid > -1) {
 		pt_delete_pid(task->pid);
 		if (spcd_get_active_threads() == 0) {
-			reset();
+			pt_task = NULL;
 			printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
 			print_stats();
 			reset_stats();
