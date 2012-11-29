@@ -14,11 +14,11 @@ static struct task_struct *map_thread;
 int init_module(void)
 {
 	printk("Welcome.....\n");
-	reset_stats();
 
+	reset_stats();
 	register_probes();
 
-	pf_thread = kthread_create(pt_pf_thread_func, NULL, "spcd_pf_thread");
+	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 	wake_up_process(pf_thread);
 
 	map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");

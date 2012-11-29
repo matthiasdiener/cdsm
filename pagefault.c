@@ -16,7 +16,7 @@ static pid_t (*vm_is_stack_p)(struct task_struct *task,
 							struct vm_area_struct *vma, int in_group) = NULL;
 
 
-int pt_pf_thread_func(void* v)
+int spcd_pagefault_func(void* v)
 {
 	while (1) {
 		if (kthread_should_stop())

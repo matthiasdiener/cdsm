@@ -59,7 +59,7 @@ void pt_print_share(void);
 void pt_share_clear(void);
 
 /* PF thread */
-int pt_pf_thread_func(void* v);
+int spcd_pagefault_func(void* v);
 void spcd_pf_thread_clear(void);
 
 /* Map thread */
