@@ -22,7 +22,7 @@ int spcd_pagefault_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 
-		if (spcd_get_active_threads() > 1) {
+		if (spcd_get_active_threads() > 1 && pt_task) {
 			// int ratio = pt_pf / (pt_pf_extra + 1);
 			// if (ratio > 150 && pt_num_faults < 9)
 			// 	pt_num_faults++;
