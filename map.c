@@ -1,52 +1,49 @@
 #include "spcd.h"
 
-
-static unsigned sharecp [PT_MAXTHREADS][PT_MAXTHREADS];
 static int pos_x, pos_y;
+static u8 mapped [PT_MAXTHREADS];
 
-static void clear(int x, int y, int nt)
+
+static inline void mark(int x, int y)
 {
-	int i;
-
-	for (i = 0; i<nt; i++) {
-		sharecp[x][i] = 0;
-		sharecp[y][i] = 0;
-		sharecp[i][x] = 0;
-		sharecp[i][y] = 0;
-	}
+	mapped[x] = 1;
+	mapped[y] = 1;
 }
 
 static unsigned listgetmax(int nt)
 {
-	unsigned res = 0;
 	int i, j;
+	unsigned res = 0;
 
 	for (i = nt-1; i >= 0; i--) {
+		if (mapped[i])
+			continue;
 		for (j = 0; j < nt; j++) {
-			if (sharecp[i][j] + sharecp[j][i] > res) {
-				res = sharecp[i][j]+sharecp[j][i];
+			if (mapped[j])
+				continue;
+			if (share[i][j] + share[j][i] > res) {
+				res = share[i][j]+share[j][i];
 				pos_x = i;
 				pos_y = j;
 			}
 		}
 	}
-	clear(pos_x, pos_y, nt);
+	mark(pos_x, pos_y);
 	return res;
 }
 
+
 void check_map(int nt)
 {
-	unsigned max;
-	memcpy(sharecp, share, sizeof(share));
+	memset(mapped, 0, sizeof(mapped));
 
-	while (1) {
-		max = listgetmax(nt);
-		if (max == 0)
-			break;
+	while (listgetmax(nt)) {
 		printk("(%d,%d) ", pos_x, pos_y);
 	}
+
 	printk("\n");
 }
+
 
 int spcd_map_func(void* v)
 {
