@@ -8,7 +8,8 @@ unsigned long pt_pf_extra;
 unsigned long pt_num_walks;
 unsigned long pt_pte_fixes;
 
-static struct task_struct *pt_pf_thread;
+static struct task_struct *pf_thread;
+static struct task_struct *map_thread;
 
 int init_module(void)
 {
@@ -17,8 +18,11 @@ int init_module(void)
 
 	register_probes();
 
-	pt_pf_thread = kthread_create(pt_pf_thread_func, NULL, "pt_pf_thread");
-	wake_up_process(pt_pf_thread);
+	pf_thread = kthread_create(pt_pf_thread_func, NULL, "spcd_pf_thread");
+	wake_up_process(pf_thread);
+
+	map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
+	wake_up_process(map_thread);
 
 	return 0;
 }
@@ -26,7 +30,8 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	kthread_stop(pt_pf_thread);
+	kthread_stop(pf_thread);
+	kthread_stop(map_thread);
 
 	unregister_probes();
 

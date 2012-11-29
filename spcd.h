@@ -62,6 +62,9 @@ void pt_share_clear(void);
 int pt_pf_thread_func(void* v);
 void spcd_pf_thread_clear(void);
 
+/* Map thread */
+int spcd_map_func(void* v);
+
 /* Utility */
 void register_probes(void);
 void unregister_probes(void);
