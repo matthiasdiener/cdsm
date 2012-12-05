@@ -107,7 +107,7 @@ void pt_print_share(void)
 	av = avg(share, nt);
 	va = var(share, nt, av);
 
-	printk ("avg: %d, var: %d, hf: %d\n", av, va, va/av);
+	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
 }
 
 
