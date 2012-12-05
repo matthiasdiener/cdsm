@@ -38,10 +38,10 @@ void check_map(int nt)
 	memset(mapped, 0, sizeof(mapped));
 
 	while (listgetmax(nt)) {
-		printk("(%d,%d) ", pos_x, pos_y);
+		// printk("(%d,%d) ", pos_x, pos_y);
 	}
 
-	printk("\n");
+	// printk("\n");
 }
 
 

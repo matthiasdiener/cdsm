@@ -23,7 +23,7 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 
 	if (elem->pg_addr != page) { /* new elem */
 		if (elem->pg_addr != 0) { /* delete old elem */
-			printk ("XXX conf, hash: %x, old: %lx, new: %lx\n", hash_32(page, PT_MEM_HASH_BITS), elem->pg_addr, page);
+			// printk ("XXX conf, hash: %x, old: %lx, new: %lx\n", hash_32(page, PT_MEM_HASH_BITS), elem->pg_addr, page);
 			pt_addr_conflict++;
 		}
 
