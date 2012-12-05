@@ -1,18 +1,24 @@
 #include "spcd.h"
 
-static int pt_pid[PT_PID_HASH_SIZE];
+struct pid_s {
+	int pid;
+	int tid;
+};
+
+static struct pid_s pt_pid[PT_PID_HASH_SIZE];
 static atomic_t pt_num_threads = ATOMIC_INIT(0);
 static atomic_t pt_active_threads = ATOMIC_INIT(0);
 
 
 void pt_delete_pid(int pid)
 {
-	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
-	int tid = pt_pid[h];
 	int at;
+	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
+	int tid = pt_pid[h].tid;
 
-	if (tid != -1) {
-		pt_pid[h] = -1;
+	if (tid != -1 && pt_pid[h].pid == pid) {
+		pt_pid[h].tid = -1;
+		pt_pid[h].pid = -1;
 		at = atomic_dec_return(&pt_active_threads);
 		printk("pt: thread %d stop (tid %d), active: %d\n", pid, tid, at);
 	}
@@ -25,12 +31,13 @@ void pt_add_pid(int pid)
 	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
 	int at;
 
-	if (pt_pid[h] == -1) {
-		pt_pid[h] = atomic_inc_return(&pt_num_threads) - 1;
+	if (pt_pid[h].pid == -1) {
+		pt_pid[h].pid = pid;
+		pt_pid[h].tid = atomic_inc_return(&pt_num_threads) - 1;
 		at = atomic_inc_return(&pt_active_threads);
-		printk ("pt: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h], at);
+		printk ("pt: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h].tid, at);
 	} else {
-		printk("pt: XXX thread already registered %d->%d\n", pid, pt_pid[h]);
+		printk("pt: XXX pid collision: %d->%d\n", pt_pid[h].pid, pt_pid[h].tid);
 	}
 }
 
@@ -45,15 +52,17 @@ void pt_pid_clear(void)
 
 int pt_get_tid(int pid)
 {
-	return pt_pid[hash_32(pid, PT_PID_HASH_BITS)];
+	return pt_pid[hash_32(pid, PT_PID_HASH_BITS)].tid;
 }
 
 
-int spcd_get_num_threads(void) {
+int spcd_get_num_threads(void)
+{
 	return atomic_read(&pt_num_threads);
 }
 
 
-int spcd_get_active_threads(void) {
+int spcd_get_active_threads(void)
+{
 	return atomic_read(&pt_active_threads);
 }
