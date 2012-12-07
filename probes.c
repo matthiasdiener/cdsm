@@ -31,6 +31,7 @@ static inline int spcd_check_name(char *name)
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU","FFT", "CHOLESKY", /*Splash2*/
 	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP */
+	".spec",
 	};
 	
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
