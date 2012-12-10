@@ -3,6 +3,9 @@
 struct task_struct *pt_task;
 struct mm_struct *pt_mm = NULL;
 
+unsigned long pt_pf;
+unsigned long pt_pte_fixes;
+
 
 inline void reset_stats(void)
 {

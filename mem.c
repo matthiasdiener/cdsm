@@ -1,7 +1,7 @@
 #include "spcd.h"
 
 static struct pt_mem_info pt_mem[PT_MEM_HASH_SIZE];
-
+unsigned long pt_addr_conflict;
 
 static inline unsigned long addr_to_page(unsigned long address)
 {

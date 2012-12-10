@@ -5,6 +5,9 @@ static struct vm_area_struct *pt_next_vma = NULL;
 static unsigned long pt_next_addr = 0;
 static unsigned pt_num_faults = 3;
 
+unsigned long pt_pf_extra;
+unsigned long pt_num_walks;
+
 static void pt_pf_pagewalk(struct mm_struct *mm);
 
 static struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte) = NULL;

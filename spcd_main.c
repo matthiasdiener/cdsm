@@ -2,12 +2,6 @@
 
 MODULE_LICENSE("GPL");
 
-unsigned long pt_pf;
-unsigned long pt_addr_conflict;
-unsigned long pt_pf_extra;
-unsigned long pt_num_walks;
-unsigned long pt_pte_fixes;
-
 static struct task_struct *pf_thread;
 static struct task_struct *map_thread;
 
