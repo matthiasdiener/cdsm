@@ -1,11 +1,17 @@
 #### TODO
 
+- avg, var, hf sometimes negative (dedup)
+- comm matrices with different granularities (12 vs 21 bits on swim)
+
+
+#### DONE
+
 - crash when hash table conflict - ok
-- large mem usage
+- large mem usage - ok
 - kprobes for begin and end process - ok
 - locks necessary? - ok
 - fix pte in dpf? - ok
-- reduce size of mem hash table to 32 bits?
+- reduce size of mem hash table to 32 bits? - ok
 
 
 #### Performance
