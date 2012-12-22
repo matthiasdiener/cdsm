@@ -1,17 +1,18 @@
 #### TODO
 
 - avg, var, hf sometimes negative (dedup)
-- comm matrices with different granularities (12 vs 21 bits on swim)
+- comm matrices with different granularities (12 vs 21 bits on swim_m)
+- move pid hashtable to real hash table
 
 
 #### DONE
 
-- crash when hash table conflict - ok
-- large mem usage - ok
-- kprobes for begin and end process - ok
-- locks necessary? - ok
-- fix pte in dpf? - ok
-- reduce size of mem hash table to 32 bits? - ok
+- crash when hash table conflict - ok, since not saving the disabled ptes anymore
+- large mem usage - ok, reduced sice of pid and mem tables
+- kprobes for begin and end process - ok, implemented
+- locks necessary? - ok, removed all locks
+- fix pte in dpf? - ok, fixed now in handle_pte_fault
+- reduce size of mem hash table to 32 bits? - ok, still need 64 bit for generality
 
 
 #### Performance
