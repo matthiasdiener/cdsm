@@ -18,6 +18,8 @@ int init_module(void)
 	map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
 	wake_up_process(map_thread);
 
+	interceptor_start();
+
 	return 0;
 }
 
@@ -28,6 +30,7 @@ void cleanup_module(void)
 	kthread_stop(map_thread);
 
 	unregister_probes();
+	interceptor_end();
 
 	printk("Bye.....\n");
 }

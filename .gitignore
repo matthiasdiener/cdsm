@@ -5,3 +5,4 @@ modules.order
 *.ko
 *.o
 *.mod.c
+a.out

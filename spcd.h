@@ -69,4 +69,8 @@ int spcd_map_func(void* v);
 void register_probes(void);
 void unregister_probes(void);
 
+/* Intercept */
+int interceptor_start(void);
+void interceptor_end(void);
+
 #endif
