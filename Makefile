@@ -1,5 +1,5 @@
 obj-m := spcd.o
-spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o map.o intercept.o spcd_main.o
+spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o map.o intercept.o topo.o spcd_main.o
 
 
 .PHONY: all clean

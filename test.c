@@ -9,7 +9,7 @@ int main (void)
 {
 	int i, j, nt;
 
-	nt = syscall(177, share, 0);
+	nt = syscall(177, share, 1);
 	printf("Threads: %d\n", nt);
 
 	for (i = nt-1; i >= 0; i--) {

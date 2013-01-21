@@ -20,6 +20,8 @@ int init_module(void)
 
 	interceptor_start();
 
+	topo_init();
+
 	return 0;
 }
 

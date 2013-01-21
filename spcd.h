@@ -73,4 +73,7 @@ void unregister_probes(void);
 int interceptor_start(void);
 void interceptor_end(void);
 
+/* Topology */
+void topo_init(void);
+
 #endif
