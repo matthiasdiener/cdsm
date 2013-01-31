@@ -50,8 +50,10 @@ static int spcd_get_comm_clear(unsigned long *addr, int clear)
 {
 	memcpy(addr, share, sizeof (share));
 
-	if (clear)
+	if (clear) {
+		printk("clearing\n");
 		memset(share, 0, sizeof (share));
+	}
 	return spcd_get_num_threads();
 }
 
