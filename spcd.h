@@ -53,7 +53,7 @@ int spcd_get_active_threads(void);
 struct pt_mem_info* pt_get_mem_init(unsigned long addr);
 void pt_mem_clear(void);
 
-/* Share functions */
+/* Communication functions */
 void pt_check_comm(int tid, unsigned long address);
 void pt_print_share(void);
 void pt_share_clear(void);
@@ -75,5 +75,6 @@ void interceptor_end(void);
 
 /* Topology */
 void topo_init(void);
+void topo_cleanup(void);
 
 #endif

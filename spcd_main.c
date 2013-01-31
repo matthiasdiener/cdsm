@@ -34,5 +34,7 @@ void cleanup_module(void)
 	unregister_probes();
 	interceptor_end();
 
+	topo_cleanup();
+
 	printk("Bye.....\n");
 }
