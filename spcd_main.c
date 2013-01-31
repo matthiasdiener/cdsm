@@ -3,7 +3,7 @@
 MODULE_LICENSE("GPL");
 
 static struct task_struct *pf_thread;
-static struct task_struct *map_thread;
+// static struct task_struct *map_thread;
 
 int init_module(void)
 {
@@ -15,12 +15,12 @@ int init_module(void)
 	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 	wake_up_process(pf_thread);
 
-	map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
-	wake_up_process(map_thread);
+	// map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
+	// wake_up_process(map_thread);
 
 	interceptor_start();
 
-	topo_init();
+	// topo_init();
 
 	return 0;
 }
@@ -28,13 +28,16 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	kthread_stop(pf_thread);
-	kthread_stop(map_thread);
+	if (pf_thread)
+		kthread_stop(pf_thread);
+
+	// if (map_thread)
+	// 	kthread_stop(map_thread);
 
 	unregister_probes();
 	interceptor_end();
 
-	topo_cleanup();
+	// topo_cleanup();
 
 	printk("Bye.....\n");
 }
