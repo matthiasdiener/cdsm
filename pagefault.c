@@ -3,7 +3,7 @@
 static int factor_walk = 61;
 static struct vm_area_struct *pt_next_vma = NULL;
 static unsigned long pt_next_addr = 0;
-static unsigned pt_num_faults = 3;
+extern int num_faults;
 
 unsigned long pt_pf_extra;
 unsigned long pt_num_walks;
@@ -27,11 +27,11 @@ int spcd_pagefault_func(void* v)
 
 		if (spcd_get_active_threads() > 1 && pt_task) {
 			// int ratio = pt_pf / (pt_pf_extra + 1);
-			// if (ratio > 150 && pt_num_faults < 9)
-			// 	pt_num_faults++;
-			// else if (ratio < 100 && pt_num_faults > 2)
-			// 	pt_num_faults--;
-			// printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", pt_num_faults, ratio, pt_pf, pt_pf_extra);
+			// if (ratio > 150 && num_faults < 9)
+			// 	num_faults++;
+			// else if (ratio < 100 && num_faults > 2)
+			// 	num_faults--;
+			// printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", num_faults, ratio, pt_pf, pt_pf_extra);
 			pt_pf_pagewalk(pt_mm);
 		}
 		msleep(10);
@@ -149,7 +149,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 	
 	down_read(&mm->mmap_sem);
 
-	for (i = 0; i < pt_num_faults; i++) {
+	for (i = 0; i < num_faults; i++) {
 
 		pt_addr_pbit_changed = 0;
 
@@ -183,7 +183,7 @@ inline void spcd_pf_thread_clear(void)
 	pt_num_walks = 0;
 	pt_next_addr = 0;
 	pt_next_vma = NULL;
-	pt_num_faults = 3;
+	num_faults = 3;
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");

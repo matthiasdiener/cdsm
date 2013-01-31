@@ -2,12 +2,18 @@
 
 MODULE_LICENSE("GPL");
 
+#define NUM_FAULTS_DEFAULT 3
+
 static struct task_struct *pf_thread;
 // static struct task_struct *map_thread;
 
+int num_faults = NUM_FAULTS_DEFAULT;
+module_param(num_faults, int, 0);
+
 int init_module(void)
 {
-	printk("Welcome.....\n");
+	printk("SPCD: Welcome.....\n");
+	printk("SPCD: Number of pagefaults per iteration: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
 
 	reset_stats();
 	register_probes();
