@@ -183,7 +183,7 @@ inline void spcd_pf_thread_clear(void)
 	pt_num_walks = 0;
 	pt_next_addr = 0;
 	pt_next_vma = NULL;
-	num_faults = 3;
+	// num_faults = 3;
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
