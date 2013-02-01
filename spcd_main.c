@@ -13,7 +13,9 @@ module_param(num_faults, int, 0);
 int init_module(void)
 {
 	printk("SPCD: Welcome.....\n");
-	printk("SPCD: Number of pagefaults per iteration: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
+	printk("SPCD: num_faults: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
+	printk("SPCD: max_threads: %d\n", PT_MAXTHREADS);
+
 
 	reset_stats();
 	register_probes();
