@@ -1,6 +1,6 @@
 #include "spcd.h"
 
-struct task_struct *pt_task;
+struct task_struct *pt_task = NULL;
 struct mm_struct *pt_mm = NULL;
 
 unsigned long pt_pf;
@@ -63,7 +63,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
-	if (pt_mm != mm)
+	if (pt_mm != mm) //need fix here
 		jprobe_return();
 
 	fix_pte(pmd, pte);
