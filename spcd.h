@@ -25,7 +25,7 @@
 struct pt_mem_info {
 	unsigned long pg_addr;
 	unsigned long tsc;
-	u8 sharer[2];
+	s16 sharer[2];
 };
 
 extern unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
