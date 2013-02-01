@@ -52,7 +52,10 @@ void pt_pid_clear(void)
 
 int pt_get_tid(int pid)
 {
-	return pt_pid[hash_32(pid, PT_PID_HASH_BITS)].tid;
+	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
+	if (pt_pid[h].pid == pid)
+		return pt_pid[h].tid;
+	return -1;
 }
 
 
