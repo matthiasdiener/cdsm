@@ -63,7 +63,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
-	if (pt_mm != mm) //need fix here
+	if (pt_mm != mm)
 		jprobe_return();
 
 	fix_pte(pmd, pte);
