@@ -51,7 +51,7 @@ static int spcd_get_comm_clear(unsigned long *addr, int clear)
 	copy_to_user(addr, share, sizeof (share));
 
 	if (clear) {
-		memset(share, 0, sizeof (share));
+		pt_share_clear();
 	}
 	return spcd_get_num_threads();
 }

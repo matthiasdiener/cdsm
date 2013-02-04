@@ -1,6 +1,6 @@
 #include "spcd.h"
 
-struct task_struct *pt_task;
+struct task_struct *pt_task = NULL;
 struct mm_struct *pt_mm = NULL;
 
 unsigned long pt_pf;
