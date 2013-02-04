@@ -31,14 +31,16 @@ void pt_check_comm(int tid, unsigned long address)
 			break;
 
 		case 1:
-			if (elem->sharer[0] == -1) {
+			/*if (elem->sharer[0] == -1) {
 				if (elem->sharer[1] != tid) {
 					elem->sharer[0] = tid;
 					maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
 				}
-			} else if (elem->sharer[0] != tid) {
-				elem->sharer[1] = tid;
+			} else */
+			if (elem->sharer[0] != tid) {
 				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
+				elem->sharer[1] = elem->sharer[0];
+				elem->sharer[0] = tid;
 			}
 			break;
 
@@ -52,6 +54,8 @@ void pt_check_comm(int tid, unsigned long address)
 				maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
 			} else if (elem->sharer[1] == tid) {
 				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
+				elem->sharer[1] = elem->sharer[0];
+                                elem->sharer[0] = tid;
 			}
 
 			break;
