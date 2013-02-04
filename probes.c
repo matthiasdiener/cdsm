@@ -63,11 +63,14 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
+	if (pt_mm != mm)
+		jprobe_return();
+
 	fix_pte(pmd, pte);
+	pt_pf++;
 
 	tid = pt_get_tid(current->pid);
 	if (tid > -1){
-		pt_pf++;
 		pt_check_comm(tid, address);
 	}
 
