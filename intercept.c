@@ -48,10 +48,14 @@ static void enable_page_protection(void)
 
 static int spcd_get_comm_clear(unsigned long *addr, int clear)
 {
-	copy_to_user(addr, share, sizeof (share));
+	if (addr)
+		copy_to_user(addr, share, sizeof (share));
 
-	if (clear) {
+	if (clear>=1) {
 		pt_share_clear();
+		if (clear>=2)
+			pt_mem_clear();
+
 	}
 	return spcd_get_num_threads();
 }
