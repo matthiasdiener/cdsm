@@ -6,3 +6,4 @@ modules.order
 *.o
 *.mod.c
 a.out
+version.h
