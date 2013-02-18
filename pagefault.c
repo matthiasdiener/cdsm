@@ -25,7 +25,7 @@ int spcd_pagefault_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 
-		if (spcd_get_active_threads() > 1 && pt_task) {
+		if (spcd_get_active_threads() >= 4 && pt_task) {
 			// int ratio = pt_pf / (pt_pf_extra + 1);
 			// if (ratio > 150 && num_faults < 9)
 			// 	num_faults++;
@@ -150,6 +150,8 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 	down_read(&mm->mmap_sem);
 
 	for (i = 0; i < num_faults; i++) {
+		if (spcd_get_active_threads() < 4)
+			goto out;
 
 		pt_addr_pbit_changed = 0;
 
@@ -172,7 +174,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 			}
 		}
 	}
-
+out:
 	up_read(&mm->mmap_sem);
 }
 
