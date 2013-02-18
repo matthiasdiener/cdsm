@@ -32,7 +32,7 @@ static inline int spcd_check_name(char *name)
 {
 	const char *bm_names[] = {".x", /*NAS*/
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
-	"LU","FFT", "CHOLESKY", /*Splash2*/
+	"LU", "FFT", "CHOLESKY", /*Splash2*/
 	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP 2001 */
 	"md_omp_", "bwaves_", "nabmd_", "bt_", "bots-alignment_", "bots-sparselu_", "ilbdc_", /*"fma3d", "swim_", */ "convert_", "mg_", "lu_", "smithwaterman_", "kdtree_", /* Spec OMP 2012 */
 	};
