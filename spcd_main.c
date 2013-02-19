@@ -5,6 +5,7 @@ MODULE_LICENSE("GPL");
 
 #define NUM_FAULTS_DEFAULT 3
 #define NUM_MAX_THREADS_DEFAULT 32 
+#define SPCD_SHIFT_DEFAULT 12
 
 static struct task_struct *pf_thread;
 static struct task_struct *map_thread;
@@ -12,9 +13,11 @@ static struct task_struct *map_thread;
 int num_faults = NUM_FAULTS_DEFAULT;
 int do_map = 0;
 int max_threads = NUM_MAX_THREADS_DEFAULT;
+int spcd_shift = SPCD_SHIFT_DEFAULT;
 module_param(num_faults, int, 0);
 module_param(do_map, int, 0);
 module_param(max_threads, int, 0);
+module_param(spcd_shift, int, 0);
 
 int init_module(void)
 {
@@ -22,7 +25,7 @@ int init_module(void)
 	printk("    num_faults: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
 	printk("    max_threads: %d\n", max_threads);
 	printk("    use mapping: %s\n", do_map ? "yes" : "no");
-
+	printk("    shift (in bits): %d %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
 
 	reset_stats();
 	register_probes();

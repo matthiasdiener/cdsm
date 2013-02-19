@@ -10,9 +10,6 @@
 #include <asm-generic/tlb.h>
 #include <linux/slab.h>
 
-#define SPCD_SHIFT PAGE_SHIFT
-// #define SPCD_SHIFT 0
-
 #define TSC_DELTA 100000*1000*1000UL
 
 #define PT_MEM_HASH_BITS 22UL
@@ -28,6 +25,7 @@ struct pt_mem_info {
 };
 
 extern int max_threads;
+extern int spcd_shift;
 extern unsigned *share;
 
 extern unsigned long pt_pte_fixes;

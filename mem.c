@@ -5,7 +5,7 @@ unsigned long pt_addr_conflict;
 
 static inline unsigned long addr_to_page(unsigned long address)
 {
-	return (address >> SPCD_SHIFT);
+	return (address >> spcd_shift);
 }
 
 
