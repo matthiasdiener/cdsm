@@ -1,6 +1,5 @@
 #include "spcd.h"
 #include <linux/cpu.h>
-#include <linux/slab.h>
 
 #define for_each_sibling(s, cpu) for_each_cpu(s, cpu_sibling_mask(cpu))
 

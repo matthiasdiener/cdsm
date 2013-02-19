@@ -1,7 +1,5 @@
 #include "spcd.h"
 
-unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
-
 static inline int get_num_sharers(struct pt_mem_info *elem)
 {
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1)

@@ -8,6 +8,7 @@
 #include <linux/kprobes.h>
 #include <linux/kallsyms.h>
 #include <asm-generic/tlb.h>
+#include <linux/slab.h>
 
 #define SPCD_SHIFT PAGE_SHIFT
 // #define SPCD_SHIFT 0
@@ -28,7 +29,7 @@ struct pt_mem_info {
 	s16 sharer[2];
 };
 
-extern unsigned share [PT_MAXTHREADS][PT_MAXTHREADS];
+extern unsigned **share;
 
 extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;
