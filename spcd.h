@@ -29,7 +29,8 @@ struct pt_mem_info {
 	s16 sharer[2];
 };
 
-extern unsigned **share;
+extern int max_threads;
+extern unsigned *share;
 
 extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;

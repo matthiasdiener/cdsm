@@ -1,5 +1,7 @@
 #include "spcd.h"
 
+unsigned *share = NULL;
+
 static inline int get_num_sharers(struct pt_mem_info *elem)
 {
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1)
@@ -13,7 +15,7 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
-		share[first][second] ++;
+		// share[first][second] ++;
 	// }
 }
 
@@ -90,6 +92,10 @@ void pt_check_comm(int tid, unsigned long address)
 // 	return sum / nt / nt;
 // }
 
+static inline unsigned get_share(int i, int j)
+{
+	return share[i*max_threads + j];
+}
 
 void pt_print_share(void)
 {
@@ -99,7 +105,7 @@ void pt_print_share(void)
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			printk ("%u", share[i][j] + share[j][i]);
+			printk ("%u", get_share(i,j) + get_share(j,i));
 			if (j != nt-1)
 				printk (",");
 		}
@@ -113,7 +119,12 @@ void pt_print_share(void)
 }
 
 
+
+
 void pt_share_clear(void)
 {
+	if (!share)
+		share = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
 	memset(share, 0, sizeof(share));
+
 }

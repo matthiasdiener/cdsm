@@ -21,11 +21,11 @@ static unsigned listgetmax(int nt)
 		for (j = 0; j < nt; j++) {
 			if (mapped[j])
 				continue;
-			if (share[i][j] + share[j][i] > res) {
-				res = share[i][j]+share[j][i];
-				pos_x = i;
-				pos_y = j;
-			}
+			// if (share[i][j] + share[j][i] > res) {
+			// 	res = share[i][j]+share[j][i];
+			// 	pos_x = i;
+			// 	pos_y = j;
+			// }
 		}
 	}
 	mark(pos_x, pos_y);
