@@ -59,6 +59,7 @@ void pt_mem_clear(void);
 void pt_check_comm(int tid, unsigned long address);
 void pt_print_share(void);
 void pt_share_clear(void);
+unsigned get_share(int i, int j);
 
 /* PF thread */
 int spcd_pagefault_func(void* v);

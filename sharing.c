@@ -61,7 +61,7 @@ void pt_check_comm(int tid, unsigned long address)
 	elem->tsc = new_tsc;
 }
 
-static inline unsigned get_share(int i, int j)
+unsigned get_share(int i, int j)
 {
 	if (i>j)
 		return share[i*max_threads + j];
