@@ -15,7 +15,7 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
-		// share[first][second] ++;
+		share[first * max_threads + second] ++;
 	// }
 }
 
