@@ -15,7 +15,10 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
+	if (first < second)
 		share[first * max_threads + second] ++;
+	else
+		share[second * max_threads + first] ++;
 	// }
 }
 
@@ -101,11 +104,14 @@ void pt_print_share(void)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
+	int sum = 0;
 	// int av, va;
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			printk ("%u", get_share(i,j) + get_share(j,i));
+			int s = get_share(i,j);
+			sum += s;
+			printk ("%u", s);
 			if (j != nt-1)
 				printk (",");
 		}
