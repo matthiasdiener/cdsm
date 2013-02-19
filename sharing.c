@@ -55,7 +55,7 @@ void pt_check_comm(int tid, unsigned long address)
 			} else if (elem->sharer[1] == tid) {
 				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
-                                elem->sharer[0] = tid;
+				elem->sharer[0] = tid;
 			}
 
 			break;
@@ -125,6 +125,6 @@ void pt_share_clear(void)
 {
 	if (!share)
 		share = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
-	memset(share, 0, sizeof(share));
+	memset(share, 0, sizeof(unsigned) * max_threads * max_threads);
 
 }
