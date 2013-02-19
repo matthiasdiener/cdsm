@@ -34,12 +34,6 @@ void pt_check_comm(int tid, unsigned long address)
 			break;
 
 		case 1: // one previous access => needs to be in pos 0
-			/*if (elem->sharer[0] == -1) {
-				if (elem->sharer[1] != tid) {
-					elem->sharer[0] = tid;
-					maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
-				}
-			} else */
 			if (elem->sharer[0] != tid) {
 				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
@@ -66,34 +60,6 @@ void pt_check_comm(int tid, unsigned long address)
 
 	elem->tsc = new_tsc;
 }
-
-
-// static int avg(unsigned share[PT_MAXTHREADS][PT_MAXTHREADS], int nt)
-// {
-// 	int i, j;
-// 	int sum = 0;
-// 	for (i = nt-1; i >= 0; i--) {
-// 		for (j = 0; j < nt; j++) {
-// 			sum += share[i][j] + share[j][i];
-// 		}
-// 	}
-// 	return sum / nt / nt;
-// }
-
-
-// static int var(unsigned share[PT_MAXTHREADS][PT_MAXTHREADS], int nt, int avg)
-// {
-// 	int i, j;
-// 	int sum = 0;
-
-// 	for (i = nt-1; i >= 0; i--) {
-// 		for (j = 0; j < nt; j++) {
-// 			int diff = avg - (share[i][j] + share[j][i]);
-// 			sum += diff*diff;
-// 		}
-// 	}
-// 	return sum / nt / nt;
-// }
 
 static inline unsigned get_share(int i, int j)
 {
@@ -123,7 +89,7 @@ void pt_print_share(void)
 	}
 	
 	av = sum / nt / nt;
-	va = (sum_sqr - ((sum*sum)/nt))/(nt-1);
+	va = (sum_sqr - ((sum*sum)/nt/nt))/(nt-1)/(nt-1);
 
 	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
 }
