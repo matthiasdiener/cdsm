@@ -1,6 +1,6 @@
 #include "spcd.h"
 
-static struct pt_mem_info pt_mem[PT_MEM_HASH_SIZE];
+static struct pt_mem_info *pt_mem;
 unsigned long pt_addr_conflict;
 
 static inline unsigned long addr_to_page(unsigned long address)
@@ -11,7 +11,7 @@ static inline unsigned long addr_to_page(unsigned long address)
 
 static inline struct pt_mem_info* pt_get_mem(unsigned long address)
 {
-	return &pt_mem[hash_32(addr_to_page(address), PT_MEM_HASH_BITS)];
+	return &pt_mem[hash_32(addr_to_page(address), spcd_mem_hash_bits)];
 }
 
 
@@ -37,6 +37,10 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 
 void pt_mem_clear(void)
 {
-	memset(pt_mem, 0, sizeof(pt_mem));
+	int spcd_mem_hash_size = 1UL << spcd_mem_hash_bits;
+	if (!pt_mem)
+		pt_mem = vmalloc(sizeof(struct pt_mem_info) * spcd_mem_hash_size);
+	if (pt_mem)
+		memset(pt_mem, 0, sizeof(struct pt_mem_info) * spcd_mem_hash_size);
 	pt_addr_conflict = 0;
 }

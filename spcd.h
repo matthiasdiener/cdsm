@@ -12,9 +12,6 @@
 
 #define TSC_DELTA 100000*1000*1000UL
 
-#define PT_MEM_HASH_BITS 22UL
-#define PT_MEM_HASH_SIZE (1UL << PT_MEM_HASH_BITS)
-
 #define PT_PID_HASH_BITS 14UL
 #define PT_PID_HASH_SIZE (1UL << PT_PID_HASH_BITS)
 
@@ -27,6 +24,7 @@ struct pt_mem_info {
 extern int max_threads;
 extern int spcd_shift;
 extern unsigned *share;
+extern int spcd_mem_hash_bits;
 
 extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;
