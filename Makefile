@@ -10,7 +10,7 @@ all:
 	@echo "#define SPCD_VERSION \"$(SPCD_VER); $(DATE)\"" > version.h
 	@if stat -t obj/* >/dev/null 2>&1; then mv -f obj/* . ; else mkdir -p obj; fi
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
-	@mv -f *.o modules.order Module.symvers spcd.mod.c obj
+	@mv -f *.o modules.order Module.symvers spcd.mod.c .*.cmd obj
 
 clean:
 	@rm -rf obj/
