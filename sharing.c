@@ -15,7 +15,7 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
-	if (first < second)
+	if (first > second)
 		share[first * max_threads + second] ++;
 	else
 		share[second * max_threads + first] ++;
@@ -97,20 +97,24 @@ void pt_check_comm(int tid, unsigned long address)
 
 static inline unsigned get_share(int i, int j)
 {
-	return share[i*max_threads + j];
+	if (i>j)
+		return share[i*max_threads + j];
+	else
+		return share[j*max_threads + i];
 }
 
 void pt_print_share(void)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
-	int sum = 0;
-	// int av, va;
+	int sum = 0, sum_sqr = 0;
+	int av, va;
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
 			int s = get_share(i,j);
 			sum += s;
+			sum_sqr += s*s;
 			printk ("%u", s);
 			if (j != nt-1)
 				printk (",");
@@ -118,10 +122,10 @@ void pt_print_share(void)
 		printk("\n");
 	}
 	
-	// av = avg(share, nt);
-	// va = var(share, nt, av);
+	av = sum / nt / nt;
+	va = (sum_sqr - ((sum*sum)/nt))/(nt-1);
 
-	// printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
+	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
 }
 
 
