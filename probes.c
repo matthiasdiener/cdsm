@@ -58,8 +58,8 @@ static inline void fix_pte(pmd_t *pmd, pte_t *pte)
 
 
 void spcd_pte_fault_handler(struct mm_struct *mm,
-			struct vm_area_struct *vma, unsigned long address,
-			pte_t *pte, pmd_t *pmd, unsigned int flags)
+							struct vm_area_struct *vma, unsigned long address,
+							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
 	int tid;
 
@@ -87,9 +87,9 @@ void spcd_del_page_handler(struct page *page)
 }
 
 static unsigned long zap_pte_range(struct mmu_gather *tlb,
-				struct vm_area_struct *vma, pmd_t *pmd,
-				unsigned long addr, unsigned long end,
-				struct zap_details *details)
+								   struct vm_area_struct *vma, pmd_t *pmd,
+								   unsigned long addr, unsigned long end,
+								   struct zap_details *details)
 {
 	struct mm_struct *mm = tlb->mm;
 	pte_t *start_pte, *pte;
@@ -107,9 +107,9 @@ static unsigned long zap_pte_range(struct mmu_gather *tlb,
 }
 
 static unsigned long zap_pmd_range(struct mmu_gather *tlb,
-                            struct vm_area_struct *vma, pud_t *pud,
-                            unsigned long addr, unsigned long end,
-                            struct zap_details *details)
+								   struct vm_area_struct *vma, pud_t *pud,
+								   unsigned long addr, unsigned long end,
+								   struct zap_details *details)
 {
 	pmd_t *pmd;
 	unsigned long next;
@@ -126,9 +126,9 @@ static unsigned long zap_pmd_range(struct mmu_gather *tlb,
 
 
 static unsigned long zap_pud_range(struct mmu_gather *tlb,
-                                struct vm_area_struct *vma, pgd_t *pgd,
-                                unsigned long addr, unsigned long end,
-                                struct zap_details *details)
+								   struct vm_area_struct *vma, pgd_t *pgd,
+								   unsigned long addr, unsigned long end,
+								   struct zap_details *details)
 {
 	pud_t *pud;
 	unsigned long next;
@@ -145,9 +145,9 @@ static unsigned long zap_pud_range(struct mmu_gather *tlb,
 }
 
 void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
-						struct vm_area_struct *vma,
-						unsigned long addr, unsigned long end,
-						struct zap_details *details)
+								   struct vm_area_struct *vma,
+								   unsigned long addr, unsigned long end,
+								   struct zap_details *details)
 {
 	pgd_t *pgd;
 	unsigned long next;
