@@ -175,7 +175,7 @@ void spcd_exit_process_handler(struct task_struct *task)
 		pt_delete_pid(task->pid);
 		if (spcd_get_active_threads() == 0) {
 			pt_task = NULL;
-			printk("pt: stop %s (pid %d)\n", task->comm, task->pid);
+			printk("spcd: stop %s (pid %d)\n", task->comm, task->pid);
 			print_stats();
 			reset_stats();
 		}
@@ -194,7 +194,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 		return 0;
 
 	if (spcd_check_name(task->comm)) {
-		printk("\npt: start %s (pid %d)\n", task->comm, task->pid);
+		printk("\nspcd: start %s (pid %d)\n", task->comm, task->pid);
 		pt_add_pid(task->pid);
 		pt_task = task;
 		pt_mm = pt_task->mm;
