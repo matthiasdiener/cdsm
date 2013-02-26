@@ -60,6 +60,7 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	pte_unmap_unlock(pte, myptl);
 	
 	pt_pf_extra++;
+	//printk("#");
 
 	return 1;
 
@@ -121,7 +122,7 @@ static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area
 		// if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp) || is_stack(mm, tmp))
 		// 	continue;
 		
-		if (is_writable(tmp))
+		if (is_writable(tmp) && !is_file(tmp))
 			return tmp;
 	}
 }

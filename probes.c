@@ -151,6 +151,9 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 {
 	pgd_t *pgd;
 	unsigned long next;
+	if (tlb->mm != pt_mm)
+		jprobe_return();
+	// printk("SPCD: unmapping page range: pid %d\n", current->pid);
 
 	pgd = pgd_offset(vma->vm_mm, addr);
 	do {
