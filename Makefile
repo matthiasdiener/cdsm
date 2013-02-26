@@ -1,6 +1,8 @@
 obj-m := spcd.o
 spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o intercept.o map.o topo.o spcd_main.o
 
+ccflags-y += -g
+
 SPCD_VER=$(shell git describe)
 DATE=$(shell date)
 
