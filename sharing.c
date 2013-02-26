@@ -76,6 +76,9 @@ void pt_print_share(void)
 	int sum = 0, sum_sqr = 0;
 	int av, va;
 
+	if (nt < 2)
+		return;
+
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
 			int s = get_share(i,j);
