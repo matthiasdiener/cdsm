@@ -68,10 +68,10 @@ void unregister_probes(void);
 
 /* Intercept */
 int interceptor_start(void);
-void interceptor_end(void);
+void interceptor_stop(void);
 
 /* Topology */
-void topo_init(void);
-void topo_cleanup(void);
+void topo_start(void);
+void topo_stop(void);
 
 #endif

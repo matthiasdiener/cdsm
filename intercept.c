@@ -77,7 +77,7 @@ int interceptor_start(void)
 	return 0;
 }
 
-void interceptor_end(void) 
+void interceptor_stop(void) 
 {
 	if(!sys_call_table)
 		return;

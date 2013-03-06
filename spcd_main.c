@@ -44,8 +44,7 @@ int init_module(void)
 	}
 
 	interceptor_start();
-
-	topo_init();
+	topo_start();
 
 	return 0;
 }
@@ -63,9 +62,9 @@ void cleanup_module(void)
 		kfree(share);
 
 	unregister_probes();
-	interceptor_end();
 
-	topo_cleanup();
+	interceptor_stop();
+	topo_stop();
 
 	printk("SPCD: Quit (version %s)\n", SPCD_VERSION);
 }

@@ -3,7 +3,7 @@
 
 #define for_each_sibling(s, cpu) for_each_cpu(s, cpu_sibling_mask(cpu))
  
-void topo_init(void)
+void topo_start(void)
 {
 	unsigned long node, cpu, sibling;
 	int curCPU = 0;
@@ -41,6 +41,6 @@ void topo_init(void)
 	}
 }
 
-void topo_cleanup(void)
+void topo_stop(void)
 {
 }
