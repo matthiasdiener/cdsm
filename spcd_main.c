@@ -1,4 +1,5 @@
 #include "spcd.h"
+#include "spcd_proc.h"
 #include "version.h"
 
 MODULE_LICENSE("GPL");
@@ -35,6 +36,8 @@ int init_module(void)
 	reset_stats();
 	register_probes();
 
+	spcd_proc_init();
+
 	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 	wake_up_process(pf_thread);
 
@@ -60,6 +63,8 @@ void cleanup_module(void)
 
 	if (share)
 		kfree(share);
+
+	spcd_proc_cleanup();
 
 	unregister_probes();
 

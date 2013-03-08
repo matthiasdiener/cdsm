@@ -1,4 +1,5 @@
 #include "spcd.h"
+#include "spcd_proc.h"
 
 unsigned *share = NULL;
 
@@ -75,6 +76,8 @@ void pt_print_share(void)
 	int nt = spcd_get_num_threads();
 	int sum = 0, sum_sqr = 0;
 	int av, va;
+	char buffer[1000];
+	int len=0;
 
 	if (nt < 2)
 		return;
@@ -84,17 +87,23 @@ void pt_print_share(void)
 			int s = get_share(i,j);
 			sum += s;
 			sum_sqr += s*s;
+			len += sprintf(buffer+len, "%u", s);
 			printk ("%u", s);
 			if (j != nt-1)
+				len += sprintf(buffer+len, ",");
 				printk (",");
 		}
+		len += sprintf(buffer+len, "\n");
 		printk("\n");
 	}
 	
 	av = sum / nt / nt;
 	va = (sum_sqr - ((sum*sum)/nt/nt))/(nt-1)/(nt-1);
 
+	len += sprintf(buffer+len, "avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
 	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
+	
+	spcd_update_matrix(buffer, len);
 }
 
 

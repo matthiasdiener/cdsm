@@ -92,12 +92,12 @@ static inline int is_file(struct vm_area_struct *vma)
 	return vma->vm_file ? 1 : 0;
 }
 
-static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
+/*static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
 {
 	if (vm_is_stack_p)
 		return (*vm_is_stack_p)(mm->owner, vma, 1) ? 1 : 0;
 	else return 0;
-}
+}*/
 
 
 static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)

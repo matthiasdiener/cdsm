@@ -1,5 +1,5 @@
 obj-m := spcd.o
-spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o intercept.o map.o topo.o spcd_main.o
+spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o intercept.o map.o topo.o spcd_procfs.o spcd_main.o
 
 ccflags-y += -g
 
