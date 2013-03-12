@@ -1,8 +1,6 @@
 #include "spcd.h"
 #include "spcd_proc.h"
 
-unsigned *share = NULL;
-
 static inline int get_num_sharers(struct pt_mem_info *elem)
 {
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1)
@@ -15,12 +13,14 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 
 static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
+	spin_lock(&spcd_main_matrix.lock);
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)
-		share[first * max_threads + second] ++;
+		spcd_main_matrix.matrix[first * max_threads + second] ++;
 	else
-		share[second * max_threads + first] ++;
+		spcd_main_matrix.matrix[second * max_threads + first] ++;
 	// }
+	spin_unlock(&spcd_main_matrix.lock);
 }
 
 void pt_check_comm(int tid, unsigned long address)
@@ -64,10 +64,13 @@ void pt_check_comm(int tid, unsigned long address)
 
 unsigned get_share(int i, int j)
 {
-	if (i>j)
-		return share[i*max_threads + j];
-	else
-		return share[j*max_threads + i];
+	int res;
+	
+	spin_lock(&spcd_main_matrix.lock);
+	res = i > j ? spcd_main_matrix.matrix[i*max_threads + j] : spcd_main_matrix.matrix[j*max_threads + i];
+	spin_unlock(&spcd_main_matrix.lock);
+	
+	return res;
 }
 
 void pt_print_share(void)
@@ -76,8 +79,6 @@ void pt_print_share(void)
 	int nt = spcd_get_num_threads();
 	int sum = 0, sum_sqr = 0;
 	int av, va;
-	char buffer[1000];
-	int len=0;
 
 	if (nt < 2)
 		return;
@@ -87,32 +88,26 @@ void pt_print_share(void)
 			int s = get_share(i,j);
 			sum += s;
 			sum_sqr += s*s;
-			len += sprintf(buffer+len, "%u", s);
 			printk ("%u", s);
 			if (j != nt-1)
-				len += sprintf(buffer+len, ",");
 				printk (",");
 		}
-		len += sprintf(buffer+len, "\n");
 		printk("\n");
 	}
 	
 	av = sum / nt / nt;
 	va = (sum_sqr - ((sum*sum)/nt/nt))/(nt-1)/(nt-1);
 
-	len += sprintf(buffer+len, "avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
 	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
-	
-	spcd_update_matrix(buffer, len);
 }
-
-
-
 
 void pt_share_clear(void)
 {
-	if (!share)
-		share = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
-	memset(share, 0, sizeof(unsigned) * max_threads * max_threads);
-
+	spin_lock(&spcd_main_matrix.lock);
+	if (!spcd_main_matrix.matrix){
+		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
+	}
+	
+	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
+	spin_unlock(&spcd_main_matrix.lock);
 }

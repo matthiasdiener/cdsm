@@ -7,6 +7,7 @@
 #include <linux/kthread.h>
 #include <linux/kprobes.h>
 #include <linux/kallsyms.h>
+#include <linux/spinlock.h>
 #include <asm-generic/tlb.h>
 #include <linux/slab.h>
 
@@ -19,6 +20,11 @@ struct pt_mem_info {
 	unsigned long pg_addr;
 	unsigned long tsc;
 	s16 sharer[2];
+};
+
+struct spcd_share_matrix {
+	unsigned *matrix;
+	spinlock_t lock;
 };
 
 extern int max_threads;
@@ -39,6 +45,7 @@ extern void reset_stats(void);
 
 /* PID/TID functions */
 int pt_get_tid(int pid); 
+int pt_get_pid(int tid);
 void pt_add_pid(int pid);
 void pt_delete_pid(int pid);
 void pt_pid_clear(void);
@@ -73,5 +80,9 @@ void interceptor_stop(void);
 /* Topology */
 void topo_start(void);
 void topo_stop(void);
+
+/* Share Matrix */
+
+extern struct spcd_share_matrix spcd_main_matrix;
 
 #endif

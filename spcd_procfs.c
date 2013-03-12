@@ -1,10 +1,11 @@
+#include "spcd.h"
 #include "spcd_proc.h"
 
 static struct proc_dir_entry *spcd_proc_root;
 static struct proc_dir_entry *spcd_matrix;
 static struct proc_dir_entry *spcd_pnames;
 
-static char *spcd_current_matrix;
+static DEFINE_SPINLOCK(spcd_procfs_lock);
 
 struct spcd_names_list spcd_current_pnames;
 
@@ -15,6 +16,8 @@ int spcd_procfs_get_names(char ***pnames){
 	char **names;
 	struct spcd_names_list *tmp;
 	int counter = 0;
+	
+	spin_lock(&spcd_procfs_lock);
 	
 	list_for_each_entry(tmp, &spcd_current_pnames.list, list){
 		counter++;
@@ -31,6 +34,8 @@ int spcd_procfs_get_names(char ***pnames){
 	
 	*pnames = names;
 	
+	spin_unlock(&spcd_procfs_lock);
+	
 	return counter;
 }
 
@@ -39,21 +44,15 @@ void spcd_procfs_add_name(const char *name){
 	
 	printk(KERN_INFO "SPCD: Adding '%s' to list of monitored processes\n", name);
 	
+	spin_lock(&spcd_procfs_lock);
+	
 	tmp = (struct spcd_names_list *) kmalloc(sizeof(struct spcd_names_list), GFP_KERNEL);
 	tmp->name = (char *) kmalloc(sizeof(name), GFP_KERNEL);
 	memcpy(tmp->name, name, sizeof(name));
 	list_add(&(tmp->list), &(spcd_current_pnames.list));
+	
+	spin_unlock(&spcd_procfs_lock);
 }
-
-void spcd_update_matrix(const char* matrix, int len)
-{
-	kfree(spcd_current_matrix);
-	spcd_current_matrix = kmalloc(sizeof(matrix), GFP_KERNEL);
-	if(sprintf(spcd_current_matrix, "%s", matrix) != len){
-		printk(KERN_INFO "Current matrix maybe incomplete!");
-	}
-}
-
 
 int spcd_proc_read_pnames(char *buf,char **start,off_t offset,int count,int *eof,void *data )
 {
@@ -97,18 +96,39 @@ int spcd_proc_create_pnames_entry(void)
 
 int spcd_read_matrix(char *buf,char **start,off_t offset,int count,int *eof,void *data ) 
 {
+	int i, j;
+	int s;
+	int nt = spcd_get_num_threads();
 	int len=0;
 
-	len  += sprintf(buf+len, "%s", *(char **) data);
+	if (nt < 2)
+		return 0;
+
+	for (i = nt-1; i >= 0; i--) {
+		len += sprintf(buf+len, "%u", pt_get_pid(i));
+		if (i != 0)
+			len += sprintf(buf+len, ",");
+	}
+	len += sprintf(buf+len, "\n\n");
+
+	for (i = nt-1; i >= 0; i--) {
+		for (j = 0; j < nt; j++) {
+			spin_lock(&spcd_main_matrix.lock);
+			s = i > j ? spcd_main_matrix.matrix[i*max_threads + j] : spcd_main_matrix.matrix[j*max_threads + i];
+			spin_unlock(&spcd_main_matrix.lock);
+			len += sprintf(buf+len, "%u", s);
+			if (j != nt-1)
+				len += sprintf(buf+len, ",");
+		}
+		len += sprintf(buf+len, "\n");
+	}
 
 	return len;
 }
 
 int spcd_proc_create_matrix_entry(void)
 {
-	spcd_update_matrix("", 0);
-	
-	spcd_matrix = create_proc_read_entry("matrix",0,spcd_proc_root,spcd_read_matrix,&spcd_current_matrix);
+	spcd_matrix = create_proc_read_entry("matrix",0,spcd_proc_root,spcd_read_matrix,NULL);
 	
 	return 0;
 }
@@ -127,8 +147,6 @@ int spcd_proc_init (void)
 	spcd_proc_create_matrix_entry();
 	spcd_proc_create_pnames_entry();
 	
-	
-	
     return 0;
 }
 
@@ -137,5 +155,4 @@ void spcd_proc_cleanup(void)
     remove_proc_entry("monitored_processes", spcd_proc_root);
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
-	kfree(spcd_current_matrix);
 }
