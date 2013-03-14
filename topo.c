@@ -7,13 +7,14 @@ void topo_start(void)
 {
 	unsigned long node, cpu, sibling;
 	int curCPU = 0;
-	// int nodes, processors, cores;
+	int num_nodes = 0, num_cores = 0, num_threads = 0;
 
 	printk("SPCD: detected hardware topology:\n");
 
 	for_each_online_node(node) {
 		int cpus[64] = {};
 		int cores[64] = {};
+		num_nodes++;
 
 		printk("  node: %lu\n", node);
 
@@ -26,6 +27,7 @@ void topo_start(void)
 				cpus[physID] = 1;
 				curCPU = physID;
 			}
+			num_threads++;
 			if (physID == curCPU && !cores[cpu]) {
 				printk("      cores: %2lu", cpu);
 				cores[cpu] = 1;
@@ -33,12 +35,14 @@ void topo_start(void)
 					if (!cores[sibling]) {
 						printk(", %2lu", sibling);
 						cores[sibling] = 1;
+						num_cores++;
 					}
 				}
 				printk("\n");
 			}
 		}
 	}
+	printk("SPCD: %d nodes, %d cores, %d threads\n", num_nodes, num_cores, num_threads);
 }
 
 void topo_stop(void)
