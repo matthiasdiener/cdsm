@@ -81,6 +81,8 @@ void interceptor_stop(void);
 void topo_start(void);
 void topo_stop(void);
 
+extern int num_nodes, num_cores, num_threads;
+
 /* Share Matrix */
 
 extern struct spcd_share_matrix spcd_main_matrix;

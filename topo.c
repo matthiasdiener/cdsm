@@ -3,11 +3,13 @@
 
 #define for_each_sibling(s, cpu) for_each_cpu(s, cpu_sibling_mask(cpu))
  
+int num_nodes = 0, num_cores = 0, num_threads = 0;
+
+
 void topo_start(void)
 {
 	unsigned long node, cpu, sibling;
 	int curCPU = 0;
-	int num_nodes = 0, num_cores = 0, num_threads = 0;
 
 	printk("SPCD: detected hardware topology:\n");
 
@@ -42,7 +44,7 @@ void topo_start(void)
 			}
 		}
 	}
-	printk("SPCD: %d nodes, %d cores, %d threads\n", num_nodes, num_cores, num_threads);
+	printk("SPCD: %d nodes/processors, %d cores, %d threads\n", num_nodes, num_cores, num_threads);
 }
 
 void topo_stop(void)
