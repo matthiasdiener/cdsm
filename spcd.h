@@ -74,4 +74,6 @@ void interceptor_stop(void);
 void topo_start(void);
 void topo_stop(void);
 
+extern int num_nodes, num_cores, num_threads;
+
 #endif
