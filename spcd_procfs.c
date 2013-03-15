@@ -10,7 +10,7 @@ static DEFINE_SPINLOCK(spcd_procfs_lock);
 struct spcd_names_list spcd_current_pnames;
 
 int spcd_procfs_get_names(char ***pnames){
-	//[TODO] check possible raise condition
+	//[TODO] check possible race condition
 	//[TODO] possible bottleneck
 	
 	char **names;
@@ -24,7 +24,7 @@ int spcd_procfs_get_names(char ***pnames){
 	}
 	
 	names = kmalloc(counter * sizeof(char *), GFP_KERNEL);
-	
+	printk("%p %p", names, pnames);
 	counter = 0;
 	list_for_each_entry(tmp, &spcd_current_pnames.list, list){
 		names[counter] = kmalloc(sizeof(tmp->name), GFP_KERNEL);
