@@ -39,7 +39,6 @@ static inline int spcd_check_name(char *name)
 	};
 
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
-	// len = spcd_procfs_get_names(&bm_names);
 
 	for (i=0; i<len; i++) {
 		if (strstr(name, bm_names[i]))

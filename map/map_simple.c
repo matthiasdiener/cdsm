@@ -38,11 +38,12 @@ void map_simple(void)
 {
 	int nt = spcd_get_active_threads();
 	mapped = kmalloc(nt*sizeof(u8), GFP_KERNEL);
+	memset(mapped, 0, nt*sizeof(u8));
 
 	while (listgetmax(nt)) {
-		// printk("(%d,%d) ", pos_x, pos_y);
+		printk("(%d,%d) ", pos_x, pos_y);
 	}
 
-	// printk("\n");
+	printk("\n");
 	kfree(mapped);
 }

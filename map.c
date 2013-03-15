@@ -14,7 +14,7 @@ int spcd_map_func(void* v)
 		nt = spcd_get_active_threads();
 		if (nt > 1) {
 			// pt_print_share();
-			map_simple();
+			map_drake();
 			//pt_share_clear();
 		}
 		msleep(100);
