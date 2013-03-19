@@ -139,9 +139,7 @@ static void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 
 static void pt_pf_pagewalk(struct mm_struct *mm)
 {
-	unsigned pt_addr_pbit_changed = 0;
-	int i = 0;
-
+	int i;
 	struct mm_walk walk = {
 		// TODO: save pmd here
 		.pte_entry = pt_callback_page_walk,
@@ -151,16 +149,19 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 	down_read(&mm->mmap_sem);
 
 	for (i = 0; i < num_faults; i++) {
+		unsigned pt_addr_pbit_changed = 0;
+		unsigned long start = pt_num_walks;
+
 		if (spcd_get_active_threads() < 4)
 			goto out;
-
-		pt_addr_pbit_changed = 0;
 
 		if (pt_next_vma == NULL) {
 			find_next_vma(mm, NULL);
 		}
 		
 		while (pt_addr_pbit_changed == 0) {
+			if (abs(pt_num_walks-start)>2)
+				goto out;
 
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
@@ -186,7 +187,6 @@ inline void spcd_pf_thread_clear(void)
 	pt_num_walks = 0;
 	pt_next_addr = 0;
 	pt_next_vma = NULL;
-	// num_faults = 3;
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
 		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
