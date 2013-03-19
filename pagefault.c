@@ -146,7 +146,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 		.mm = mm,
 	};
 	
-	down_read(&mm->mmap_sem);
+	down_write(&mm->mmap_sem);
 
 	for (i = 0; i < num_faults; i++) {
 		unsigned pt_addr_pbit_changed = 0;
@@ -177,7 +177,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 		}
 	}
 out:
-	up_read(&mm->mmap_sem);
+	up_write(&mm->mmap_sem);
 }
 
 
