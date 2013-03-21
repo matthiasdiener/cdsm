@@ -1,7 +1,7 @@
 #include "spcd.h"
 
 extern void map_simple(void);
-extern void map_drake(void);
+extern void map_drake(int nt);
 
 int spcd_map_func(void* v)
 {
@@ -12,11 +12,12 @@ int spcd_map_func(void* v)
 			return 0;
 		
 		nt = spcd_get_active_threads();
-		if (nt > 1) {
+		if (nt > 2) {
 			// pt_print_share();
-			map_drake();
+			map_drake(nt);
 			//pt_share_clear();
 		}
-		msleep(100);
+		msleep(500);
 	}
+	return 0;
 }
