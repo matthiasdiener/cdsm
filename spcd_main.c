@@ -14,6 +14,7 @@ static struct task_struct *map_thread;
 int num_faults = NUM_FAULTS_DEFAULT;
 int do_map = 0;
 int max_threads = NUM_MAX_THREADS_DEFAULT;
+int max_threads_bits = 0;
 int spcd_shift = SPCD_SHIFT_DEFAULT;
 int spcd_mem_hash_bits = SPCD_MEM_HASH_BITS_DEFAULT;
 module_param(num_faults, int, 0);
@@ -25,12 +26,16 @@ module_param(spcd_mem_hash_bits, int, 0);
 
 int init_module(void)
 {
+	max_threads = roundup_pow_of_two(max_threads);
+	max_threads_bits = ilog2(max_threads);
+
 	printk("SPCD: Start (version %s)\n", SPCD_VERSION);
 	printk("    num_faults: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
-	printk("    max_threads: %d\n", max_threads);
+	printk("    max_threads: %d, bits: %d\n", max_threads, max_threads_bits);
 	printk("    use mapping: %s\n", do_map ? "yes" : "no");
 	printk("    shift (in bits): %d %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
 	printk("    mem size: %d bits, %d elements\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits);
+
 
 	reset_stats();
 	register_probes();

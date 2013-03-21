@@ -22,6 +22,7 @@ struct pt_mem_info {
 };
 
 extern int max_threads;
+extern int max_threads_bits;
 extern int spcd_shift;
 extern unsigned *share;
 extern int spcd_mem_hash_bits;
@@ -35,7 +36,7 @@ extern struct mm_struct *pt_mm;
 
 extern unsigned long pt_num_walks;
 
-extern void reset_stats(void);
+void reset_stats(void);
 
 /* PID/TID functions */
 int pt_get_tid(int pid); 
@@ -53,7 +54,6 @@ void pt_mem_clear(void);
 void pt_check_comm(int tid, unsigned long address);
 void pt_print_share(void);
 void pt_share_clear(void);
-unsigned get_share(int i, int j);
 
 /* PF thread */
 int spcd_pagefault_func(void* v);
@@ -75,5 +75,14 @@ void topo_start(void);
 void topo_stop(void);
 
 extern int num_nodes, num_cores, num_threads;
+
+
+static inline unsigned get_share(int i, int j)
+{
+	if (i>j)
+		return share[(i<<max_threads_bits) + j];
+	else
+		return share[(j<<max_threads_bits) + i];
+}
 
 #endif

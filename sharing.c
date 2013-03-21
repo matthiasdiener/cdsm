@@ -16,9 +16,9 @@ static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned l
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)
-		share[first * max_threads + second] ++;
+		share[(first << max_threads_bits) + second] ++;
 	else
-		share[second * max_threads + first] ++;
+		share[(second << max_threads_bits) + first] ++;
 	// }
 }
 
@@ -59,14 +59,6 @@ void pt_check_comm(int tid, unsigned long address)
 	}
 
 	elem->tsc = new_tsc;
-}
-
-unsigned get_share(int i, int j)
-{
-	if (i>j)
-		return share[i*max_threads + j];
-	else
-		return share[j*max_threads + i];
 }
 
 void pt_print_share(void)
