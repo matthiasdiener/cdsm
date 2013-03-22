@@ -1,11 +1,15 @@
 #include "../spcd.h"
 
+
+#define SIZE 16 //debug
+
+
 struct pos {
-	s16 x, y;
+	s16 x, y; //needs to be array
 	unsigned val;
 };
 
-#define SIZE 16
+
 
 unsigned Mat0[][SIZE] = {
 {0,29,4,0,3,1,1,1,3,6,1,5,1,5,2,6 },
@@ -28,7 +32,8 @@ unsigned Mat0[][SIZE] = {
 
 unsigned Mat1[SIZE][SIZE] = {};
 
-static inline unsigned get_share_xxx(int x, int y, int level)
+static inline
+unsigned get_share_xxx(int x, int y, int level)
 {
 	switch (level) {
 		case 0:
@@ -40,7 +45,8 @@ static inline unsigned get_share_xxx(int x, int y, int level)
 	}
 }
 
-static inline void printMat(int level)
+static inline
+void printMat(int level)
 {
 	int i,j, nt=SIZE;
 
@@ -57,13 +63,13 @@ static inline void printMat(int level)
 }
 
 
+static inline
 int findnext(int done[], int nt, int level)
 {
 	int i;
-	// printk("done[] findnext: %d %d %d %d\n", done[0], done[1], done[2], done[3]);
+
 	for (i=0; i<nt; i++) {
 		if (!done[i] && get_share_xxx(nt-1, i, level)>0) {
-			// printk("\tfindnext(%d,%d) == %d\n", nt-1, i, get_share_xxx(nt-1, i));
 			return i;
 		}
 	}
@@ -72,15 +78,14 @@ int findnext(int done[], int nt, int level)
 }
 
 
+static inline
 struct pos findmax(int v, int done[], int nt, int level)
 {
 	int i, tmp;
 	struct pos res = {.x=v, .val=0};
-	// printk("done[] findmax: %d %d %d %d\n", done[0], done[1], done[2], done[3]);
 
 	for (i=0; i<nt; i++) {
 		tmp = get_share_xxx(v, i, level);
-		// printk("\tfindmax(%d,%d) == %d\n", v, i, tmp);
 		if (tmp > res.val && !done[i]) {
 			res.val = tmp;
 			res.y = i;
@@ -90,12 +95,26 @@ struct pos findmax(int v, int done[], int nt, int level)
 	return res;
 }
 
-void generate_new_matrix(int newlevel)
+
+static inline
+void generate_new_matrix(int new, struct pos res[][2][SIZE], int w)
 {
+	int old = new-1;
+	int m = 0;
+	int i, x, y;
+
+	while (res[old][w][m].val!=0)
+		m++;
+
+	for (i=0; i<m; i++) {
+
+	}
 
 }
 
-static inline void add_res(struct pos r[][2][SIZE], int level, int i, struct pos ret)
+
+static inline
+void add_res(struct pos r[][2][SIZE], int level, int i, struct pos ret)
 {
 	int j=0;
 	while (r[level][i][j].val!=0)
@@ -109,12 +128,8 @@ void map_drake(int ntxxx) {
 	int nt=SIZE; //debug
 	int v, i=0, done[nt];
 	struct pos ret;
-	char M[2][256];
 	int W[2] = {0};
 	struct pos res[4][2][nt];
-
-	sprintf(M[0], " ");
-	sprintf(M[1], " ");
 
 	printMat(0);
 
@@ -123,22 +138,15 @@ void map_drake(int ntxxx) {
 	printk("drake start\n");
 
 	while ((v=findnext(done, nt, 0))!=-1) {
-		// printk("\tnext vertex: %d\n", v);
 		while (1) {
 			ret = findmax(v, done, nt, 0);
 			done[v] = 1;
 
-			// printk("\tfindmax: max=%d, x=%d, y=%d\n", ret.max, ret.x, ret.y);
 			if (!ret.val)
 				break;
 			W[i] += ret.val;
 			add_res(res, 0, i, ret);
 
-			// printk("\tadd to M[%d]: %d (%d,%d)\n", i, ret.val, ret.x, ret.y);
-			sprintf(M[i], "%s %d (%d,%d) ", M[i], ret.val, ret.x, ret.y);
-			
-			// printk("\tM[0]: %s\n", M[0]);
-			// printk("\tM[1]: %s\n", M[1]);
 			i = 1-i;
 			v = ret.y;
 		}
@@ -158,6 +166,6 @@ void map_drake(int ntxxx) {
 
 	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[0] : W[1]);
 
-	generate_new_matrix(1);
+	generate_new_matrix(1, res, W[0]>W[1] ? 0 : 1);
 	printMat(1);
 }
