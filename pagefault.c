@@ -10,13 +10,8 @@ unsigned long pt_num_walks;
 
 static void pt_pf_pagewalk(struct mm_struct *mm);
 
-static struct page* (*vm_normal_page_p)(struct vm_area_struct *vma, unsigned long addr, pte_t pte) = NULL;
-
 static int (*walk_page_range_p)(unsigned long addr, unsigned long end,
-			struct mm_walk *walk) = NULL;
-
-static pid_t (*vm_is_stack_p)(struct task_struct *task,
-							struct vm_area_struct *vma, int in_group) = NULL;
+								struct mm_walk *walk) = NULL;
 
 
 int spcd_pagefault_func(void* v)
@@ -25,13 +20,7 @@ int spcd_pagefault_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 
-		if (spcd_get_active_threads() >= 4 && pt_task) {
-			// int ratio = pt_pf / (pt_pf_extra + 1);
-			// if (ratio > 150 && num_faults < 9)
-			// 	num_faults++;
-			// else if (ratio < 100 && num_faults > 2)
-			// 	num_faults--;
-			// printk ("num: %d, ratio: %d, pf: %lu, extra: %lu\n", num_faults, ratio, pt_pf, pt_pf_extra);
+		if (spcd_get_active_threads() >= 4) {
 			pt_pf_pagewalk(pt_mm);
 		}
 		msleep(10);
@@ -60,43 +49,14 @@ static int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long n
 	pte_unmap_unlock(pte, myptl);
 	
 	pt_pf_extra++;
-	//printk("#");
 
 	return 1;
 
 }
 
-
-static inline unsigned long vma_size(struct vm_area_struct *vma)
-{
-	return vma->vm_end - vma->vm_start;
-}
-
-static inline int is_heap(struct mm_struct *mm, struct vm_area_struct *vma)
-{
-	return (vma->vm_start <= mm->brk && vma->vm_end >= mm->start_brk);
-}
-
 static inline int is_writable(struct vm_area_struct *vma)
 {
 	return vma->vm_flags & VM_WRITE ? 1 : 0;
-}
-
-static inline int is_vdso(struct vm_area_struct *vma)
-{
-	return (vma->vm_mm && vma->vm_start == (long)vma->vm_mm->context.vdso);
-}
-
-static inline int is_file(struct vm_area_struct *vma)
-{
-	return vma->vm_file ? 1 : 0;
-}
-
-static inline int is_stack(struct mm_struct *mm, struct vm_area_struct* vma)
-{
-	if (vm_is_stack_p)
-		return (*vm_is_stack_p)(mm->owner, vma, 1) ? 1 : 0;
-	else return 0;
 }
 
 
@@ -117,23 +77,16 @@ static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area
 			tmp = mm->mmap;
 		}
 
-		// printk("tmp: %p, size: %10lu, writeable: %d, is_vdso: %d, is_file: %d, is_heap: %d, is_stack: %d\n", tmp, vma_size(tmp), is_writable(tmp), is_vdso(tmp), is_file(tmp), is_heap(mm, tmp), is_stack(mm, tmp));
-
-		// if (is_vdso(tmp) || vma_size(tmp) <= 8096 || is_file(tmp) || is_stack(mm, tmp))
-		// 	continue;
-		
-		if (is_writable(tmp) && !is_file(tmp))
+		if (is_writable(tmp))
 			return tmp;
 	}
 }
 
 
-static void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	pt_next_vma = find_good_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
-	// factor_walk = vma_size(pt_next_vma) / 1024;
-	// printk ("Size:%lu, Factor: %d\n", vma_size(pt_next_vma), factor_walk);
 }
 
 
@@ -160,7 +113,7 @@ static void pt_pf_pagewalk(struct mm_struct *mm)
 		}
 		
 		while (pt_addr_pbit_changed == 0) {
-			if (abs(pt_num_walks-start)>2)
+			if ((pt_num_walks-start)>2)
 				goto out;
 
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
@@ -181,7 +134,7 @@ out:
 }
 
 
-inline void spcd_pf_thread_clear(void)
+void spcd_pf_thread_clear(void)
 {
 	factor_walk = 61;
 	pt_num_walks = 0;
@@ -189,12 +142,6 @@ inline void spcd_pf_thread_clear(void)
 	pt_next_vma = NULL;
 	pt_pf_extra = 0;
 	if (!walk_page_range_p) {
-		vm_normal_page_p = (void*) kallsyms_lookup_name("vm_normal_page");
-		if (!vm_normal_page_p)
-			printk("vm_normal_page_p missing\n");
-		vm_is_stack_p = (void*) kallsyms_lookup_name("vm_is_stack");
-		if (!vm_is_stack_p)
-			printk("vm_is_stack_p missing\n");
 		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
 		if (!walk_page_range_p)
 			printk("walk_page_range_p missing\n");
