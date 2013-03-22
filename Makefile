@@ -21,4 +21,4 @@ clean:
 
 install: all
 	-sudo rmmod spcd
-	sudo insmod ${PWD}/spcd.ko
+	sudo insmod ${PWD}/spcd.ko do_map=1
