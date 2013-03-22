@@ -49,6 +49,7 @@ int spcd_get_active_threads(void);
 /* Mem functions */
 struct pt_mem_info* pt_get_mem_init(unsigned long addr);
 void pt_mem_clear(void);
+void pt_mem_stop(void);
 
 /* Communication functions */
 void pt_check_comm(int tid, unsigned long address);
@@ -62,7 +63,7 @@ void spcd_pf_thread_clear(void);
 /* Map thread */
 int spcd_map_func(void* v);
 
-/* Utility */
+/* Probes */
 void register_probes(void);
 void unregister_probes(void);
 

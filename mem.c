@@ -42,5 +42,14 @@ void pt_mem_clear(void)
 		pt_mem = vmalloc(sizeof(struct pt_mem_info) * spcd_mem_hash_size);
 	if (pt_mem)
 		memset(pt_mem, 0, sizeof(struct pt_mem_info) * spcd_mem_hash_size);
+	else
+		printk("BUG: spcd could not allocate memory buffer pt_mem\n");
+	printk("sizeof: %lu", sizeof(struct pt_mem_info));
 	pt_addr_conflict = 0;
+}
+
+void pt_mem_stop(void) 
+{
+	if (pt_mem)
+		vfree(pt_mem);
 }

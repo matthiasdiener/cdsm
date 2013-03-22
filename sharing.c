@@ -90,12 +90,12 @@ void pt_print_share(void)
 }
 
 
-
-
 void pt_share_clear(void)
 {
 	if (!share)
-		share = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
-	memset(share, 0, sizeof(unsigned) * max_threads * max_threads);
-
+		share = kmalloc (sizeof(unsigned)*max_threads*max_threads, GFP_KERNEL);
+	if (share)
+		memset(share, 0, sizeof(unsigned)*max_threads*max_threads);
+	else
+		printk("BUG: spcd could not allocate comm matrix share\n");
 }
