@@ -17,3 +17,8 @@ all:
 clean:
 	@rm -rf obj/
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+
+
+install: all
+	-sudo rmmod spcd
+	sudo insmod ${PWD}/spcd.ko
