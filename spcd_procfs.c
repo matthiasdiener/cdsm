@@ -146,7 +146,7 @@ int spcd_read_raw_matrix(char *buf,char **start,off_t offset,int count,int *eof,
 		temp.pids = kmalloc(sizeof(int) * temp.num_threads, GFP_KERNEL);
 	
 		for (i = temp.num_threads-1; i >= 0; i--) {
-			temp.pids[i] = pt_get_pid(temp.num_threads - i);
+			temp.pids[i] = pt_get_pid(temp.num_threads - 1 - i);
 		}
 	
 		spin_lock(&spcd_main_matrix.lock);
