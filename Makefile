@@ -1,5 +1,5 @@
 obj-m := spcd.o
-spcd-objs := pagefault.o mem.o pid.o mem.o sharing.o probes.o map.o topo.o spcd_procfs.o spcd_main.o map/map_simple.o map/map_drake.o
+spcd-objs := libspcd.o pagefault.o mem.o pid.o mem.o sharing.o probes.o map.o topo.o spcd_procfs.o spcd_main.o map/map_simple.o map/map_drake.o
 
 ccflags-y += -g -Werror
 

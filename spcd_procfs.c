@@ -1,13 +1,18 @@
 #include "spcd.h"
 #include "spcd_proc.h"
+#include "libspcd.h"
 
 static struct proc_dir_entry *spcd_proc_root;
 static struct proc_dir_entry *spcd_matrix;
+static struct proc_dir_entry *spcd_raw_matrix;
 static struct proc_dir_entry *spcd_pnames;
 
 static DEFINE_SPINLOCK(spcd_procfs_lock);
 
 struct spcd_names_list spcd_current_pnames;
+
+static void *tmp_buffer;
+size_t tmp_buffer_size;
 
 int spcd_procfs_get_names(char ***pnames){
 	//[TODO] check possible race condition
@@ -126,6 +131,47 @@ int spcd_read_matrix(char *buf,char **start,off_t offset,int count,int *eof,void
 	return len;
 }
 
+int spcd_read_raw_matrix(char *buf,char **start,off_t offset,int count,int *eof,void *data ) 
+{
+	spcd_matrix_t temp;
+	void *ptr;
+	int i;
+	
+	if(offset == 0){
+		if(tmp_buffer)
+			kfree(tmp_buffer);
+		
+		temp.num_threads = spcd_get_num_threads();
+		temp.max_threads = max_threads;
+		temp.pids = kmalloc(sizeof(int) * temp.num_threads, GFP_KERNEL);
+	
+		for (i = temp.num_threads-1; i >= 0; i--) {
+			temp.pids[i] = pt_get_pid(temp.num_threads - i);
+		}
+	
+		spin_lock(&spcd_main_matrix.lock);
+		temp.matrix = spcd_main_matrix.matrix;
+		ptr = spcd_matrix_encode(&temp);
+		tmp_buffer_size = spcd_matrix_size(ptr);
+		tmp_buffer = kmalloc(tmp_buffer_size, GFP_KERNEL);
+		memcpy(tmp_buffer, ptr, tmp_buffer_size);
+		spin_unlock(&spcd_main_matrix.lock);
+	
+		kfree(ptr);
+		kfree(temp.pids);
+	}
+
+	if(count < (tmp_buffer_size - offset)){
+		memcpy(buf,tmp_buffer+offset,count);
+		return count;
+	}
+	else{
+		memcpy(buf,tmp_buffer+offset,tmp_buffer_size - offset);
+		*eof = 1;
+		return tmp_buffer_size - offset;
+	}
+}
+
 int spcd_proc_create_matrix_entry(void)
 {
 	spcd_matrix = create_proc_read_entry("matrix",0,spcd_proc_root,spcd_read_matrix,NULL);
@@ -133,8 +179,17 @@ int spcd_proc_create_matrix_entry(void)
 	return 0;
 }
 
+int spcd_proc_create_raw_matrix_entry(void)
+{
+	spcd_raw_matrix = create_proc_read_entry("raw_matrix",0,spcd_proc_root,spcd_read_raw_matrix,NULL);
+	
+	return 0;
+}
+
 int spcd_proc_init (void) 
 {
+	tmp_buffer = NULL;
+	
 	spcd_proc_root = proc_mkdir("spcd",NULL);
 	if(!spcd_proc_root)
 	{
@@ -144,6 +199,7 @@ int spcd_proc_init (void)
 	
 	INIT_LIST_HEAD(&spcd_current_pnames.list);
 	
+	spcd_proc_create_raw_matrix_entry();
 	spcd_proc_create_matrix_entry();
 	spcd_proc_create_pnames_entry();
 	
@@ -153,6 +209,7 @@ int spcd_proc_init (void)
 void spcd_proc_cleanup(void) 
 {
     remove_proc_entry("monitored_processes", spcd_proc_root);
+	remove_proc_entry("raw_matrix", spcd_proc_root);
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
 }
