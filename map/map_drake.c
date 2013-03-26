@@ -138,7 +138,6 @@ static
 void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[], int level) {
 	int v, i=0;
 	struct pos ret;
-	if (level) printk("drake level %d start\n", level);
 
 	while ((v=findnext(done, nt, level))!=-1) {
 		while (1) {
@@ -159,7 +158,7 @@ void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[], int level)
 
 void map_drake(int ntxxx) {
 	int nt=SIZE; //debug
-	int i; 
+	int i, j, level;
 	int done[LEVELS][nt];
 	int W[LEVELS][2];
 	struct pos res[LEVELS][2][nt];
@@ -168,46 +167,24 @@ void map_drake(int ntxxx) {
 	memset(done, 0, LEVELS*nt*sizeof(int));
 	memset(res, 0, nt*2*4*sizeof(struct pos));
 
+	for (level=0; level<3; level++) {
+		printk("drake level %d start\n", level);
+		if (level) generate_new_matrix(level, res, W[level-1][0]>W[level-1][1] ? 0 : 1);
+		printMat(level);
+
+		do_drake(res, done[level], nt, W[level], level);
+
+		for (j=0; j<2; j++) {
+			printk("M[%d]:", j);
+			for (i=0; res[level][j][i].val!=0; i++) {
+				printk(" %d (%d,%d)", res[level][j][i].val, res[level][j][i].x, res[level][j][i].y);
+			}
+			if (j!=1) printk("\n");
+		}
+
+		printk("\nChoose: M[%d] (%d)\n", W[level][0]>W[level][1] ? 0 : 1, W[level][0]>W[level][1] ? W[level][0] : W[level][1]);
 
 
-	do_drake(res, done[0], nt, W[0], 0);
-
-
-	i=0;
-	printk("Result:\nM[0]:");
-	while (res[0][0][i].val!=0) {
-		printk(" %d (%d,%d)", res[0][0][i].val, res[0][0][i].x, res[0][0][i].y);
-		i++;
-	}
-	i=0;
-	printk("\nM[1]:");
-	while (res[0][1][i].val!=0) {
-		printk(" %d (%d,%d)", res[0][1][i].val, res[0][1][i].x, res[0][1][i].y);
-		i++;
-	}
-
-	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[0][0] : W[0][1]);
-
-	generate_new_matrix(1, res, W[0]>W[1] ? 0 : 1);
-	printMat(1);
-
-	do_drake(res, done[1], nt, W[1], 1);
-
-	i=0;
-	printk("Result:\nM[0]:");
-	while (res[1][0][i].val!=0) {
-		printk(" %d (%d,%d)", res[0][0][i].val, res[0][0][i].x, res[0][0][i].y);
-		i++;
-	}
-	i=0;
-	printk("\nM[1]:");
-	while (res[1][1][i].val!=0) {
-		printk(" %d (%d,%d)", res[0][1][i].val, res[0][1][i].x, res[0][1][i].y);
-		i++;
 	}
 
-	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[1][0] : W[1][1]);
-
-	generate_new_matrix(2, res, W[0]>W[1] ? 0 : 1);
-	printMat(2);
 }
