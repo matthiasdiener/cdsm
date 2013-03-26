@@ -2,6 +2,7 @@
 
 
 #define SIZE 16 //debug
+#define LEVELS 4
 
 
 struct pos {
@@ -66,7 +67,7 @@ int findnext(int done[], int nt, int level)
 	int i;
 
 	for (i=0; i<nt; i++) {
-		if (!done[i] && get_share_xxx(nt-1, i, level)>0) {
+		if (!done[i] && get_share_xxx(i==0 ? 1 : i-1, i, level)>0) {
 			return i;
 		}
 	}
@@ -132,20 +133,22 @@ void add_res(struct pos r[][2][SIZE], int level, int i, struct pos ret)
 	printk("added: i:%d idx:%d w:%d (%d,%d)\n", i, j, r[level][i][j].val, r[level][i][j].x, r[level][i][j].y);
 }
 
+
 static
-void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[]) {
+void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[], int level) {
 	int v, i=0;
 	struct pos ret;
+	if (level) printk("drake level %d start\n", level);
 
-	while ((v=findnext(done, nt, 0))!=-1) {
+	while ((v=findnext(done, nt, level))!=-1) {
 		while (1) {
-			ret = findmax(v, done, nt, 0);
+			ret = findmax(v, done, nt, level);
 			done[v] = 1;
 
 			if (!ret.val)
 				break;
 			W[i] += ret.val;
-			add_res(res, 0, i, ret);
+			add_res(res, level, i, ret);
 
 			i = 1-i;
 			v = ret.y;
@@ -153,32 +156,58 @@ void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[]) {
 	}
 }
 
+
 void map_drake(int ntxxx) {
 	int nt=SIZE; //debug
-	int i, done[nt];
-	int W[2] = {0};
-	struct pos res[4][2][nt];
+	int i; 
+	int done[LEVELS][nt];
+	int W[LEVELS][2];
+	struct pos res[LEVELS][2][nt];
 
-	memset(done, 0, nt*sizeof(int));
+	memset(W, 0, LEVELS*2*sizeof(int));
+	memset(done, 0, LEVELS*nt*sizeof(int));
 	memset(res, 0, nt*2*4*sizeof(struct pos));
-	do_drake(res, done, nt, W);
+
+
+
+	do_drake(res, done[0], nt, W[0], 0);
 
 
 	i=0;
 	printk("Result:\nM[0]:");
 	while (res[0][0][i].val!=0) {
-		printk(" %d (%d,%d) ", res[0][0][i].val, res[0][0][i].x, res[0][0][i].y);
+		printk(" %d (%d,%d)", res[0][0][i].val, res[0][0][i].x, res[0][0][i].y);
 		i++;
 	}
 	i=0;
 	printk("\nM[1]:");
 	while (res[0][1][i].val!=0) {
-		printk(" %d (%d,%d) ", res[0][1][i].val, res[0][1][i].x, res[0][1][i].y);
+		printk(" %d (%d,%d)", res[0][1][i].val, res[0][1][i].x, res[0][1][i].y);
 		i++;
 	}
 
-	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[0] : W[1]);
+	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[0][0] : W[0][1]);
 
 	generate_new_matrix(1, res, W[0]>W[1] ? 0 : 1);
 	printMat(1);
+
+	do_drake(res, done[1], nt, W[1], 1);
+
+	i=0;
+	printk("Result:\nM[0]:");
+	while (res[1][0][i].val!=0) {
+		printk(" %d (%d,%d)", res[0][0][i].val, res[0][0][i].x, res[0][0][i].y);
+		i++;
+	}
+	i=0;
+	printk("\nM[1]:");
+	while (res[1][1][i].val!=0) {
+		printk(" %d (%d,%d)", res[0][1][i].val, res[0][1][i].x, res[0][1][i].y);
+		i++;
+	}
+
+	printk("\nChoose: M[%d] (%d)\n", W[0]>W[1] ? 0 : 1, W[0]>W[1] ? W[1][0] : W[1][1]);
+
+	generate_new_matrix(2, res, W[0]>W[1] ? 0 : 1);
+	printMat(2);
 }
