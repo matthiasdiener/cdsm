@@ -59,6 +59,32 @@ void spcd_procfs_add_name(const char *name){
 	spin_unlock(&spcd_procfs_lock);
 }
 
+int spcd_proc_write_reset(struct file *file,const char *buf, unsigned long count,void *data )
+{
+	spin_lock(&spcd_main_matrix.lock);
+	if (!spcd_main_matrix.matrix){
+		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
+	}
+	
+	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
+	spin_unlock(&spcd_main_matrix.lock);
+	
+	return count;
+}
+
+int spcd_proc_create_reset_entry(void)
+{
+	spcd_pnames = create_proc_entry("reset",0666,spcd_proc_root);
+	if(!spcd_pnames)
+	{
+	    printk(KERN_INFO "Error creating proc entry");
+	    return -ENOMEM;
+	}
+	spcd_pnames->write_proc = spcd_proc_write_reset;
+
+	return 0;
+}
+
 int spcd_proc_read_pnames(char *buf,char **start,off_t offset,int count,int *eof,void *data )
 {
 	int i, len=0;
@@ -201,6 +227,7 @@ int spcd_proc_init (void)
 	
 	spcd_proc_create_raw_matrix_entry();
 	spcd_proc_create_matrix_entry();
+	spcd_proc_create_reset_entry();
 	spcd_proc_create_pnames_entry();
 	
     return 0;
@@ -209,6 +236,7 @@ int spcd_proc_init (void)
 void spcd_proc_cleanup(void) 
 {
     remove_proc_entry("monitored_processes", spcd_proc_root);
+	remove_proc_entry("reset", spcd_proc_root);
 	remove_proc_entry("raw_matrix", spcd_proc_root);
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
