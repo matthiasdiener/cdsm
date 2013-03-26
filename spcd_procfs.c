@@ -5,6 +5,7 @@
 static struct proc_dir_entry *spcd_proc_root;
 static struct proc_dir_entry *spcd_matrix;
 static struct proc_dir_entry *spcd_raw_matrix;
+static struct proc_dir_entry *spcd_reset;
 static struct proc_dir_entry *spcd_pnames;
 
 static DEFINE_SPINLOCK(spcd_procfs_lock);
@@ -74,7 +75,7 @@ int spcd_proc_write_reset(struct file *file,const char *buf, unsigned long count
 
 int spcd_proc_create_reset_entry(void)
 {
-	spcd_pnames = create_proc_entry("reset",0666,spcd_proc_root);
+	spcd_reset = create_proc_entry("reset",0666,spcd_proc_root);
 	if(!spcd_pnames)
 	{
 	    printk(KERN_INFO "Error creating proc entry");
