@@ -1,17 +1,20 @@
 #include "spcd.h"
 
-static struct pt_mem_info *pt_mem;
+static struct pt_mem_info *mem;
 unsigned long pt_addr_conflict;
 
-static inline unsigned long addr_to_page(unsigned long address)
+
+static inline
+unsigned long addr_to_page(unsigned long address)
 {
 	return (address >> spcd_shift);
 }
 
 
-static inline struct pt_mem_info* pt_get_mem(unsigned long address)
+static inline
+struct pt_mem_info* pt_get_mem(unsigned long address)
 {
-	return &pt_mem[hash_32(addr_to_page(address), spcd_mem_hash_bits)];
+	return &mem[hash_32(addr_to_page(address), spcd_mem_hash_bits)];
 }
 
 
@@ -38,17 +41,18 @@ struct pt_mem_info* pt_get_mem_init(unsigned long address)
 void pt_mem_clear(void)
 {
 	int spcd_mem_hash_size = 1UL << spcd_mem_hash_bits;
-	if (!pt_mem)
-		pt_mem = vmalloc(sizeof(struct pt_mem_info) * spcd_mem_hash_size);
-	if (pt_mem)
-		memset(pt_mem, 0, sizeof(struct pt_mem_info) * spcd_mem_hash_size);
+	if (!mem)
+		mem = vmalloc(sizeof(struct pt_mem_info) * spcd_mem_hash_size);
+	if (mem)
+		memset(mem, 0, sizeof(struct pt_mem_info) * spcd_mem_hash_size);
 	else
-		printk("BUG: spcd could not allocate memory buffer pt_mem\n");
+		printk("BUG: spcd could not allocate memory buffer mem\n");
 	pt_addr_conflict = 0;
 }
 
+
 void pt_mem_stop(void) 
 {
-	if (pt_mem)
-		vfree(pt_mem);
+	if (mem)
+		vfree(mem);
 }

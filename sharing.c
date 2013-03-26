@@ -2,7 +2,8 @@
 
 unsigned *share = NULL;
 
-static inline int get_num_sharers(struct pt_mem_info *elem)
+static inline
+int get_num_sharers(struct pt_mem_info *elem)
 {
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1)
 		return 0;
@@ -12,7 +13,8 @@ static inline int get_num_sharers(struct pt_mem_info *elem)
 }
 
 
-static inline void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
+static inline
+void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)
