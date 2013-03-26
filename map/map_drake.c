@@ -34,7 +34,8 @@ unsigned Mat[4][SIZE][SIZE] = {
  {}
 };
 
-unsigned sizes[4] = {SIZE};
+unsigned sizes[LEVELS] = {SIZE};
+unsigned topo[LEVELS] = {2,4,2};
 
 
 static inline
@@ -157,15 +158,14 @@ void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[], int level)
 
 
 void map_drake(int ntxxx) {
-	int nt=SIZE; //debug
+	int nt = SIZE; //debug
 	int i, j, level;
+	int W[LEVELS][2] = {{0}};
 	int done[LEVELS][nt];
-	int W[LEVELS][2];
 	struct pos res[LEVELS][2][nt];
 
-	memset(W, 0, LEVELS*2*sizeof(int));
 	memset(done, 0, LEVELS*nt*sizeof(int));
-	memset(res, 0, nt*2*4*sizeof(struct pos));
+	memset(res, 0, LEVELS*2*nt*sizeof(struct pos));
 
 	for (level=0; level<3; level++) {
 		printk("drake level %d start\n", level);
