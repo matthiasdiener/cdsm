@@ -1,5 +1,4 @@
 #include "spcd.h"
-#include "spcd_proc.h"
 #include "version.h"
 
 MODULE_LICENSE("GPL");

@@ -10,6 +10,7 @@
 #include <linux/spinlock.h>
 #include <asm-generic/tlb.h>
 #include <linux/slab.h>
+#include <linux/proc_fs.h>
 
 #define TSC_DELTA 100000*1000*1000UL
 
@@ -86,5 +87,9 @@ extern int num_nodes, num_cores, num_threads;
 /* Share Matrix */
 
 extern struct spcd_share_matrix spcd_main_matrix;
+
+/* ProcFS */
+int spcd_proc_init (void);
+void spcd_proc_cleanup(void);
 
 #endif

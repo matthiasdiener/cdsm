@@ -1,5 +1,4 @@
 #include "spcd.h"
-#include "spcd_proc.h"
 
 struct task_struct *pt_task = NULL;
 struct mm_struct *pt_mm = NULL;
