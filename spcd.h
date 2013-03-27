@@ -7,8 +7,10 @@
 #include <linux/kthread.h>
 #include <linux/kprobes.h>
 #include <linux/kallsyms.h>
+#include <linux/spinlock.h>
 #include <asm-generic/tlb.h>
 #include <linux/slab.h>
+#include <linux/proc_fs.h>
 
 #define TSC_DELTA 100000*1000*1000UL
 
@@ -19,6 +21,11 @@ struct pt_mem_info {
 	unsigned long pg_addr;
 	unsigned long tsc;
 	s16 sharer[2];
+};
+
+struct spcd_share_matrix {
+	unsigned *matrix;
+	spinlock_t lock;
 };
 
 extern int max_threads;
@@ -40,6 +47,7 @@ void reset_stats(void);
 
 /* PID/TID functions */
 int pt_get_tid(int pid); 
+int pt_get_pid(int tid);
 void pt_add_pid(int pid);
 void pt_delete_pid(int pid);
 void pt_pid_clear(void);
@@ -74,16 +82,28 @@ void interceptor_stop(void);
 /* Topology */
 void topo_start(void);
 void topo_stop(void);
-
 extern int num_nodes, num_cores, num_threads;
 
+/* Share Matrix */
+extern struct spcd_share_matrix spcd_main_matrix;
 
-static inline unsigned get_share(int i, int j)
+static inline
+unsigned get_share(int i, int j)
 {
-	if (i>j)
-		return share[(i<<max_threads_bits) + j];
-	else
-		return share[(j<<max_threads_bits) + i];
+	int res;
+	
+	spin_lock(&spcd_main_matrix.lock);
+	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads) + j] : spcd_main_matrix.matrix[(j<<max_threads) + i];
+	spin_unlock(&spcd_main_matrix.lock);
+	
+	return res;
 }
+
+
+
+/* ProcFS */
+int spcd_proc_init (void);
+void spcd_proc_cleanup(void);
+
 
 #endif

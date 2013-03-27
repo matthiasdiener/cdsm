@@ -1,6 +1,5 @@
 #include "../spcd.h"
 
-
 #define SIZE 16 //debug
 #define LEVELS 4
 

@@ -3,6 +3,7 @@
 extern void map_simple(void);
 extern void map_drake(int nt);
 
+
 int spcd_map_func(void* v)
 {
 	int nt;
@@ -19,5 +20,6 @@ int spcd_map_func(void* v)
 		}
 		msleep(500);
 	}
+	
 	return 0;
 }

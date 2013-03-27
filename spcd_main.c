@@ -23,6 +23,7 @@ module_param(max_threads, int, 0);
 module_param(spcd_shift, int, 0);
 module_param(spcd_mem_hash_bits, int, 0);
 
+struct spcd_share_matrix spcd_main_matrix;
 
 int init_module(void)
 {
@@ -36,9 +37,13 @@ int init_module(void)
 	printk("    shift (in bits): %d %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
 	printk("    mem size: %d bits, %d elements\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits);
 
+	spcd_main_matrix.matrix = NULL;
+	spin_lock_init(&spcd_main_matrix.lock);
 
 	reset_stats();
 	register_probes();
+
+	spcd_proc_init();
 
 	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 	wake_up_process(pf_thread);
@@ -48,7 +53,7 @@ int init_module(void)
 		wake_up_process(map_thread);
 	}
 
-	interceptor_start();
+	//interceptor_start();
 	topo_start();
 
 	return 0;
@@ -63,12 +68,14 @@ void cleanup_module(void)
 	if (map_thread)
 		kthread_stop(map_thread);
 
-	if (share)
-		kfree(share);
+	if (spcd_main_matrix.matrix)
+		kfree(spcd_main_matrix.matrix);
+
+	spcd_proc_cleanup();
 
 	unregister_probes();
 
-	interceptor_stop();
+	//interceptor_stop();
 	topo_stop();
 	pt_mem_stop();
 

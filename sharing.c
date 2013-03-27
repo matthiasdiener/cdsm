@@ -1,6 +1,5 @@
 #include "spcd.h"
 
-unsigned *share = NULL;
 
 static inline
 int get_num_sharers(struct pt_mem_info *elem)
@@ -16,12 +15,16 @@ int get_num_sharers(struct pt_mem_info *elem)
 static inline
 void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
+	// TODO: replace with Atomic incr.
+	
+	spin_lock(&spcd_main_matrix.lock);
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)
-		share[(first << max_threads_bits) + second] ++;
+		spcd_main_matrix.matrix[(first << max_threads_bits) + second] ++;
 	else
-		share[(second << max_threads_bits) + first] ++;
+		spcd_main_matrix.matrix[(second << max_threads_bits) + first] ++;
 	// }
+	spin_unlock(&spcd_main_matrix.lock);
 }
 
 void pt_check_comm(int tid, unsigned long address)
@@ -63,6 +66,7 @@ void pt_check_comm(int tid, unsigned long address)
 	elem->tsc = new_tsc;
 }
 
+
 void pt_print_share(void)
 {
 	int i, j;
@@ -94,10 +98,14 @@ void pt_print_share(void)
 
 void pt_share_clear(void)
 {
-	if (!share)
-		share = kmalloc (sizeof(unsigned)*max_threads*max_threads, GFP_KERNEL);
-	if (share)
-		memset(share, 0, sizeof(unsigned)*max_threads*max_threads);
+	spin_lock(&spcd_main_matrix.lock);
+	if (!spcd_main_matrix.matrix){
+		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
+	}
+	
+	if (spcd_main_matrix.matrix)
+		memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	else
-		printk("BUG: spcd could not allocate comm matrix share\n");
+		printk("BUG: spcd could not allocate comm matrix\n");
+	spin_unlock(&spcd_main_matrix.lock);
 }

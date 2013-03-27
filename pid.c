@@ -6,6 +6,7 @@ struct pid_s {
 };
 
 static struct pid_s pt_pid[PT_PID_HASH_SIZE];
+static struct pid_s pt_pid_reverse[PT_PID_HASH_SIZE];
 static atomic_t pt_num_threads = ATOMIC_INIT(0);
 static atomic_t pt_active_threads = ATOMIC_INIT(0);
 
@@ -35,6 +36,9 @@ void pt_add_pid(int pid)
 		pt_pid[h].pid = pid;
 		pt_pid[h].tid = atomic_inc_return(&pt_num_threads) - 1;
 		at = atomic_inc_return(&pt_active_threads);
+		
+		pt_pid_reverse[pt_pid[h].tid] = pt_pid[h];
+		
 		printk ("pt: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h].tid, at);
 	} else {
 		printk("pt: XXX pid collision: %d->%d\n", pt_pid[h].pid, pt_pid[h].tid);
@@ -49,6 +53,9 @@ void pt_pid_clear(void)
 	atomic_set(&pt_active_threads, 0);
 }
 
+int pt_get_pid(int tid){
+	return pt_pid_reverse[tid].pid;
+}
 
 int pt_get_tid(int pid)
 {
