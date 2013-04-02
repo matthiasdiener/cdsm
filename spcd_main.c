@@ -32,10 +32,11 @@ int init_module(void)
 
 	printk("SPCD: Start (version %s)\n", SPCD_VERSION);
 	printk("    num_faults: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
-	printk("    max_threads: %d, bits: %d\n", max_threads, max_threads_bits);
+	printk("    max_threads: %d %s\n", max_threads, max_threads==NUM_MAX_THREADS_DEFAULT ? "(default)" : "");
 	printk("    use mapping: %s\n", do_map ? "yes" : "no");
-	printk("    shift (in bits): %d %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
-	printk("    mem size: %d bits, %d elements\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits);
+	printk("    shift: %d bits %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
+	printk("    mem size: %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ? 
+		"(default)" : "");
 
 	spcd_main_matrix.matrix = NULL;
 	spin_lock_init(&spcd_main_matrix.lock);
