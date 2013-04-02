@@ -29,38 +29,35 @@ int spcd_pagefault_func(void* v)
 }
 
 
-static inline int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
+static inline
+int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
-	// pgd_t *pgd;
-	// pud_t *pud;
-	// pmd_t *pmd;
-	// spinlock_t *myptl;
 	
-	if (pte_none(*pte) || !pte_present(*pte) || !pte_young(*pte) || pte_special(*pte))
+	if (pte_none(*pte) || 
+		!pte_present(*pte) || 
+		!pte_young(*pte) || 
+		pte_special(*pte) )
 		return 0;
 
-	// pgd = pgd_offset(walk->mm, addr);
-	// pud = pud_offset(pgd, addr);
-	// pmd = pmd_offset(pud, addr);
 	pt_next_addr = addr;
 
-	// pte = pte_offset_map_lock(walk->mm, pmd, addr, &myptl);
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
-	// pte_unmap_unlock(pte, myptl);
 	
 	pt_pf_extra++;
 
 	return 1;
-
 }
 
-static inline int is_writable(struct vm_area_struct *vma)
+
+static inline 
+int is_writable(struct vm_area_struct *vma)
 {
 	return vma->vm_flags & VM_WRITE ? 1 : 0;
 }
 
 
-static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static
+struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 
@@ -83,14 +80,16 @@ static struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area
 }
 
 
-static inline void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+static inline
+void find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	pt_next_vma = find_good_vma(mm, prev_vma);
 	pt_next_addr = pt_next_vma->vm_start;
 }
 
 
-static void pt_pf_pagewalk(struct mm_struct *mm)
+static
+void pt_pf_pagewalk(struct mm_struct *mm)
 {
 	int i;
 	struct mm_walk walk = {
@@ -145,6 +144,6 @@ void spcd_pf_thread_clear(void)
 	if (!walk_page_range_p) {
 		walk_page_range_p = (void*) kallsyms_lookup_name("walk_page_range");
 		if (!walk_page_range_p)
-			printk("walk_page_range_p missing\n");
+			printk("SPCD BUG: walk_page_range missing\n");
 	}
 }

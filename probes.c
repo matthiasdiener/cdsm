@@ -48,7 +48,8 @@ static inline int spcd_check_name(char *name)
 }
 
 
-static inline void fix_pte(pmd_t *pmd, pte_t *pte)
+static inline
+void fix_pte(pmd_t *pmd, pte_t *pte)
 {
 	if (!pte_present(*pte) && !pte_none(*pte)) {
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
@@ -86,10 +87,11 @@ void spcd_del_page_handler(struct page *page)
 	jprobe_return();
 }
 
-static unsigned long zap_pte_range(struct mmu_gather *tlb,
-								   struct vm_area_struct *vma, pmd_t *pmd,
-								   unsigned long addr, unsigned long end,
-								   struct zap_details *details)
+static
+unsigned long zap_pte_range(struct mmu_gather *tlb,
+							struct vm_area_struct *vma, pmd_t *pmd,
+							unsigned long addr, unsigned long end,
+							struct zap_details *details)
 {
 	struct mm_struct *mm = tlb->mm;
 	pte_t *start_pte, *pte;
@@ -106,10 +108,12 @@ static unsigned long zap_pte_range(struct mmu_gather *tlb,
 	return addr;
 }
 
-static unsigned long zap_pmd_range(struct mmu_gather *tlb,
-								   struct vm_area_struct *vma, pud_t *pud,
-								   unsigned long addr, unsigned long end,
-								   struct zap_details *details)
+
+static
+unsigned long zap_pmd_range(struct mmu_gather *tlb,
+							struct vm_area_struct *vma, pud_t *pud,
+							unsigned long addr, unsigned long end,
+							struct zap_details *details)
 {
 	pmd_t *pmd;
 	unsigned long next;
@@ -125,10 +129,11 @@ static unsigned long zap_pmd_range(struct mmu_gather *tlb,
 }
 
 
-static unsigned long zap_pud_range(struct mmu_gather *tlb,
-								   struct vm_area_struct *vma, pgd_t *pgd,
-								   unsigned long addr, unsigned long end,
-								   struct zap_details *details)
+static
+unsigned long zap_pud_range(struct mmu_gather *tlb,
+							struct vm_area_struct *vma, pgd_t *pgd,
+							unsigned long addr, unsigned long end,
+							struct zap_details *details)
 {
 	pud_t *pud;
 	unsigned long next;
@@ -144,6 +149,7 @@ static unsigned long zap_pud_range(struct mmu_gather *tlb,
 	return addr;
 }
 
+
 void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 								   struct vm_area_struct *vma,
 								   unsigned long addr, unsigned long end,
@@ -153,7 +159,6 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 	unsigned long next;
 	if (tlb->mm != pt_mm)
 		jprobe_return();
-	// printk("SPCD: unmapping page range: pid %d\n", current->pid);
 
 	pgd = pgd_offset(vma->vm_mm, addr);
 	do {
@@ -264,24 +269,25 @@ void register_probes(void)
 {
 	int ret;
 	if ((ret=register_jprobe(&spcd_pte_fault_jprobe))) {
-		printk("spcd_pte_fault_jprobe failed, %d\n", ret);
+		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_exit_process_probe))){
-		printk("spcd_exit_process_probe failed, %d\n", ret);
+		printk("SPCD BUG: perf_event_exit_task missing, %d\n", ret);
 	}
 	if ((ret=register_kretprobe(&spcd_new_process_probe))){
-		printk("spcd_new_process_probe failed, %d\n", ret);
+		printk("SPCD BUG: do_execve missing, %d\n", ret);
 	}
 	if ((ret=register_kretprobe(&spcd_fork_probe))){
-		printk("spcd_fork_probe failed, %d\n", ret);
+		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_del_page_probe))){
-		printk("spcd_del_page_probe failed, %d\n", ret);
+		printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_unmap_page_range_probe))){
-		printk("spcd_zap_pte_range_probe failed, %d\n", ret);
+		printk("SPCD BUG: unmap_page_range missing, %d\n", ret);
 	}
 }
+
 
 void unregister_probes(void)
 {

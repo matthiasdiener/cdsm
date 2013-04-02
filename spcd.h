@@ -99,8 +99,6 @@ unsigned get_share(int i, int j)
 	return res;
 }
 
-
-
 /* ProcFS */
 int spcd_proc_init (void);
 void spcd_proc_cleanup(void);
