@@ -46,7 +46,7 @@ void pt_mem_clear(void)
 	if (mem)
 		memset(mem, 0, sizeof(struct pt_mem_info) * spcd_mem_hash_size);
 	else
-		printk("BUG: spcd could not allocate memory buffer mem\n");
+		printk("SPCD BUG: could not allocate memory for mem hash table\n");
 	pt_addr_conflict = 0;
 }
 

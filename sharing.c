@@ -106,6 +106,6 @@ void pt_share_clear(void)
 	if (spcd_main_matrix.matrix)
 		memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	else
-		printk("BUG: spcd could not allocate comm matrix\n");
+		printk("SPCD BUG: could not allocate memory for comm matrix\n");
 	spin_unlock(&spcd_main_matrix.lock);
 }
