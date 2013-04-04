@@ -93,7 +93,7 @@ unsigned get_share(int i, int j)
 	int res;
 	
 	spin_lock(&spcd_main_matrix.lock);
-	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads) + j] : spcd_main_matrix.matrix[(j<<max_threads) + i];
+	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads_bits) + j] : spcd_main_matrix.matrix[(j<<max_threads_bits) + i];
 	spin_unlock(&spcd_main_matrix.lock);
 	
 	return res;
