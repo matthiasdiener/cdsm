@@ -37,9 +37,7 @@ int spcd_read_matrix(char *buf, char **start, off_t offset, int count, int *eof,
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			spin_lock(&spcd_main_matrix.lock);
-			s = i > j ? spcd_main_matrix.matrix[i*max_threads + j] : spcd_main_matrix.matrix[j*max_threads + i];
-			spin_unlock(&spcd_main_matrix.lock);
+			s = get_share(i, j);
 			len += sprintf(buf+len, "%u", s);
 			if (j != nt-1)
 				len += sprintf(buf+len, ",");
