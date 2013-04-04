@@ -7,3 +7,5 @@ modules.order
 *.mod.c
 a.out
 version.h
+/obj/
+/matrices/
