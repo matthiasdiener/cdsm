@@ -1,6 +1,7 @@
 #include "libspcd.h"
 
-void *spcd_matrix_encode(spcd_matrix_t *data){
+void *spcd_matrix_encode(spcd_matrix_t *data)
+{
 	spcd_matrix_t *tmp_matrix;
 	void *tmp, *ret;
 #ifdef __KERNEL__
@@ -30,7 +31,9 @@ void *spcd_matrix_encode(spcd_matrix_t *data){
 	return ret;
 }
 
-spcd_matrix_t spcd_matrix_decode(void *ptr){
+
+spcd_matrix_t spcd_matrix_decode(void *ptr)
+{
 	spcd_matrix_t ret;
 	void *tmp;
 	
@@ -58,7 +61,9 @@ spcd_matrix_t spcd_matrix_decode(void *ptr){
 	return ret;
 }
 
-size_t spcd_matrix_size(void *ptr){
+
+size_t spcd_matrix_size(void *ptr)
+{
 	spcd_matrix_t tmp = spcd_matrix_decode(ptr);
 	return sizeof(unsigned) + 
 		   sizeof(spcd_matrix_t) + 
@@ -67,7 +72,8 @@ size_t spcd_matrix_size(void *ptr){
 }
 
 #ifndef __KERNEL__
-unsigned *spcd_get_small_matrix(spcd_matrix_t *data){
+unsigned *spcd_get_small_matrix(spcd_matrix_t *data)
+{
 	int i,j,a=0;
 	unsigned *ret = malloc(sizeof(unsigned) * data->num_threads * data->num_threads);
 	for (i = data->num_threads-1; i >= 0; i--) {
@@ -80,7 +86,9 @@ unsigned *spcd_get_small_matrix(spcd_matrix_t *data){
 	return ret;
 }
 
-void spcd_matrix_print(spcd_matrix_t *data){
+
+void spcd_matrix_print(spcd_matrix_t *data)
+{
 	int i, j;
 	
 	if(data == NULL){
