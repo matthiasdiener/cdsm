@@ -5,8 +5,8 @@
 
 
 struct pos {
-	s16 x, y; //needs to be array
 	unsigned val;
+	s16 id[SIZE]; //needs to be array
 };
 
 
@@ -34,7 +34,7 @@ unsigned Mat[4][SIZE][SIZE] = {
 };
 
 unsigned sizes[LEVELS] = {SIZE};
-unsigned topo[LEVELS] = {2,4,2};
+unsigned arity[LEVELS] = {4,2,2};
 
 
 static inline
@@ -68,6 +68,7 @@ int findnext(int done[], int nt, int level)
 
 	for (i=0; i<nt; i++) {
 		if (!done[i] && get_share_xxx(i==0 ? 1 : i-1, i, level)>0) {
+			printk("findnext: %d\n", i);
 			return i;
 		}
 	}
@@ -79,17 +80,33 @@ int findnext(int done[], int nt, int level)
 static inline
 struct pos findmax(int v, int done[], int nt, int level)
 {
-	int i, tmp;
-	struct pos res = {.x=v, .val=0};
+	int i, j, tmp, p = 1, max = 0, maxi = 0;
+	struct pos res = {.id={v, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, .val=0};
+	printk("  findmax(%d) start\n", v);
+	for (j=0; j<arity[level]-1; j++) {
 
-	for (i=0; i<nt; i++) {
-		tmp = get_share_xxx(v, i, level);
-		if (tmp > res.val && !done[i]) {
-			res.val = tmp;
-			res.y = i;
+		for (i=0; i<nt; i++) {
+			tmp = get_share_xxx(v, i, level);
+			printk("    %d: %d\n", i, tmp);
+			if (tmp > max && !done[i]) {
+				max = tmp;
+				maxi = i;
+			}
+		}
+		if (max) {
+			printk("    choose: %d\n", maxi);
+			res.val += max;
+			res.id[p++] = maxi;
+			done[maxi] = 1;
+			max = 0;
 		}
 	}
 
+	printk("  findmax(%d): ", v);
+	for (j=0; j<SIZE; j++)
+		printk("%d ", res.id[j]);
+	
+	printk("(val: %d)\n", res.val);
 	return res;
 }
 
@@ -97,28 +114,28 @@ struct pos findmax(int v, int done[], int nt, int level)
 static inline
 void generate_new_matrix(int new, struct pos res[][2][SIZE], int w)
 {
-	int old = new-1;
-	int i=0, j, x, y;
+	// int old = new-1;
+	// int i=0, j, x, y;
 
-	while (res[old][w][i].val!=0) {
-		x = res[old][w][i].x;
-		y = res[old][w][i].y;
-		printk("xy: (%d,%d)\n", x, y);
-		for (j=0; j<i; j++) {
-			int x2, y2;
-			x2 = res[old][w][j].x;
-			y2 = res[old][w][j].y;
-			Mat[new][i][j] = get_share_xxx(x, x2, old);
-			Mat[new][i][j] += get_share_xxx(x, y2, old);
-			Mat[new][i][j] += get_share_xxx(y, x2, old);
-			Mat[new][i][j] += get_share_xxx(y, y2, old);
-			printk("ij: %d,%d calc new: %d,%d,%d,%d = %d\n", i, j, x, y, x2, y2, Mat[new][i][j]);
-			Mat[new][j][i] = Mat[new][i][j]; //make matrix symmetric
-		}
-		i++;
-	}
+	// while (res[old][w][i].val!=0) {
+	// 	x = res[old][w][i].x;
+	// 	y = res[old][w][i].y;
+	// 	printk("xy: (%d,%d)\n", x, y);
+	// 	for (j=0; j<i; j++) {
+	// 		int x2, y2;
+	// 		x2 = res[old][w][j].x;
+	// 		y2 = res[old][w][j].y;
+	// 		Mat[new][i][j] = get_share_xxx(x, x2, old);
+	// 		Mat[new][i][j] += get_share_xxx(x, y2, old);
+	// 		Mat[new][i][j] += get_share_xxx(y, x2, old);
+	// 		Mat[new][i][j] += get_share_xxx(y, y2, old);
+	// 		printk("ij: %d,%d calc new: %d,%d,%d,%d = %d\n", i, j, x, y, x2, y2, Mat[new][i][j]);
+	// 		Mat[new][j][i] = Mat[new][i][j]; //make matrix symmetric
+	// 	}
+	// 	i++;
+	// }
 
-	sizes[new] = i;
+	// sizes[new] = i;
 
 }
 
@@ -130,7 +147,7 @@ void add_res(struct pos r[][2][SIZE], int level, int i, struct pos ret)
 	while (r[level][i][j].val!=0)
 		j++;
 	r[level][i][j] = ret;
-	printk("added: i:%d idx:%d w:%d (%d,%d)\n", i, j, r[level][i][j].val, r[level][i][j].x, r[level][i][j].y);
+	// printk("added: i:%d idx:%d w:%d (%d,%d)\n", i, j, r[level][i][j].val, r[level][i][j].x, r[level][i][j].y);
 }
 
 
@@ -150,7 +167,7 @@ void do_drake(struct pos res[][2][SIZE], int done[], int nt, int W[], int level)
 			add_res(res, level, i, ret);
 
 			i = 1-i;
-			v = ret.y;
+			v = ret.id[1];
 		}
 	}
 }
@@ -166,9 +183,9 @@ void map_drake(int ntxxx) {
 	memset(done, 0, LEVELS*nt*sizeof(int));
 	memset(res, 0, LEVELS*2*nt*sizeof(struct pos));
 
-	for (level=0; level<3; level++) {
-		printk("drake level %d start\n", level);
-		if (level) generate_new_matrix(level, res, W[level-1][0]>W[level-1][1] ? 0 : 1);
+	for (level=0; level<1; level++) {
+		printk("drake level %d start (arity %d)\n", level, arity[level]);
+		// if (level) generate_new_matrix(level, res, W[level-1][0]>W[level-1][1] ? 0 : 1);
 		printMat(level);
 
 		do_drake(res, done[level], nt, W[level], level);
@@ -176,7 +193,7 @@ void map_drake(int ntxxx) {
 		for (j=0; j<2; j++) {
 			printk("M[%d]:", j);
 			for (i=0; res[level][j][i].val!=0; i++) {
-				printk(" %d (%d,%d)", res[level][j][i].val, res[level][j][i].x, res[level][j][i].y);
+				printk(" %d (%d,%d)", res[level][j][i].val, res[level][j][i].id[0], res[level][j][i].id[1]);
 			}
 			if (j!=1) printk("\n");
 		}
