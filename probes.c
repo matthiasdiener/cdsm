@@ -7,7 +7,7 @@ unsigned long pt_pf;
 unsigned long pt_pte_fixes;
 
 
-inline void reset_stats(void)
+void reset_stats(void)
 {
 	pt_pid_clear();
 	pt_mem_clear();
@@ -18,7 +18,8 @@ inline void reset_stats(void)
 }
 
 
-static inline void print_stats(void)
+static inline
+void print_stats(void)
 {
 	int nt = spcd_get_num_threads();
 
@@ -28,9 +29,10 @@ static inline void print_stats(void)
 }
 
 
-static inline int spcd_check_name(char *name)
+static inline
+int check_name(char *name)
 {
-	const char *bm_names[] = {".x", /*NAS*/
+	const char *bm_names[] = {".x", /*NAS*/ "bt.", "lu.",
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU", "FFT", "CHOLESKY", /*Splash2*/
 	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP 2001 */
@@ -64,14 +66,15 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
-	if (pt_mm != mm)
-		jprobe_return();
+	// if (pt_mm != mm)
+	// 	jprobe_return();
 
 	fix_pte(pmd, pte);
-	pt_pf++;
+	// pt_pf++;
 
 	tid = pt_get_tid(current->pid);
 	if (tid > -1){
+		pt_pf++;
 		pt_check_comm(tid, address);
 	}
 
@@ -86,6 +89,7 @@ void spcd_del_page_handler(struct page *page)
 
 	jprobe_return();
 }
+
 
 static
 unsigned long zap_pte_range(struct mmu_gather *tlb,
@@ -195,43 +199,19 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
 
-	if (pt_task || ret)
+	if (ret)
 		return 0;
 
-	if (spcd_check_name(task->comm)) {
-		printk("\nspcd: start %s (pid %d)\n", task->comm, task->pid);
+	if (check_name(task->comm)) {
+		printk("spcd: start %s (pid %d)\n", task->comm, task->pid);
 		pt_add_pid(task->pid);
-		pt_task = task;
-		pt_mm = pt_task->mm;
+		// pt_task = task;
+		// pt_mm = pt_task->mm;
 	}
 
 	return 0;
 }
 
-
-int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
-{
-	int pid = regs_return_value(regs);
-	struct pid *pids;
-	struct task_struct *task = NULL;
-
-	if (!pt_task)
-		return 0;
-	
-	rcu_read_lock();
-	pids = find_vpid(pid);
-	if (pids)
-		task = pid_task(pids, PIDTYPE_PID);
-	rcu_read_unlock();
-
-	if (!task)
-		return 0;
-
-	if (pt_task->parent->pid == task->parent->pid)
-		pt_add_pid(pid);
-
-	return 0;
-}
 
 
 static struct jprobe spcd_pte_fault_jprobe = {
@@ -247,11 +227,6 @@ static struct jprobe spcd_exit_process_probe = {
 static struct kretprobe spcd_new_process_probe = {
 	.handler = spcd_new_process_handler,
 	.kp.symbol_name = "do_execve",
-};
-
-static struct kretprobe spcd_fork_probe = {
-	.handler = spcd_fork_handler,
-	.kp.symbol_name = "do_fork",
 };
 
 static struct jprobe spcd_del_page_probe = {
@@ -277,9 +252,6 @@ void register_probes(void)
 	if ((ret=register_kretprobe(&spcd_new_process_probe))){
 		printk("SPCD BUG: do_execve missing, %d\n", ret);
 	}
-	if ((ret=register_kretprobe(&spcd_fork_probe))){
-		printk("SPCD BUG: do_fork missing, %d\n", ret);
-	}
 	if ((ret=register_jprobe(&spcd_del_page_probe))){
 		printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
 	}
@@ -294,7 +266,6 @@ void unregister_probes(void)
 	unregister_jprobe(&spcd_pte_fault_jprobe);
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
-	unregister_kretprobe(&spcd_fork_probe);
 	unregister_jprobe(&spcd_del_page_probe);
 	unregister_jprobe(&spcd_unmap_page_range_probe);
 }

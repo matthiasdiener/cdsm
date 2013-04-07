@@ -21,4 +21,5 @@ clean:
 
 install: all
 	-sudo rmmod spcd
-	sudo insmod ${PWD}/spcd.ko do_map=1
+	sudo insmod ${PWD}/spcd.ko
+	-dmesg | grep -i bug
