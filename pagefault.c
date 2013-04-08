@@ -107,12 +107,15 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 		.pte_entry = pt_callback_page_walk,
 		.mm = mm,
 	};
+
+	if (!mm)
+		return;
 	
 	down_write(&mm->mmap_sem);
 
 	for (i = 0; i < num_faults; i++) {
 		unsigned pt_addr_pbit_changed = 0;
-		unsigned long start = pt_num_walks;
+		// unsigned long start = pt_num_walks;
 
 		if (spcd_get_active_threads() < 4)
 			goto out;
@@ -123,8 +126,8 @@ void pt_pf_pagewalk(struct mm_struct *mm)
 		
 		while (pt_addr_pbit_changed == 0) {
 
-			if ((pt_num_walks-start)>2)
-				goto out;
+			// if ((pt_num_walks-start)>2)
+			// 	goto out;
 
 			pt_addr_pbit_changed = (*walk_page_range_p)(pt_next_addr, pt_next_vma->vm_end, &walk);
 			
