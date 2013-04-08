@@ -16,14 +16,24 @@ static int (*walk_page_range_p)(unsigned long addr, unsigned long end,
 
 int spcd_pagefault_func(void* v)
 {
+	int i;
 	while (1) {
+		msleep(100);
 		if (kthread_should_stop())
 			return 0;
 
-		if (spcd_get_active_threads() >= 4) {
-			pt_pf_pagewalk(pt_mm);
+		if (spcd_get_active_threads() <= 4) {
+			// pt_pf_pagewalk(pt_task->mm);
+			continue;
 		}
-		msleep(10);
+		for (i=0; i<spcd_get_active_threads(); i++) {
+			struct task_struct *tsk = pid_task(find_vpid(pt_get_pid(i)), PIDTYPE_PID);
+			// printk("pagewalk thread %d, pid %d\n", i, pt_get_pid(i));
+			if (tsk)
+				pt_pf_pagewalk(tsk->mm);
+
+		}
+		
 	}
 
 }

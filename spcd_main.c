@@ -46,8 +46,8 @@ int init_module(void)
 
 	spcd_proc_init();
 
-	// pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
-	// wake_up_process(pf_thread);
+	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
+	wake_up_process(pf_thread);
 
 	if (do_map) {
 		map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");

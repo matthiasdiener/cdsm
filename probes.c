@@ -1,7 +1,6 @@
 #include "spcd.h"
 
 struct task_struct *pt_task = NULL;
-struct mm_struct *pt_mm = NULL;
 
 unsigned long pt_pf;
 unsigned long pt_pte_fixes;
@@ -66,11 +65,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int tid;
 
-	// if (pt_mm != mm)
-	// 	jprobe_return();
-
 	fix_pte(pmd, pte);
-	// pt_pf++;
 
 	tid = pt_get_tid(current->pid);
 	if (tid > -1){
@@ -161,7 +156,8 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 {
 	pgd_t *pgd;
 	unsigned long next;
-	if (tlb->mm != pt_mm)
+
+	if (pt_get_tid(current->pid) == -1)
 		jprobe_return();
 
 	pgd = pgd_offset(vma->vm_mm, addr);
@@ -184,7 +180,7 @@ void spcd_exit_process_handler(struct task_struct *task)
 		pt_delete_pid(task->pid);
 		if (spcd_get_active_threads() == 0) {
 			pt_task = NULL;
-			printk("spcd: stop %s (pid %d)\n", task->comm, task->pid);
+			printk("SPCD: stop %s (pid %d)\n", task->comm, task->pid);
 			print_stats();
 			reset_stats();
 		}
@@ -203,10 +199,9 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 		return 0;
 
 	if (check_name(task->comm)) {
-		printk("spcd: start %s (pid %d)\n", task->comm, task->pid);
+		printk("SPCD: start %s (pid %d)\n", task->comm, task->pid);
 		pt_add_pid(task->pid);
 		// pt_task = task;
-		// pt_mm = pt_task->mm;
 	}
 
 	return 0;
