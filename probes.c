@@ -59,6 +59,15 @@ void fix_pte(pmd_t *pmd, pte_t *pte)
 }
 
 
+static inline
+int is_shared(struct vm_area_struct *vma)
+{
+	if (!vma)
+		return 0;
+	return vma->vm_flags & VM_SHARED ? 1 : 0;
+}
+
+
 void spcd_pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
@@ -70,7 +79,9 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 	tid = pt_get_tid(current->pid);
 	if (tid > -1){
 		pt_pf++;
-		pt_check_comm(tid, address);
+		if (is_shared(find_vma(mm, address)))
+			// TODO: convert address to physical address here (pagetable walk)
+			pt_check_comm(tid, address);
 	}
 
 	jprobe_return();

@@ -22,13 +22,13 @@ int spcd_pagefault_func(void* v)
 		if (kthread_should_stop())
 			return 0;
 
-		if (spcd_get_active_threads() <= 4) {
+		if (spcd_get_active_threads() < 4) {
 			// pt_pf_pagewalk(pt_task->mm);
 			continue;
 		}
 		for (i=0; i<spcd_get_active_threads(); i++) {
 			struct task_struct *tsk = pid_task(find_vpid(pt_get_pid(i)), PIDTYPE_PID);
-			// printk("pagewalk thread %d, pid %d\n", i, pt_get_pid(i));
+			// printk("pagewalk thread %d, pid %d, tsk %p\n", i, pt_get_pid(i), tsk);
 			if (tsk)
 				pt_pf_pagewalk(tsk->mm);
 
@@ -52,7 +52,7 @@ int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_add
 	pt_next_addr = addr;
 
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
-	
+
 	pt_pf_extra++;
 
 	return 1;
@@ -64,6 +64,14 @@ int is_writable(struct vm_area_struct *vma)
 {
 	return vma->vm_flags & VM_WRITE ? 1 : 0;
 }
+
+
+static inline
+int is_shared(struct vm_area_struct *vma)
+{
+	return vma->vm_flags & VM_SHARED ? 1 : 0;
+}
+
 
 
 static
@@ -84,7 +92,7 @@ struct vm_area_struct *find_good_vma(struct mm_struct *mm, struct vm_area_struct
 			tmp = mm->mmap;
 		}
 
-		if (is_writable(tmp))
+		if (is_shared(tmp))
 			return tmp;
 	}
 }
