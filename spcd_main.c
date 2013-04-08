@@ -17,11 +17,13 @@ int max_threads = NUM_MAX_THREADS_DEFAULT;
 int max_threads_bits = 0;
 int spcd_shift = SPCD_SHIFT_DEFAULT;
 int spcd_mem_hash_bits = SPCD_MEM_HASH_BITS_DEFAULT;
+int do_pf = 1;
 module_param(num_faults, int, 0);
 module_param(do_map, int, 0);
 module_param(max_threads, int, 0);
 module_param(spcd_shift, int, 0);
 module_param(spcd_mem_hash_bits, int, 0);
+module_param(do_pf, int, 1);
 
 struct spcd_share_matrix spcd_main_matrix;
 
@@ -31,11 +33,12 @@ int init_module(void)
 	max_threads_bits = ilog2(max_threads);
 
 	printk("SPCD: Start (version %s)\n", SPCD_VERSION);
-	printk("    num_faults: %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
-	printk("    max_threads: %d %s\n", max_threads, max_threads==NUM_MAX_THREADS_DEFAULT ? "(default)" : "");
-	printk("    use mapping: %s\n", do_map ? "yes" : "no");
-	printk("    shift: %d bits %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
-	printk("    mem size: %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ? 
+	printk("    additional pagefaults (do_pf): %s\n", do_pf ? "yes (default)" : "no");
+	printk("    extra pagefaults (num_faults): %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
+	printk("    maximum threads (max_threads): %d %s\n", max_threads, max_threads==NUM_MAX_THREADS_DEFAULT ? "(default)" : "");
+	printk("    use mapping (do_map): %s\n", do_map ? "yes" : "no (default)");
+	printk("    granularity (spcd_shift): %d bits %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
+	printk("    mem hash table size (spcd_mem_hash_bits): %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ? 
 		"(default)" : "");
 
 	spcd_main_matrix.matrix = NULL;
@@ -46,8 +49,10 @@ int init_module(void)
 
 	spcd_proc_init();
 
-	pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
-	wake_up_process(pf_thread);
+	if (do_pf) {
+		pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
+		wake_up_process(pf_thread);
+	}
 
 	if (do_map) {
 		map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
