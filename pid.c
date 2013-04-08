@@ -20,8 +20,9 @@ void pt_delete_pid(int pid)
 	if (tid != -1 && pt_pid[h].pid == pid) {
 		pt_pid[h].tid = -1;
 		pt_pid[h].pid = -1;
+		//TODO: need to delete from pt_pid_reverse?
 		at = atomic_dec_return(&pt_active_threads);
-		printk("pt: thread %d stop (tid %d), active: %d\n", pid, tid, at);
+		printk("SPCD: thread %d stop (tid %d), active: %d\n", pid, tid, at);
 	}
 
 }
@@ -39,9 +40,9 @@ void pt_add_pid(int pid)
 		
 		pt_pid_reverse[pt_pid[h].tid] = pt_pid[h];
 		
-		printk ("pt: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h].tid, at);
+		printk ("SPCD: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h].tid, at);
 	} else {
-		printk("pt: XXX pid collision: %d->%d\n", pt_pid[h].pid, pt_pid[h].tid);
+		printk("SPCD BUG: XXX pid collision: %d->%d\n", pt_pid[h].pid, pt_pid[h].tid);
 	}
 }
 
@@ -49,13 +50,16 @@ void pt_add_pid(int pid)
 void pt_pid_clear(void)
 {
 	memset(pt_pid, -1, sizeof(pt_pid));
+	memset(pt_pid_reverse, -1, sizeof(pt_pid_reverse));
 	atomic_set(&pt_num_threads, 0);
 	atomic_set(&pt_active_threads, 0);
 }
 
+
 int pt_get_pid(int tid){
 	return pt_pid_reverse[tid].pid;
 }
+
 
 int pt_get_tid(int pid)
 {
