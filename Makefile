@@ -3,6 +3,8 @@ spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o p
 
 ccflags-y += -g -Werror
 
+options = ""
+
 SPCD_VER=$(shell git describe)
 DATE=$(shell date)
 
@@ -21,5 +23,5 @@ clean:
 
 install: all
 	-sudo rmmod spcd
-	sudo insmod ${PWD}/spcd.ko
+	sudo insmod ${PWD}/spcd.ko ${options}
 	-dmesg | grep -i bug
