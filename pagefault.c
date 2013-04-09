@@ -12,7 +12,7 @@ extern int num_faults;
 unsigned long pt_pf_extra;
 unsigned long pt_num_walks;
 
-static void pt_pf_pagewalk(long pid, struct mm_struct *mm);
+static void pf_pagewalk(long pid, struct mm_struct *mm);
 
 static int (*walk_page_range_p)(unsigned long addr, unsigned long end,
 								struct mm_walk *walk) = NULL;
@@ -34,7 +34,7 @@ int spcd_pagefault_func(void* v)
 			struct task_struct *tsk = pid_task(find_vpid(pt_get_pid(i)), PIDTYPE_PID);
 			// printk("pagewalk thread %d, pid %d, tsk %p\n", i, pt_get_pid(i), tsk);
 			if (tsk)
-				pt_pf_pagewalk(i, tsk->mm);
+				pf_pagewalk(i, tsk->mm);
 
 		}
 		
@@ -44,7 +44,7 @@ int spcd_pagefault_func(void* v)
 
 
 static inline
-int pt_callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
+int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
 	
 	if (pte_none(*pte)
@@ -131,11 +131,11 @@ struct vm_area_struct* find_next_vma(struct mm_struct *mm, struct vm_area_struct
 
 
 static
-void pt_pf_pagewalk(long pid, struct mm_struct *mm)
+void pf_pagewalk(long pid, struct mm_struct *mm)
 {
 	int i;
 	struct mm_walk walk = {
-		.pte_entry = pt_callback_page_walk,
+		.pte_entry = callback_page_walk,
 		.mm = mm,
 		.private = (void*) pid,
 	};
