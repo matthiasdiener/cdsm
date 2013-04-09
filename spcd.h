@@ -38,7 +38,6 @@ extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
-extern struct task_struct *pt_task;
 
 extern unsigned long pt_num_walks;
 

@@ -1,7 +1,5 @@
 #include "spcd.h"
 
-struct task_struct *pt_task = NULL;
-
 unsigned long pt_pf;
 unsigned long pt_pte_fixes;
 
@@ -79,9 +77,11 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 	tid = pt_get_tid(current->pid);
 	if (tid > -1){
 		pt_pf++;
-		if (is_shared(find_vma(mm, address)))
-			// TODO: convert address to physical address here (pagetable walk)
-			pt_check_comm(tid, address);
+		if (is_shared(find_vma(mm, address))) {
+			unsigned long physaddr = pte_pfn(*pte);
+			pt_check_comm(tid, physaddr<<(spcd_shift) );
+			// pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
+		}
 	}
 
 	jprobe_return();
@@ -190,7 +190,6 @@ void spcd_exit_process_handler(struct task_struct *task)
 	if (tid > -1) {
 		pt_delete_pid(task->pid);
 		if (spcd_get_active_threads() == 0) {
-			pt_task = NULL;
 			printk("SPCD: stop %s (pid %d)\n", task->comm, task->pid);
 			print_stats();
 			reset_stats();
