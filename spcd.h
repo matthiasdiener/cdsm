@@ -66,8 +66,10 @@ void pt_share_clear(void);
 int spcd_pagefault_func(void* v);
 void spcd_pf_thread_clear(void);
 
-/* Map thread */
+/* Mapping */
 int spcd_map_func(void* v);
+void spcd_set_affinity(int tid, int core);
+void spcd_map_init(void);
 
 /* Probes */
 void register_probes(void);

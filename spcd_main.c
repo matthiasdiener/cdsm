@@ -48,6 +48,7 @@ int init_module(void)
 	register_probes();
 
 	spcd_proc_init();
+	spcd_map_init();
 
 	if (do_pf) {
 		pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
