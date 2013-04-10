@@ -81,6 +81,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 			unsigned long physaddr = pte_pfn(*pte);
 			pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			// pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
+			printk("addr:%lx physaddr: %lx\n", addr, physaddr);
 		}
 	}
 

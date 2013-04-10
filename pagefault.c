@@ -121,9 +121,9 @@ struct vm_area_struct* find_next_vma(struct mm_struct *mm, struct vm_area_struct
 		}
 
 		if (tmp && is_shared(tmp)) {
-			pte_t *pte = walk_page_table(mm, tmp->vm_start);
-			unsigned long physaddr = pte ? pte_pfn(*pte) : 0;
-			printk("pid: %d, vma: %lx, size: %lu physaddr: %lx\n", mm->owner->pid, tmp->vm_start, (tmp->vm_end-tmp->vm_start)/1024, physaddr);
+			// pte_t *pte = walk_page_table(mm, tmp->vm_start);
+			// unsigned long physaddr = pte ? pte_pfn(*pte) : 0;
+			// printk("pid: %d, vma: %lx, size: %lu physaddr: %lx\n", mm->owner->pid, tmp->vm_start, (tmp->vm_end-tmp->vm_start)/1024, physaddr);
 			return tmp;
 		}
 	}
