@@ -9,3 +9,6 @@ a.out
 version.h
 /obj/
 /matrices/
+*.fls
+*.synctex.gz
+*.fdb_latexmk
