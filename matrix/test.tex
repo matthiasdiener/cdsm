@@ -1,12 +1,25 @@
 \documentclass{standalone}
 
 \usepackage{CommMatrix}
-
+\usepackage{array}
 
 \begin{document}
 
-\CommMatrix{bt.csv} {\Huge\bf BT}
-\CommMatrix{lu.csv} {\Huge\bf LU}
+\begin{tabular}{ccc}
+
+\CommMatrix{bt.csv} {\Huge\bf BT} &
+\CommMatrix{cg.csv} {\Huge\bf CG} &
+% \CommMatrix{dt.csv} {\Huge\bf DT}
+\\
+% \CommMatrix{ep.csv} {\Huge\bf EP} 
+& \CommMatrix{ft.csv} {\Huge\bf FT} &
+\CommMatrix{is.csv} {\Huge\bf IS}
+\\
+\CommMatrix{lu.csv} {\Huge\bf LU} & 
+\CommMatrix{mg.csv} {\Huge\bf MG} &
 \CommMatrix{sp.csv} {\Huge\bf SP}
- 
+
+\\
+\end{tabular}
+
 \end{document}
