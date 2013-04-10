@@ -1,7 +1,7 @@
 obj-m := spcd.o
 spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o procfs.o spcd_main.o map/map_simple.o map/map_drake.o
 
-ccflags-y += -g -Werror
+ccflags-y += -g -Wall
 
 options = ""
 
