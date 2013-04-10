@@ -37,6 +37,8 @@ void spcd_set_affinity(int tid, int core)
 	cpumask_set_cpu(core, &mask);
 
 	ret = (*sched_setaffinity_p)(pid, &mask);
+	if (ret == 0)
+		printk ("SPCD BUG: spcd_set_affinity failed\n");
 }
 
 void spcd_map_init(void)
