@@ -79,7 +79,8 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 		pt_pf++;
 		if (is_shared(find_vma(mm, address))) {
 			unsigned long physaddr = pte_pfn(*pte);
-			pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
+			if (physaddr)
+				pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			// pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
 			printk("addr:%lx physaddr: %lx\n", address, physaddr);
 		}
