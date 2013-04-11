@@ -25,7 +25,6 @@ struct pt_mem_info {
 	s16 sharer[2];
 };
 
-
 extern int max_threads;
 extern int max_threads_bits;
 extern int spcd_shift;

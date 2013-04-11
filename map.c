@@ -8,20 +8,22 @@ static long (*sched_setaffinity_p)(pid_t pid, const struct cpumask *in_mask);
 
 int spcd_map_func(void* v)
 {
-	int nt;
+	int nt, i;
 	int arities[] = {num_nodes, num_cores, num_threads};
 	int nlevels =  sizeof(arities)/sizeof(arities[0]);
 	int npus = 0, nvertices = 0;
+	int map[MAX_THREADS];
 	topology_t *topo = libmapping_topology_get();
 
 	libmapping_get_n_pus_fake_topology(arities, nlevels, &npus, &nvertices);
-	printk("npus: %d nvertices: %d\n", npus, nvertices);
+	printk("npus: %d, nvertices: %d\n", npus, nvertices);
 
 	libmapping_graph_init(&topo->graph, nvertices, nvertices-1);
 
 	topo->root = libmapping_create_fake_topology(arities, nlevels, pu);
 	topo->root->weight = 0;
 	topo->root->type = GRAPH_ELTYPE_ROOT;
+	topo->pu_number = npus;
 
 	libmapping_topology_print (topo);
 
@@ -33,12 +35,19 @@ int spcd_map_func(void* v)
 			break;
 		
 		nt = spcd_get_active_threads();
-		if (nt > 2) {
+		if (nt >= 4) {
 			// pt_print_share();
 			// map_drake(nt);
+			spcd_main_matrix.nthreads = nt;
+			libmapping_mapping_algorithm_greedy_map (&spcd_main_matrix, map);
+			printk("MAP ");
+			for (i=0; i<nt; i++){
+				printk("T%d->P%d ", i, map[i]);
+			}
+			printk("\n");
 			//pt_share_clear();
 		}
-		msleep(500);
+		msleep(1000);
 	}
 	
 	libmapping_graph_destroy(&topo->graph);

@@ -86,6 +86,7 @@ void pt_share_clear(void)
 	spin_lock(&spcd_main_matrix.lock);
 	if (!spcd_main_matrix.matrix){
 		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
+		spcd_main_matrix.nthreads = 0;
 	}
 	
 	if (spcd_main_matrix.matrix)

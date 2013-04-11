@@ -83,7 +83,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 			if (physaddr)
 			//pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
-			printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
+			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
 		}
 	}
 
@@ -208,8 +208,8 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
 
-	if (ret)
-		return 0;
+	// if (ret)
+	// 	return 0;
 
 	if (check_name(task->comm)) {
 		printk("SPCD: start %s (pid %d)\n", task->comm, task->pid);
