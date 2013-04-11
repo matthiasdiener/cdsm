@@ -12,21 +12,6 @@ int get_num_sharers(struct pt_mem_info *elem)
 }
 
 
-static inline
-void maybe_inc(int first, int second, unsigned old_tsc, unsigned long new_tsc)
-{
-	// TODO: replace with Atomic incr.
-	
-	spin_lock(&spcd_main_matrix.lock);
-	// if (new_tsc-old_tsc <= TSC_DELTA) {
-	if (first > second)
-		spcd_main_matrix.matrix[(first << max_threads_bits) + second] ++;
-	else
-		spcd_main_matrix.matrix[(second << max_threads_bits) + first] ++;
-	// }
-	spin_unlock(&spcd_main_matrix.lock);
-}
-
 void pt_check_comm(int tid, unsigned long address)
 {
 	struct pt_mem_info *elem = pt_get_mem_init(address);
@@ -40,7 +25,7 @@ void pt_check_comm(int tid, unsigned long address)
 
 		case 1: // one previous access => needs to be in pos 0
 			if (elem->sharer[0] != tid) {
-				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
+				inc_share(tid, elem->sharer[0], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
 				elem->sharer[0] = tid;
 			}
@@ -48,14 +33,14 @@ void pt_check_comm(int tid, unsigned long address)
 
 		case 2: // two previous accesses
 			if (elem->sharer[0] != tid && elem->sharer[1] != tid) {
-				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
-				maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
+				inc_share(tid, elem->sharer[0], elem->tsc, new_tsc);
+				inc_share(tid, elem->sharer[1], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
 				elem->sharer[0] = tid;
 			} else if (elem->sharer[0] == tid) {
-				maybe_inc(tid, elem->sharer[1], elem->tsc, new_tsc);
+				inc_share(tid, elem->sharer[1], elem->tsc, new_tsc);
 			} else if (elem->sharer[1] == tid) {
-				maybe_inc(tid, elem->sharer[0], elem->tsc, new_tsc);
+				inc_share(tid, elem->sharer[0], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
 				elem->sharer[0] = tid;
 			}

@@ -12,6 +12,8 @@
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 
+#include "libmapping.h"
+
 #define TSC_DELTA 100000*1000*1000UL
 
 #define PT_PID_HASH_BITS 14UL
@@ -23,15 +25,10 @@ struct pt_mem_info {
 	s16 sharer[2];
 };
 
-struct spcd_share_matrix {
-	unsigned *matrix;
-	spinlock_t lock;
-};
 
 extern int max_threads;
 extern int max_threads_bits;
 extern int spcd_shift;
-extern unsigned *share;
 extern int spcd_mem_hash_bits;
 
 extern unsigned long pt_pte_fixes;
@@ -80,7 +77,7 @@ void interceptor_stop(void);
 /* Topology */
 void topo_start(void);
 void topo_stop(void);
-extern int num_nodes, num_cores, num_threads;
+extern int num_nodes, num_cores, num_threads, pu[256];
 
 /* Share Matrix */
 extern struct spcd_share_matrix spcd_main_matrix;
@@ -90,11 +87,25 @@ unsigned get_share(int i, int j)
 {
 	int res;
 	
-	spin_lock(&spcd_main_matrix.lock);
 	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads_bits) + j] : spcd_main_matrix.matrix[(j<<max_threads_bits) + i];
-	spin_unlock(&spcd_main_matrix.lock);
 	
 	return res;
+}
+
+
+static inline
+void inc_share(int first, int second, unsigned old_tsc, unsigned long new_tsc)
+{
+	// TODO: replace with Atomic incr.
+	
+	// spin_lock(&spcd_main_matrix.lock);
+	// if (new_tsc-old_tsc <= TSC_DELTA) {
+	if (first > second)
+		spcd_main_matrix.matrix[(first << max_threads_bits) + second] ++;
+	else
+		spcd_main_matrix.matrix[(second << max_threads_bits) + first] ++;
+	// }
+	// spin_unlock(&spcd_main_matrix.lock);
 }
 
 /* ProcFS */

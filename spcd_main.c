@@ -12,7 +12,7 @@ static struct task_struct *pf_thread;
 static struct task_struct *map_thread;
 
 int num_faults = NUM_FAULTS_DEFAULT;
-int do_map = 0;
+int do_map = 1;
 int max_threads = NUM_MAX_THREADS_DEFAULT;
 int max_threads_bits = 0;
 int spcd_shift = SPCD_SHIFT_DEFAULT;
@@ -55,13 +55,15 @@ int init_module(void)
 		wake_up_process(pf_thread);
 	}
 
+	topo_start();
+
 	if (do_map) {
 		map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
 		wake_up_process(map_thread);
 	}
 
 	//interceptor_start();
-	topo_start();
+	
 
 	return 0;
 }
