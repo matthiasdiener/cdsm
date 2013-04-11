@@ -12,7 +12,8 @@ int spcd_map_func(void* v)
 	int arities[] = {num_nodes, num_cores, num_threads};
 	int nlevels =  sizeof(arities)/sizeof(arities[0]);
 	int npus = 0, nvertices = 0;
-	int map[MAX_THREADS];
+	static int map[MAX_THREADS];
+	static int oldmap[MAX_THREADS];
 	topology_t *topo = libmapping_topology_get();
 
 	libmapping_get_n_pus_fake_topology(arities, nlevels, &npus, &nvertices);
@@ -29,7 +30,6 @@ int spcd_map_func(void* v)
 
 	libmapping_mapping_algorithm_greedy_init(topo);
 
-	// loop:
 	while (1) {
 		if (kthread_should_stop())
 			break;
@@ -43,9 +43,16 @@ int spcd_map_func(void* v)
 			printk("MAP ");
 			for (i=0; i<nt; i++){
 				printk("T%d->P%d ", i, map[i]);
+				if (oldmap[i] != map[i]) {
+					oldmap[i] = map[i];
+					spcd_set_affinity(i, map[i]);
+				}
 			}
 			printk("\n");
 			//pt_share_clear();
+		} else {
+			for (i=0; i<MAX_THREADS; i++)
+				oldmap[i] = -1;
 		}
 		msleep(1000);
 	}
@@ -66,7 +73,7 @@ void spcd_set_affinity(int tid, int core)
 	cpumask_set_cpu(core, &mask);
 
 	ret = (*sched_setaffinity_p)(pid, &mask);
-	if (ret == 0)
+	if (ret)
 		printk ("SPCD BUG: spcd_set_affinity failed\n");
 }
 
