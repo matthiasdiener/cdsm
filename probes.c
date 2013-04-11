@@ -20,7 +20,7 @@ void print_stats(void)
 {
 	int nt = spcd_get_num_threads();
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu walks, %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_num_walks, pt_addr_conflict);
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_addr_conflict);
 
 	pt_print_share();
 }

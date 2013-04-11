@@ -3,6 +3,7 @@
 struct pf_process_t {
 	struct vm_area_struct * vma;
 	unsigned long next_addr;
+	unsigned num_walks;
 };
 
 static struct pf_process_t* proc = NULL;
@@ -10,7 +11,6 @@ static struct pf_process_t* proc = NULL;
 extern int num_faults;
 
 unsigned long pt_pf_extra;
-unsigned long pt_num_walks;
 
 static void pf_pagewalk(long pid, struct mm_struct *mm);
 
@@ -77,7 +77,7 @@ int is_shared(struct vm_area_struct *vma)
 	return vma->vm_flags & VM_SHARED ? 1 : 0;
 }
 
-
+/*
 static pte_t *walk_page_table(struct mm_struct *mm, unsigned long addr)
 {
 	pgd_t *pgd;
@@ -102,9 +102,10 @@ out:
 	return ptep;
 
 }
+*/
 
 static inline
-struct vm_area_struct* find_next_vma(struct mm_struct *mm, struct vm_area_struct* prev_vma)
+struct vm_area_struct* find_next_vma(long pid, struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
 	struct vm_area_struct *tmp = prev_vma;
 	int i = 0;
@@ -114,7 +115,7 @@ struct vm_area_struct* find_next_vma(struct mm_struct *mm, struct vm_area_struct
 		if (!tmp) {
 			if (++i>2)
 				return NULL;
-			pt_num_walks++;
+			proc[pid].num_walks++;
 			tmp = mm->mmap;
 		} else {
 			tmp = tmp->vm_next;
@@ -147,30 +148,34 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 
 	for (i = 0; i < num_faults; i++) {
 		unsigned addr_pbit_changed = 0;
+		unsigned long start = proc[pid].num_walks;
 
 		if (spcd_get_active_threads() < 4)
 			goto out;
 
 		if (proc[pid].vma == NULL) {
-			proc[pid].vma = find_next_vma(mm, NULL);
+			proc[pid].vma = find_next_vma(pid, mm, NULL);
 			if (!proc[pid].vma) goto out;
 			proc[pid].next_addr = proc[pid].vma->vm_start;
 		}
 		
 		while (addr_pbit_changed == 0) {
 
+			if ((proc[pid].num_walks-start)>2)
+				goto out;
+
 			addr_pbit_changed = (*walk_page_range_p)(proc[pid].next_addr, proc[pid].vma->vm_end, &walk);
 			
 			if (addr_pbit_changed) {
 				proc[pid].next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
 				if (proc[pid].next_addr >= proc[pid].vma->vm_end) {
-					proc[pid].vma = find_next_vma(mm, proc[pid].vma);
+					proc[pid].vma = find_next_vma(pid, mm, proc[pid].vma);
 					if (!proc[pid].vma) goto out;
 					proc[pid].next_addr = proc[pid].vma->vm_start;
 				}
 			}
 			else {
-				proc[pid].vma = find_next_vma(mm, proc[pid].vma);
+				proc[pid].vma = find_next_vma(pid, mm, proc[pid].vma);
 				if (!proc[pid].vma) goto out;
 				proc[pid].next_addr = proc[pid].vma->vm_start;
 			}
@@ -184,7 +189,6 @@ out:
 
 void spcd_pf_thread_clear(void)
 {
-	pt_num_walks = 0;
 	pt_pf_extra = 0;
 	if (!proc)
 		proc = kmalloc(max_threads * sizeof (struct pf_process_t), GFP_KERNEL);

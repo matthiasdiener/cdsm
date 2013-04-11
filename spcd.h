@@ -39,8 +39,6 @@ extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
 
-extern unsigned long pt_num_walks;
-
 void reset_stats(void);
 
 /* PID/TID functions */
