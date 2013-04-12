@@ -52,7 +52,8 @@ void topo_start(void)
 		printk("%d ", pu[i]);
 	}
 
-	num_threads /= num_cores;
+	if (num_cores)
+		num_threads /= num_cores;
 	num_cores /= num_nodes;
 
 	printk("\nSPCD: %d nodes/processors, %d cores per cpu, %d threads per core\n", num_nodes, num_cores, num_threads);
