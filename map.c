@@ -9,7 +9,7 @@ static long (*sched_setaffinity_p)(pid_t pid, const struct cpumask *in_mask);
 int spcd_map_func(void* v)
 {
 	int nt, i;
-	int arities[] = {num_nodes, num_cores, num_threads};
+	int arities[] = {num_nodes, num_cpus, num_cores, num_threads};
 	int nlevels =  sizeof(arities)/sizeof(arities[0]);
 	int npus = 0, nvertices = 0;
 	static int map[MAX_THREADS];

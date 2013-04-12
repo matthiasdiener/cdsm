@@ -3,7 +3,7 @@
 
 #define for_each_sibling(s, cpu) for_each_cpu(s, cpu_sibling_mask(cpu))
  
-int num_nodes = 0, num_cores = 0, num_threads = 0;
+int num_nodes = 0, num_cpus = 0, num_cores = 0, num_threads = 0;
 int pu[256];
 
 void topo_start(void)
@@ -27,6 +27,7 @@ void topo_start(void)
 				continue;
 			if (!cpus[physID]) {
 				printk("    processor: %d\n", physID);
+				num_cpus++;
 				cpus[physID] = 1;
 				curCPU = physID;
 			}
@@ -52,11 +53,14 @@ void topo_start(void)
 		printk("%d ", pu[i]);
 	}
 
-	if (num_cores)
-		num_threads /= num_cores;
-	num_cores /= num_nodes;
+	if (!num_cores)
+		num_cores++;
 
-	printk("\nSPCD: %d nodes/processors, %d cores per cpu, %d threads per core\n", num_nodes, num_cores, num_threads);
+	num_threads /= num_cores;
+	num_cores /= num_cpus;
+	num_cpus /= num_nodes;
+
+	printk("\nSPCD: %d nodes, %d processors, %d cores per cpu, %d threads per core\n", num_nodes, num_cpus, num_cores, num_threads);
 }
 
 void topo_stop(void)
