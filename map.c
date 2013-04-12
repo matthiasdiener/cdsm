@@ -26,7 +26,7 @@ int spcd_map_func(void* v)
 	topo->root->type = GRAPH_ELTYPE_ROOT;
 	topo->pu_number = npus;
 
-	libmapping_topology_print (topo);
+	libmapping_topology_print(topo);
 
 	libmapping_mapping_algorithm_greedy_init(topo);
 

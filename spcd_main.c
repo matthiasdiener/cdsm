@@ -25,7 +25,7 @@ module_param(spcd_shift, int, 0);
 module_param(spcd_mem_hash_bits, int, 0);
 module_param(do_pf, int, 1);
 
-struct spcd_share_matrix spcd_main_matrix;
+struct spcd_share_matrix spcd_main_matrix = {.matrix = NULL, .nthreads = 0};
 
 int init_module(void)
 {
