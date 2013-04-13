@@ -183,6 +183,7 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 
 	}
 out:
+	// printk("pagewalk thread %ld done, %d faults\n", pid, i);
 	up_write(&mm->mmap_sem);
 }
 

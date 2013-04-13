@@ -40,7 +40,7 @@ void reset_stats(void);
 /* PID/TID functions */
 int pt_get_tid(int pid); 
 int pt_get_pid(int tid);
-void pt_add_pid(int pid);
+int pt_add_pid(int pid);
 void pt_delete_pid(int pid);
 void pt_pid_clear(void);
 int spcd_get_num_threads(void);

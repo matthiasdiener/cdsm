@@ -71,21 +71,23 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
-	int tid;
+	int tid = pt_get_tid(current->pid);
+	unsigned long physaddr;
 
 	fix_pte(pmd, pte);
 
-	tid = pt_get_tid(current->pid);
-	if (tid > -1){
+	if (tid != -1){
 		pt_pf++;
-		if (is_shared(find_vma(mm, address))) {
-			unsigned long physaddr = pte_pfn(*pte);
-			unsigned long finaladdr = (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1));
+		// if (is_shared(find_vma(mm, address))) {
+			physaddr = pte_pfn(*pte);
+			// unsigned long finaladdr = (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1));
 			if (physaddr)
 			//pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
+		if (tid>1)
+			printk("tid: %d, addr: %lx\n", tid, physaddr);
 			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
-		}
+		// }
 	}
 
 	jprobe_return();
@@ -203,19 +205,42 @@ void spcd_exit_process_handler(struct task_struct *task)
 	jprobe_return();
 }
 
-
+static
 int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-	int ret = regs_return_value(regs);
 	struct task_struct *task = current;
 
-	// if (ret)
-	// 	return 0;
+	if (check_name(task->comm)) {
+		int tid = pt_add_pid(task->pid);
+		printk("SPCD: new process %s (pid:%d -> tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
+	}
+
+	return 0;
+}
+
+static
+int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+{
+    int pid = regs_return_value(regs);
+    struct pid *pids;
+    struct task_struct *task = NULL;
+
+    if (spcd_get_active_threads()==0)
+        return 0;
+     
+    rcu_read_lock();
+    pids = find_vpid(pid);
+    if (pids)
+        task = pid_task(pids, PIDTYPE_PID);
+    rcu_read_unlock();
+
+    if (!task)
+        return 0;
+
 
 	if (check_name(task->comm)) {
-		printk("SPCD: start %s (pid %d)\n", task->comm, task->pid);
-		pt_add_pid(task->pid);
-		// pt_task = task;
+		int tid = pt_add_pid(task->pid);
+		printk("SPCD: new thread %s (pid:%d -> tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}
 
 	return 0;
@@ -223,10 +248,16 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 
 
 
-static struct jprobe spcd_pte_fault_jprobe = {
+static struct jprobe spcd_pte_fault_probe = {
 	.entry = spcd_pte_fault_handler,
 	.kp.symbol_name = "handle_pte_fault",
 };
+
+static struct kretprobe spcd_fork_probe = {
+	.handler = spcd_fork_handler,
+	.kp.symbol_name = "do_fork",
+};
+
 
 static struct jprobe spcd_exit_process_probe = {
 	.entry = spcd_exit_process_handler,
@@ -252,7 +283,7 @@ static struct jprobe spcd_unmap_page_range_probe = {
 void register_probes(void)
 {
 	int ret;
-	if ((ret=register_jprobe(&spcd_pte_fault_jprobe))) {
+	if ((ret=register_jprobe(&spcd_pte_fault_probe))) {
 		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_exit_process_probe))){
@@ -260,6 +291,9 @@ void register_probes(void)
 	}
 	if ((ret=register_kretprobe(&spcd_new_process_probe))){
 		printk("SPCD BUG: do_execve missing, %d\n", ret);
+	}
+	if ((ret=register_kretprobe(&spcd_fork_probe))){
+		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_del_page_probe))){
 		printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
@@ -272,9 +306,10 @@ void register_probes(void)
 
 void unregister_probes(void)
 {
-	unregister_jprobe(&spcd_pte_fault_jprobe);
+	unregister_jprobe(&spcd_pte_fault_probe);
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
+	unregister_kretprobe(&spcd_fork_probe);
 	unregister_jprobe(&spcd_del_page_probe);
 	unregister_jprobe(&spcd_unmap_page_range_probe);
 }

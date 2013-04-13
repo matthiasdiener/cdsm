@@ -22,13 +22,13 @@ void pt_delete_pid(int pid)
 		pt_pid[h].pid = -1;
 		//TODO: need to delete from pt_pid_reverse?
 		at = atomic_dec_return(&pt_active_threads);
-		printk("SPCD: thread %d stop (tid %d), active: %d\n", pid, tid, at);
+		printk("SPCD: thread %d stop (tid %d), #active: %d\n", pid, tid, at);
 	}
 
 }
 
 
-void pt_add_pid(int pid)
+int pt_add_pid(int pid)
 {
 	unsigned h = hash_32(pid, PT_PID_HASH_BITS);
 	int at;
@@ -39,10 +39,11 @@ void pt_add_pid(int pid)
 		at = atomic_inc_return(&pt_active_threads);
 		
 		pt_pid_reverse[pt_pid[h].tid] = pt_pid[h];
-		
-		printk ("SPCD: added mapping: pid=%d -> tid=%d, active: %d\n", pid, pt_pid[h].tid, at);
+
+		return pt_pid[h].tid;
 	} else {
 		printk("SPCD BUG: XXX pid collision: %d->%d\n", pt_pid[h].pid, pt_pid[h].tid);
+		return -1;
 	}
 }
 

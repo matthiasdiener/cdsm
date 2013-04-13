@@ -11,6 +11,7 @@ DATE=$(shell date)
 .PHONY: all clean
 
 all:
+	@sync
 	@echo "#define SPCD_VERSION \"$(SPCD_VER); $(DATE)\"" > version.h
 	@if stat -t obj/* >/dev/null 2>&1; then mv -f obj/* obj/.*.cmd . ; else mkdir -p obj; fi
 	make -j4 -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
