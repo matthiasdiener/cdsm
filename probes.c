@@ -71,7 +71,8 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
-	int tid = pt_get_tid(current->pid);
+	int pid = current->pid;
+	int tid = pt_get_tid(pid);
 	unsigned long physaddr;
 
 	fix_pte(pmd, pte);
@@ -84,7 +85,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 			if (physaddr)
 			//pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
-		if (tid>1)
+		if (pid != mm->owner->pid)
 			printk("tid: %d, addr: %lx\n", tid, physaddr);
 			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
 		// }
