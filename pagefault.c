@@ -37,7 +37,7 @@ int spcd_pagefault_func(void* v)
 				pf_pagewalk(i, tsk->mm);
 
 		}
-		
+
 	}
 
 }
@@ -46,7 +46,7 @@ int spcd_pagefault_func(void* v)
 static inline
 int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
-	
+
 	if (pte_none(*pte)
 		|| !pte_present(*pte)
 		// || !pte_young(*pte)
@@ -64,7 +64,7 @@ int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, 
 }
 
 
-static inline 
+static inline
 int is_writable(struct vm_area_struct *vma)
 {
 	return vma->vm_flags & VM_WRITE ? 1 : 0;
@@ -143,7 +143,7 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 
 	if (!mm)
 		return;
-	
+
 	down_write(&mm->mmap_sem);
 
 	for (i = 0; i < num_faults; i++) {
@@ -158,14 +158,14 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 			if (!proc[pid].vma) goto out;
 			proc[pid].next_addr = proc[pid].vma->vm_start;
 		}
-		
+
 		while (addr_pbit_changed == 0) {
 
 			if ((proc[pid].num_walks-start)>2)
 				goto out;
 
 			addr_pbit_changed = (*walk_page_range_p)(proc[pid].next_addr, proc[pid].vma->vm_end, &walk);
-			
+
 			if (addr_pbit_changed) {
 				proc[pid].next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
 				if (proc[pid].next_addr >= proc[pid].vma->vm_end) {

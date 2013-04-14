@@ -85,8 +85,8 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 			if (physaddr)
 			//pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
 			pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
-		if (pid != mm->owner->pid)
-			printk("tid: %d, addr: %lx\n", tid, physaddr);
+		// if (pid != mm->owner->pid)
+			// printk("tid:%d,addr:%lx\n", tid, physaddr);
 			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
 		// }
 	}
@@ -228,7 +228,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
     if (spcd_get_active_threads()==0)
         return 0;
-     
+
     rcu_read_lock();
     pids = find_vpid(pid);
     if (pids)

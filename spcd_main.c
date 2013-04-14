@@ -38,7 +38,7 @@ int init_module(void)
 	printk("    maximum threads (max_threads): %d %s\n", max_threads, max_threads==NUM_MAX_THREADS_DEFAULT ? "(default)" : "");
 	printk("    use mapping (do_map): %s\n", do_map ? "yes" : "no (default)");
 	printk("    granularity (spcd_shift): %d bits %s\n", spcd_shift, spcd_shift==SPCD_SHIFT_DEFAULT ? "(default)" : "");
-	printk("    mem hash table size (spcd_mem_hash_bits): %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ? 
+	printk("    mem hash table size (spcd_mem_hash_bits): %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ?
 		"(default)" : "");
 
 	spcd_main_matrix.matrix = NULL;
@@ -63,7 +63,7 @@ int init_module(void)
 	}
 
 	//interceptor_start();
-	
+
 
 	return 0;
 }
