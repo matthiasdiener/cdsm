@@ -2,6 +2,7 @@
 
 unsigned long pt_pf;
 unsigned long pt_pte_fixes;
+int spcd_vma_shared_flag = 1;
 
 
 void reset_stats(void)
@@ -10,6 +11,7 @@ void reset_stats(void)
 	pt_mem_clear();
 	pt_pte_fixes = 0;
 	pt_pf = 0;
+	spcd_vma_shared_flag = 1;
 	pt_share_clear();
 	spcd_pf_thread_clear();
 }
@@ -241,6 +243,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 	if (check_name(task->comm)) {
 		int tid = pt_add_pid(task->pid);
+		spcd_vma_shared_flag = 0;
 		printk("SPCD: new thread %s (pid:%d -> tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}
 
