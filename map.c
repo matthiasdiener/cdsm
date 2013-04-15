@@ -40,15 +40,17 @@ int spcd_map_func(void* v)
 			// map_drake(nt);
 			spcd_main_matrix.nthreads = nt;
 			libmapping_mapping_algorithm_greedy_map (&spcd_main_matrix, map);
-			printk("MAP ");
+			printk("MAP \"");
 			for (i=0; i<nt; i++){
-				printk("T%d->P%d ", i, map[i]);
+				printk("%d", map[i]);
+				if (i != nt-1)
+					printk(",");
 				if (oldmap[i] != map[i]) {
 					oldmap[i] = map[i];
 					spcd_set_affinity(i, map[i]);
 				}
 			}
-			printk("\n");
+			printk("\"\n");
 			//pt_share_clear();
 		} else {
 			for (i=0; i<MAX_THREADS; i++)
