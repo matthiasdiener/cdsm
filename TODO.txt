@@ -1,6 +1,6 @@
 #### TODO
 
-- avg, var, hf sometimes negative (dedup)
+- avg, var, hf sometimes negative (dedup) ok
 - comm matrices with different granularities (12 vs 21 bits on swim_m)
 - move pid hashtable to real hash table
 
