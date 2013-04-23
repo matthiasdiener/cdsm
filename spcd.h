@@ -34,6 +34,7 @@ extern unsigned long pt_pte_fixes;
 extern unsigned long pt_pf;
 extern unsigned long pt_addr_conflict;
 extern unsigned long pt_pf_extra;
+extern int spcd_vma_shared_flag;
 
 void reset_stats(void);
 
