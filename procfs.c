@@ -9,9 +9,8 @@ static
 ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count, loff_t *pos)
 {
 	spin_lock(&spcd_main_matrix.lock);
-	if (!spcd_main_matrix.matrix){
-		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
-	}
+	if (!spcd_main_matrix.matrix)
+		return count;
 
 	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	spin_unlock(&spcd_main_matrix.lock);
@@ -20,22 +19,30 @@ ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count,
 }
 
 static
-int matrix_read(struct seq_file *m, void *v)
+int pids_read(struct seq_file *m, void *v)
 {
-	int i, j;
-	int nt = spcd_get_num_threads();
+	int i, nt = spcd_get_num_threads();
 
-	if (nt < 2)
+	if (!nt)
 		return 1;
 
-	/* TODO: put this into separate proc file
 	for (i = nt-1; i >= 0; i--) {
 		seq_printf(m, "%u", pt_get_pid(i));
 		if (i != 0)
 			seq_printf(m, ",");
 	}
-	seq_printf(m, "\n\n");
-	*/
+	seq_printf(m, "\n");
+
+	return 0;
+}
+
+static
+int matrix_read(struct seq_file *m, void *v)
+{
+	int i, j, nt = spcd_get_num_threads();
+
+	if (nt < 2)
+		return 1;
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
@@ -101,6 +108,12 @@ int matrix_open(struct inode *inode, struct file *file)
 	return single_open(file, matrix_read, NULL);
 }
 
+static
+int pids_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, pids_read, NULL);
+}
+
 static const struct file_operations matrix_ops = {
 	.owner = THIS_MODULE,
 	.open = matrix_open,
@@ -114,6 +127,14 @@ static const struct file_operations reset_ops = {
 	.write = matrix_reset,
 };
 
+static const struct file_operations pids_ops = {
+	.owner = THIS_MODULE,
+	.open = pids_open,
+	.read = seq_read,
+	.llseek	= seq_lseek,
+	.release = single_release,
+};
+
 int spcd_proc_init(void)
 {
 	spcd_proc_root = proc_mkdir("spcd", NULL);
@@ -123,6 +144,7 @@ int spcd_proc_init(void)
 	}
 
 	proc_create("matrix", 0, spcd_proc_root, &matrix_ops);
+	proc_create("pids", 0, spcd_proc_root, &pids_ops);
 	// proc_create("raw_matrix", 0, spcd_proc_root, spcd_read_raw_matrix, NULL);
 	proc_create("reset", 0666, spcd_proc_root, &reset_ops);
 
