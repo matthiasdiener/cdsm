@@ -155,6 +155,7 @@ int spcd_proc_init(void)
 void spcd_proc_cleanup(void)
 {
 	remove_proc_entry("reset", spcd_proc_root);
+	remove_proc_entry("pids", spcd_proc_root);
 	// remove_proc_entry("raw_matrix", spcd_proc_root);
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
