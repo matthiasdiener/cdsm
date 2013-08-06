@@ -2,46 +2,43 @@
 #include <linux/cpu.h>
 
 #define for_each_sibling(s, cpu) for_each_cpu(s, cpu_sibling_mask(cpu))
- 
+#define for_each_core(s, cpu) for_each_cpu(s, cpu_core_mask(cpu))
+#define for_each_node_cpu(s, node) for_each_cpu(s, cpumask_of_node(node))
+
 int num_nodes = 0, num_cpus = 0, num_cores = 0, num_threads = 0;
 int pu[256];
 
 void topo_start(void)
 {
-	unsigned long node, cpu, sibling;
-	int curCPU = 0;
+	int node, cpu, sibling, core;
 	int index = 0, i;
+	int cpus[256] = {};
 
 	printk("SPCD: detected hardware topology:\n");
 
 	for_each_online_node(node) {
-		int cpus[64] = {};
-		int cores[64] = {};
+		printk("  node: %d\n", node);
 		num_nodes++;
 
-		printk("  node: %lu\n", node);
-
-		for_each_online_cpu(cpu) {
-			int physID = cpu_data(cpu).phys_proc_id;
-			if (cpu_to_node(cpu) != node)
+		for_each_node_cpu(cpu, node) {
+			if (cpus[cpu])
 				continue;
-			if (!cpus[physID]) {
-				printk("    processor: %d\n", physID);
-				num_cpus++;
-				cpus[physID] = 1;
-				curCPU = physID;
-			}
-			num_threads++;
-			if (physID == curCPU && !cores[cpu]) {
-				printk("      cores: %2lu", cpu);
-				cores[cpu] = 1;
-				for_each_sibling(sibling, cpu) {
+			printk("    processor: %d\n", cpu);
+			num_cpus++;
+
+			for_each_core(core, cpu) {
+				if (cpus[core])
+					continue;
+				printk ("      core: %d", core);
+				cpus[core] = 1;
+				num_cores++; num_threads++; pu[index++] = core;
+				for_each_sibling(sibling, core) {
+					if (cpus[sibling])
+						continue;
+					cpus[sibling] = 1;
+					num_threads++;
+					printk(", %d", sibling);
 					pu[index++] = sibling;
-					if (!cores[sibling]) {
-						printk(", %2lu", sibling);
-						cores[sibling] = 1;
-						num_cores++;
-					}
 				}
 				printk("\n");
 			}
@@ -53,8 +50,8 @@ void topo_start(void)
 		printk("%d ", pu[i]);
 	}
 
-	if (!num_cores)
-		num_cores++;
+	// if (!num_cores)
+	// 	num_cores++;
 
 	num_threads /= num_cores;
 	num_cores /= num_cpus;
