@@ -23,31 +23,30 @@ static
 int spcd_read_matrix(struct seq_file *m, void *v)
 {
 	int i, j;
-	int s;
 	int nt = spcd_get_num_threads();
-	int len=0;
 
 	if (nt < 2)
-		return 0;
+		return 1;
 
+	/* TODO: put this into separate proc file
 	for (i = nt-1; i >= 0; i--) {
-		len += seq_printf(m, "%u", pt_get_pid(i));
+		seq_printf(m, "%u", pt_get_pid(i));
 		if (i != 0)
-			len += seq_printf(m, ",");
+			seq_printf(m, ",");
 	}
-	len += seq_printf(m, "\n\n");
+	seq_printf(m, "\n\n");
+	*/
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			s = get_share(i, j);
-			len += seq_printf(m, "%u", s);
+			seq_printf(m, "%u", get_share(i, j));
 			if (j != nt-1)
-				len += seq_printf(m, ",");
+				seq_printf(m, ",");
 		}
-		len += seq_printf(m, "\n");
+		seq_printf(m, "\n");
 	}
 
-	return len;
+	return 0;
 }
 
 static
@@ -103,6 +102,7 @@ static const struct file_operations matrix_ops = {
 	.owner = THIS_MODULE,
 	.open = matrix_open,
 	.read = seq_read,
+	.llseek	= seq_lseek,
 	.release = single_release,
 };
 
