@@ -6,7 +6,7 @@
 static struct proc_dir_entry *spcd_proc_root;
 
 static
-int spcd_proc_write_reset(struct file *file, const char *buf, unsigned long count, void *data)
+ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count, loff_t *pos)
 {
 	spin_lock(&spcd_main_matrix.lock);
 	if (!spcd_main_matrix.matrix){
@@ -16,11 +16,11 @@ int spcd_proc_write_reset(struct file *file, const char *buf, unsigned long coun
 	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	spin_unlock(&spcd_main_matrix.lock);
 
-	return count;
+	return 0;
 }
 
 static
-int spcd_read_matrix(struct seq_file *m, void *v)
+int matrix_read(struct seq_file *m, void *v)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
@@ -49,8 +49,10 @@ int spcd_read_matrix(struct seq_file *m, void *v)
 	return 0;
 }
 
+
+/* TODO: fix this for new procfs API
 static
-int spcd_read_raw_matrix(char *buf, char **start, off_t offset, int count, int *eof, void *data)
+int matrix_read_raw(char *buf, char **start, off_t offset, int count, int *eof, void *data)
 {
 	static void *tmp_buffer = NULL;
 	static size_t tmp_buffer_size;
@@ -83,20 +85,21 @@ int spcd_read_raw_matrix(char *buf, char **start, off_t offset, int count, int *
 	}
 
 	if (count < (tmp_buffer_size - offset)){
-		memcpy(buf,tmp_buffer+offset,count);
+		memcpy(buf, tmp_buffer+offset, count);
 		return count;
 	} else {
-		memcpy(buf,tmp_buffer+offset,tmp_buffer_size - offset);
+		memcpy(buf, tmp_buffer+offset, tmp_buffer_size - offset);
 		*eof = 1;
 		return tmp_buffer_size - offset;
 	}
 }
+*/
 
-static int matrix_open(struct inode *inode, struct file *file)
+static
+int matrix_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, spcd_read_matrix, NULL);
+	return single_open(file, matrix_read, NULL);
 }
-
 
 static const struct file_operations matrix_ops = {
 	.owner = THIS_MODULE,
@@ -104,6 +107,11 @@ static const struct file_operations matrix_ops = {
 	.read = seq_read,
 	.llseek	= seq_lseek,
 	.release = single_release,
+};
+
+static const struct file_operations reset_ops = {
+	.owner = THIS_MODULE,
+	.write = matrix_reset,
 };
 
 int spcd_proc_init(void)
@@ -116,7 +124,7 @@ int spcd_proc_init(void)
 
 	proc_create("matrix", 0, spcd_proc_root, &matrix_ops);
 	// proc_create("raw_matrix", 0, spcd_proc_root, spcd_read_raw_matrix, NULL);
-	// proc_create("reset", 0666, spcd_proc_root)->write_proc = spcd_proc_write_reset;
+	proc_create("reset", 0666, spcd_proc_root, &reset_ops);
 
 	return 0;
 }
@@ -125,7 +133,7 @@ int spcd_proc_init(void)
 void spcd_proc_cleanup(void)
 {
 	remove_proc_entry("reset", spcd_proc_root);
-	remove_proc_entry("raw_matrix", spcd_proc_root);
+	// remove_proc_entry("raw_matrix", spcd_proc_root);
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
 }
