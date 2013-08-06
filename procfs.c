@@ -16,7 +16,7 @@ ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count,
 	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	spin_unlock(&spcd_main_matrix.lock);
 
-	return 0;
+	return count;
 }
 
 static
