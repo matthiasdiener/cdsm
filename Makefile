@@ -1,5 +1,5 @@
 obj-m := spcd.o
-spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o spcd_main.o map/map_simple.o map/map_drake.o ../libmapping/mapping-greedy.o ../libmapping/topology.o ../libmapping/lib.o ../libmapping/graph.o
+spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o spcd_main.o map/map_simple.o procfs.o ../libmapping/mapping-greedy.o ../libmapping/topology.o ../libmapping/lib.o ../libmapping/graph.o
 
 
 

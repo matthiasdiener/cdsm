@@ -12,7 +12,7 @@ static struct task_struct *pf_thread;
 static struct task_struct *map_thread;
 
 int num_faults = NUM_FAULTS_DEFAULT;
-int do_map = 1;
+int do_map = 0;
 int max_threads = NUM_MAX_THREADS_DEFAULT;
 int max_threads_bits = 0;
 int spcd_shift = SPCD_SHIFT_DEFAULT;
@@ -47,7 +47,7 @@ int init_module(void)
 	reset_stats();
 	register_probes();
 
-	// spcd_proc_init();
+	spcd_proc_init();
 	spcd_map_init();
 
 	if (do_pf) {
@@ -80,7 +80,7 @@ void cleanup_module(void)
 	if (spcd_main_matrix.matrix)
 		kfree(spcd_main_matrix.matrix);
 
-	// spcd_proc_cleanup();
+	spcd_proc_cleanup();
 
 	unregister_probes();
 
