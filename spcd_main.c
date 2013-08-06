@@ -47,7 +47,7 @@ int init_module(void)
 	reset_stats();
 	register_probes();
 
-	spcd_proc_init();
+	// spcd_proc_init();
 	spcd_map_init();
 
 	if (do_pf) {
@@ -80,7 +80,7 @@ void cleanup_module(void)
 	if (spcd_main_matrix.matrix)
 		kfree(spcd_main_matrix.matrix);
 
-	spcd_proc_cleanup();
+	// spcd_proc_cleanup();
 
 	unregister_probes();
 

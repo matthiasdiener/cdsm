@@ -15,31 +15,40 @@ int spcd_map_func(void* v)
 	static int map[MAX_THREADS];
 	static int oldmap[MAX_THREADS];
 	topology_t *topo = libmapping_topology_get();
+	thread_map_alg_init_t data;
 
 	libmapping_get_n_pus_fake_topology(arities, nlevels, &npus, &nvertices);
 	printk("npus: %d, nvertices: %d\n", npus, nvertices);
 
 	libmapping_graph_init(&topo->graph, nvertices, nvertices-1);
 
-	topo->root = libmapping_create_fake_topology(arities, nlevels, pu);
+	topo->root = libmapping_create_fake_topology(arities, nlevels, pu, NULL);
 	topo->root->weight = 0;
 	topo->root->type = GRAPH_ELTYPE_ROOT;
-	topo->pu_number = npus;
+	// topo->pu_number = npus;
+
+	data.topology = topo;
+
+	libmapping_topology_analysis(topo);
 
 	libmapping_topology_print(topo);
 
-	libmapping_mapping_algorithm_greedy_init(topo);
+
+
+	libmapping_mapping_algorithm_greedy_init(&data);
 
 	while (1) {
 		if (kthread_should_stop())
 			break;
-		
+
 		nt = spcd_get_active_threads();
 		if (nt >= 4) {
-			// pt_print_share();
-			// map_drake(nt);
+			thread_map_alg_map_t mapdata;
+			mapdata.m_init = &spcd_main_matrix;
+			mapdata.map = map;
+
 			spcd_main_matrix.nthreads = nt;
-			libmapping_mapping_algorithm_greedy_map (&spcd_main_matrix, map);
+			libmapping_mapping_algorithm_greedy_map (&mapdata);
 			printk("MAP \"");
 			for (i=0; i<nt; i++){
 				printk("%d", map[i]);
@@ -51,16 +60,15 @@ int spcd_map_func(void* v)
 				}
 			}
 			printk("\"\n");
-			//pt_share_clear();
 		} else {
 			for (i=0; i<MAX_THREADS; i++)
 				oldmap[i] = -1;
 		}
 		msleep(1000);
 	}
-	
+
 	libmapping_graph_destroy(&topo->graph);
-	libmapping_mapping_algorithm_greedy_destroy();
+	libmapping_mapping_algorithm_greedy_destroy(NULL);
 	return 0;
 }
 

@@ -1,7 +1,12 @@
 obj-m := spcd.o
-spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o procfs.o spcd_main.o map/map_simple.o map/map_drake.o ../libmapping/mapping-greedy.o ../libmapping/topology.o ../libmapping/lib.o ../libmapping/graph.o
+spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o spcd_main.o map/map_simple.o map/map_drake.o ../libmapping/mapping-greedy.o ../libmapping/topology.o ../libmapping/lib.o ../libmapping/graph.o
 
-ccflags-y += -g -Wall -D_SPCD -I/home/mdiener/Work/libmapping/
+
+
+include ~/Work/libmapping/make.config.spcd
+include ~/Work/libmapping/make.macros
+
+ccflags-y += -g -Wall -D_SPCD -I/home/mdiener/Work/libmapping/ $(LMCFLAGS)
 
 options = ""
 
