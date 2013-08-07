@@ -24,7 +24,7 @@ void topo_start(void)
 			if (seen[cpu])
 				continue;
 			printk("    processor: %d\n", cpu);
-			num_seen++;
+			num_cpus++;
 
 			for_each_core(core, cpu) {
 				if (seen[core])
