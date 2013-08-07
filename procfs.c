@@ -8,10 +8,10 @@ static struct proc_dir_entry *spcd_proc_root;
 static
 ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count, loff_t *pos)
 {
-	spin_lock(&spcd_main_matrix.lock);
 	if (!spcd_main_matrix.matrix)
 		return count;
 
+	spin_lock(&spcd_main_matrix.lock);
 	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	spin_unlock(&spcd_main_matrix.lock);
 
