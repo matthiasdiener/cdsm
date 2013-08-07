@@ -12,7 +12,7 @@ void topo_start(void)
 {
 	int node, cpu, sibling, core;
 	int index = 0, i;
-	int cpus[256] = {};
+	char cpus[256] = {};
 
 	printk("SPCD: detected hardware topology:\n");
 
@@ -49,9 +49,6 @@ void topo_start(void)
 	for (i=0; i<num_threads; i++) {
 		printk("%d ", pu[i]);
 	}
-
-	// if (!num_cores)
-	// 	num_cores++;
 
 	num_threads /= num_cores;
 	num_cores /= num_cpus;
