@@ -31,7 +31,7 @@ void print_stats(void)
 static inline
 int check_name(char *name)
 {
-	const char *bm_names[] = {"bt.", "cg.", "dc.", "dt.", "ep.", "ft.", "is.", "lu.", "mg.", "sp.", "ua.", /*NAS*/
+	const char *bm_names[] = {".x", "bt.", "cg.", "dc.", "dt.", "ep.", "ft.", "is.", "lu.", "mg.", "sp.", "ua.", /*NAS*/
 	"bt-mz", "lu-mz", "sp-mz", /*NAS-MZ*/
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
 	"LU", "FFT", "CHOLESKY", /*Splash2*/
