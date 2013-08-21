@@ -22,7 +22,6 @@ void pt_delete_pid(int pid)
 		pt_pid[h].pid = -1;
 		//TODO: need to delete from pt_pid_reverse?
 		at = atomic_dec_return(&pt_active_threads);
-		printk("SPCD: thread %d stop (tid %d), #active: %d\n", pid, tid, at);
 	}
 
 }

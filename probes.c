@@ -194,12 +194,16 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 
 void spcd_exit_process_handler(struct task_struct *task)
 {
-	int tid = pt_get_tid(task->pid);
+	int pid = task->pid;
+	int tid = pt_get_tid(pid);
+	int at;
 
 	if (tid > -1) {
-		pt_delete_pid(task->pid);
-		if (spcd_get_active_threads() == 0) {
-			printk("SPCD: stop %s (pid %d)\n", task->comm, task->pid);
+		pt_delete_pid(pid);
+		at = spcd_get_active_threads();
+		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", task->comm, pid, tid, at);
+		if (at == 0) {
+			printk("SPCD: stop app %s (pid %d, tid %d)\n", task->comm, pid, tid);
 			print_stats();
 			reset_stats();
 		}
@@ -215,7 +219,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 
 	if (check_name(task->comm)) {
 		int tid = pt_add_pid(task->pid);
-		printk("SPCD: new process %s (pid:%d -> tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
+		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}
 
 	return 0;
@@ -244,7 +248,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	if (check_name(task->comm)) {
 		int tid = pt_add_pid(task->pid);
 		spcd_vma_shared_flag = 0;
-		printk("SPCD: new thread %s (pid:%d -> tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
+		printk("SPCD: new thread %s (pid:%d, tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}
 
 	return 0;
