@@ -7,8 +7,5 @@ modules.order
 *.mod.c
 a.out
 version.h
-/obj/
-/matrices/
-*.fls
-*.synctex.gz
-*.fdb_latexmk
+/obj
+spcd-*.tar.gz
