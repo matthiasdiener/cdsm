@@ -8,7 +8,7 @@ spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o s
 
 ccflags-y += -g -Wall -D_SPCD -I$(SRCDIR)/libmapping $(LMCFLAGS)
 
-.PHONY: all clean install
+.PHONY: all clean install dist
 
 all:
 	@sync
@@ -20,6 +20,7 @@ all:
 clean:
 	@rm -rf obj/
 	@rm -f version.h
+	@rm -f spcd-*.tar.gz
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 
 
@@ -27,3 +28,6 @@ install: all
 	@if test $(shell lsmod | grep spcd >/dev/null; echo $$?) -eq 0; then sudo rmmod spcd; fi
 	sudo insmod $(PWD)/spcd.ko $(options)
 	@dmesg | grep -i "spcd bug"; echo -n
+
+dist: clean
+	tar czf spcd-$(shell git describe).tar.gz *
