@@ -213,7 +213,7 @@ void spcd_exit_process_handler(struct task_struct *task)
 }
 
 static
-int spcd_new_process_handler(struct kretprobe_instance *ri, struct spcd_regs *regs)
+int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
 	struct task_struct *task = current;
 
@@ -226,7 +226,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct spcd_regs *re
 }
 
 static
-int spcd_fork_handler(struct kretprobe_instance *ri, struct spcd_regs *regs)
+int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
     int pid = regs_return_value(regs);
     struct pid *pids;
