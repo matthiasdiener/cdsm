@@ -602,6 +602,7 @@ void libmapping_topology_analysis (topology_t *t)
 	LM_ASSERT( t->graph.n_edges == t->graph.used_edges );
 
 	topology_analysis_(t, NULL);
+	return;
 
 	optimize_topology(t, t->opt_topology);
 
