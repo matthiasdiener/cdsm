@@ -2,7 +2,7 @@
 
 
 static inline
-int get_num_sharers(struct pt_mem_info *elem)
+int get_num_sharers(struct spcd_mem_info *elem)
 {
 	if (elem->sharer[0] == -1 && elem->sharer[1] == -1)
 		return 0;
@@ -12,9 +12,9 @@ int get_num_sharers(struct pt_mem_info *elem)
 }
 
 
-void pt_check_comm(int tid, unsigned long address)
+void spcd_check_comm(int tid, unsigned long address)
 {
-	struct pt_mem_info *elem = pt_get_mem_init(address);
+	struct spcd_mem_info *elem = spcd_get_mem_init(address);
 	int sh = get_num_sharers(elem);
 	unsigned new_tsc = get_cycles();
 
@@ -52,7 +52,7 @@ void pt_check_comm(int tid, unsigned long address)
 }
 
 
-void pt_print_share(void)
+void spcd_print_share(void)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
@@ -73,7 +73,7 @@ void pt_print_share(void)
 		}
 		printk("\n");
 	}
-	
+
 	av = sum / nt / nt;
 	va = (sum_sqr - ((sum*sum)/nt/nt))/(nt-1)/(nt-1);
 
@@ -81,14 +81,14 @@ void pt_print_share(void)
 }
 
 
-void pt_share_clear(void)
+void spcd_share_clear(void)
 {
 	spin_lock(&spcd_main_matrix.lock);
 	if (!spcd_main_matrix.matrix){
 		spcd_main_matrix.matrix = (unsigned*) kmalloc (sizeof(unsigned) * max_threads * max_threads, GFP_KERNEL);
 		spcd_main_matrix.nthreads = 0;
 	}
-	
+
 	if (spcd_main_matrix.matrix)
 		memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 	else

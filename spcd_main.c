@@ -86,7 +86,7 @@ void cleanup_module(void)
 
 	//interceptor_stop();
 	topo_stop();
-	pt_mem_stop();
+	spcd_mem_stop();
 
 	printk("SPCD: Quit (version %s)\n", SPCD_VERSION);
 }

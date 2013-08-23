@@ -1,5 +1,5 @@
-#ifndef __PT_COMM_H
-#define __PT_COMM_H
+#ifndef __SPCD_COMM_H
+#define __SPCD_COMM_H
 
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -16,10 +16,10 @@
 
 #define TSC_DELTA 100000*1000*1000UL
 
-#define PT_PID_HASH_BITS 14UL
-#define PT_PID_HASH_SIZE (1UL << PT_PID_HASH_BITS)
+#define SPCD_PID_HASH_BITS 14UL
+#define SPCD_PID_HASH_SIZE (1UL << SPCD_PID_HASH_BITS)
 
-struct pt_mem_info {
+struct spcd_mem_info {
 	unsigned long pg_addr;
 	unsigned long tsc;
 	s16 sharer[2];
@@ -30,32 +30,32 @@ extern int max_threads_bits;
 extern int spcd_shift;
 extern int spcd_mem_hash_bits;
 
-extern unsigned long pt_pte_fixes;
-extern unsigned long pt_pf;
-extern unsigned long pt_addr_conflict;
-extern unsigned long pt_pf_extra;
+extern unsigned long spcd_pte_fixes;
+extern unsigned long spcd_pf;
+extern unsigned long spcd_addr_conflict;
+extern unsigned long spcd_pf_extra;
 extern int spcd_vma_shared_flag;
 
 void reset_stats(void);
 
 /* PID/TID functions */
-int pt_get_tid(int pid); 
-int pt_get_pid(int tid);
-int pt_add_pid(int pid);
-void pt_delete_pid(int pid);
-void pt_pid_clear(void);
+int spcd_get_tid(int pid);
+int spcd_get_pid(int tid);
+int spcd_add_pid(int pid);
+void spcd_delete_pid(int pid);
+void spcd_pid_clear(void);
 int spcd_get_num_threads(void);
 int spcd_get_active_threads(void);
 
 /* Mem functions */
-struct pt_mem_info* pt_get_mem_init(unsigned long addr);
-void pt_mem_clear(void);
-void pt_mem_stop(void);
+struct spcd_mem_info* spcd_get_mem_init(unsigned long addr);
+void spcd_mem_clear(void);
+void spcd_mem_stop(void);
 
 /* Communication functions */
-void pt_check_comm(int tid, unsigned long address);
-void pt_print_share(void);
-void pt_share_clear(void);
+void spcd_check_comm(int tid, unsigned long address);
+void spcd_print_share(void);
+void spcd_share_clear(void);
 
 /* PF thread */
 int spcd_pagefault_func(void* v);
@@ -86,9 +86,9 @@ static inline
 unsigned get_share(int i, int j)
 {
 	int res;
-	
+
 	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads_bits) + j] : spcd_main_matrix.matrix[(j<<max_threads_bits) + i];
-	
+
 	return res;
 }
 
@@ -97,7 +97,7 @@ static inline
 void inc_share(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	// TODO: replace with Atomic incr.
-	
+
 	// spin_lock(&spcd_main_matrix.lock);
 	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)

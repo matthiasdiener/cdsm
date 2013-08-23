@@ -1,18 +1,18 @@
 #include "spcd.h"
 
-unsigned long pt_pf;
-unsigned long pt_pte_fixes;
+unsigned long spcd_pf;
+unsigned long spcd_pte_fixes;
 int spcd_vma_shared_flag = 1;
 
 
 void reset_stats(void)
 {
-	pt_pid_clear();
-	pt_mem_clear();
-	pt_pte_fixes = 0;
-	pt_pf = 0;
+	spcd_pid_clear();
+	spcd_mem_clear();
+	spcd_pte_fixes = 0;
+	spcd_pf = 0;
 	spcd_vma_shared_flag = 1;
-	pt_share_clear();
+	spcd_share_clear();
 	spcd_pf_thread_clear();
 }
 
@@ -22,9 +22,9 @@ void print_stats(void)
 {
 	int nt = spcd_get_num_threads();
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, pt_pf, pt_pf_extra, pt_pte_fixes, pt_addr_conflict);
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, spcd_pf, spcd_pf_extra, spcd_pte_fixes, spcd_addr_conflict);
 
-	pt_print_share();
+	spcd_print_share();
 }
 
 
@@ -55,7 +55,7 @@ void fix_pte(pmd_t *pmd, pte_t *pte)
 {
 	if (!pte_present(*pte) && !pte_none(*pte)) {
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
-		pt_pte_fixes++;
+		spcd_pte_fixes++;
 	}
 }
 
@@ -74,19 +74,19 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
 	int pid = current->pid;
-	int tid = pt_get_tid(pid);
+	int tid = spcd_get_tid(pid);
 	unsigned long physaddr;
 
 	fix_pte(pmd, pte);
 
 	if (tid != -1){
-		pt_pf++;
+		spcd_pf++;
 		// if (is_shared(find_vma(mm, address))) {
 			physaddr = pte_pfn(*pte);
 			// unsigned long finaladdr = (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1));
 			if (physaddr)
-			//pt_check_comm(tid, physaddr<<(PAGE_SHIFT) );
-			pt_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
+			//spcd_check_comm(tid, physaddr<<(PAGE_SHIFT) );
+			spcd_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
 		// if (pid != mm->owner->pid)
 			// printk("tid:%d,addr:%lx\n", tid, physaddr);
 			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
@@ -177,7 +177,7 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 	pgd_t *pgd;
 	unsigned long next;
 
-	if (pt_get_tid(current->pid) == -1)
+	if (spcd_get_tid(current->pid) == -1)
 		jprobe_return();
 
 	pgd = pgd_offset(vma->vm_mm, addr);
@@ -195,11 +195,11 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 void spcd_exit_process_handler(struct task_struct *task)
 {
 	int pid = task->pid;
-	int tid = pt_get_tid(pid);
+	int tid = spcd_get_tid(pid);
 	int at;
 
 	if (tid > -1) {
-		pt_delete_pid(pid);
+		spcd_delete_pid(pid);
 		at = spcd_get_active_threads();
 		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", task->comm, pid, tid, at);
 		if (at == 0) {
@@ -213,12 +213,12 @@ void spcd_exit_process_handler(struct task_struct *task)
 }
 
 static
-int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+int spcd_new_process_handler(struct kretprobe_instance *ri, struct spcd_regs *regs)
 {
 	struct task_struct *task = current;
 
 	if (check_name(task->comm)) {
-		int tid = pt_add_pid(task->pid);
+		int tid = spcd_add_pid(task->pid);
 		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}
 
@@ -226,7 +226,7 @@ int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs
 }
 
 static
-int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+int spcd_fork_handler(struct kretprobe_instance *ri, struct spcd_regs *regs)
 {
     int pid = regs_return_value(regs);
     struct pid *pids;
@@ -246,7 +246,7 @@ int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 
 	if (check_name(task->comm)) {
-		int tid = pt_add_pid(task->pid);
+		int tid = spcd_add_pid(task->pid);
 		spcd_vma_shared_flag = 0;
 		printk("SPCD: new thread %s (pid:%d, tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
 	}

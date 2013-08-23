@@ -27,7 +27,7 @@ int pids_read(struct seq_file *m, void *v)
 		return 1;
 
 	for (i = nt-1; i >= 0; i--) {
-		seq_printf(m, "%u", pt_get_pid(i));
+		seq_printf(m, "%u", spcd_get_pid(i));
 		if (i != 0)
 			seq_printf(m, ",");
 	}
@@ -76,7 +76,7 @@ int matrix_read_raw(char *buf, char **start, off_t offset, int count, int *eof, 
 		temp.pids = kmalloc(sizeof(int) * temp.num_threads, GFP_KERNEL);
 
 		for (i = temp.num_threads-1; i >= 0; i--) {
-			temp.pids[i] = pt_get_pid(temp.num_threads - 1 - i);
+			temp.pids[i] = spcd_get_pid(temp.num_threads - 1 - i);
 		}
 
 		spin_lock(&spcd_main_matrix.lock);

@@ -10,7 +10,7 @@ static struct pf_process_t* proc = NULL;
 
 extern int num_faults;
 
-unsigned long pt_pf_extra;
+unsigned long spcd_pf_extra;
 
 static void pf_pagewalk(long pid, struct mm_struct *mm);
 
@@ -27,12 +27,12 @@ int spcd_pagefault_func(void* v)
 			return 0;
 
 		if (spcd_get_active_threads() < 4) {
-			// pt_pf_pagewalk(pt_task->mm);
+			// spcd_pf_pagewalk(spcd_task->mm);
 			continue;
 		}
 		for (i=0; i<spcd_get_active_threads(); i++) {
-			struct task_struct *tsk = pid_task(find_vpid(pt_get_pid(i)), PIDTYPE_PID);
-			// printk("pagewalk thread %d, pid %d, tsk %p\n", i, pt_get_pid(i), tsk);
+			struct task_struct *tsk = pid_task(find_vpid(spcd_get_pid(i)), PIDTYPE_PID);
+			// printk("pagewalk thread %d, pid %d, tsk %p\n", i, spcd_get_pid(i), tsk);
 			if (tsk)
 				pf_pagewalk(i, tsk->mm);
 
@@ -58,7 +58,7 @@ int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, 
 
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
 
-	pt_pf_extra++;
+	spcd_pf_extra++;
 
 	return 1;
 }
@@ -190,7 +190,7 @@ out:
 
 void spcd_pf_thread_clear(void)
 {
-	pt_pf_extra = 0;
+	spcd_pf_extra = 0;
 	if (!proc)
 		proc = kmalloc(max_threads * sizeof (struct pf_process_t), GFP_KERNEL);
 	if (!proc)

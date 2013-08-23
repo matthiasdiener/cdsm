@@ -75,7 +75,7 @@ int spcd_map_func(void* v)
 
 void spcd_set_affinity(int tid, int core)
 {
-	int pid = pt_get_pid(tid);
+	int pid = spcd_get_pid(tid);
 	struct cpumask mask;
 	long ret;
 
