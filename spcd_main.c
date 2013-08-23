@@ -62,9 +62,6 @@ int init_module(void)
 		wake_up_process(map_thread);
 	}
 
-	//interceptor_start();
-
-
 	return 0;
 }
 
@@ -84,7 +81,6 @@ void cleanup_module(void)
 
 	unregister_probes();
 
-	//interceptor_stop();
 	topo_stop();
 	spcd_mem_stop();
 

@@ -33,8 +33,6 @@ int spcd_map_func(void* v)
 
 	libmapping_topology_print(topo);
 
-
-
 	libmapping_mapping_algorithm_greedy_init(&data);
 
 	while (1) {
@@ -64,7 +62,7 @@ int spcd_map_func(void* v)
 			for (i=0; i<MAX_THREADS; i++)
 				oldmap[i] = -1;
 		}
-		msleep(1000);
+		msleep(100);
 	}
 
 	libmapping_graph_destroy(&topo->graph);
