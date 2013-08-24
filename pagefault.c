@@ -55,6 +55,7 @@ int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, 
 		return 0;
 
 	proc[(long)walk->private].next_addr = addr;
+
 	//TODO: try pte_mknuma on 3.8
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
 
