@@ -33,6 +33,7 @@ int check_name(char *name)
 {
 	int len = strlen(name);
 
+	/* Only programs whose name ends with ".x" are accepted */
 	if (name[len-2] == '.' && name[len-1] == 'x')
 		return 1;
 
