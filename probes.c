@@ -51,37 +51,23 @@ void fix_pte(pmd_t *pmd, pte_t *pte)
 }
 
 
-static inline
-int is_shared(struct vm_area_struct *vma)
-{
-	if (!vma)
-		return 0;
-	return vma->vm_flags & VM_SHARED ? 1 : 0;
-}
-
-
 void spcd_pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
 	int pid = current->pid;
 	int tid = spcd_get_tid(pid);
-	unsigned long physaddr;
 
+	/* TODO: check if we can move this into the next if */
 	fix_pte(pmd, pte);
 
 	if (tid != -1){
+		unsigned long physaddr = pte_pfn(*pte);
 		spcd_pf++;
-		// if (is_shared(find_vma(mm, address))) {
-			physaddr = pte_pfn(*pte);
-			// unsigned long finaladdr = (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1));
-			if (physaddr)
-			//spcd_check_comm(tid, physaddr<<(PAGE_SHIFT) );
+
+		/* TODO: make the physaddr calculation later so it never is zero */
+		if (physaddr)
 			spcd_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
-		// if (pid != mm->owner->pid)
-			// printk("tid:%d,addr:%lx\n", tid, physaddr);
-			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
-		// }
 	}
 
 	jprobe_return();
