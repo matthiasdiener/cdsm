@@ -31,16 +31,10 @@ void print_stats(void)
 static inline
 int check_name(char *name)
 {
-	const char *bm_names[] = {".x",
-	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
-	};
+	int len = strlen(name);
 
-	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
-
-	for (i=0; i<len; i++) {
-		if (strstr(name, bm_names[i]))
-			return 1;
-	}
+	if (name[len-2] == '.' && name[len-1] == 'x')
+		return 1;
 
 	return 0;
 }
