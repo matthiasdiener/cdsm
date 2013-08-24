@@ -31,12 +31,8 @@ void print_stats(void)
 static inline
 int check_name(char *name)
 {
-	const char *bm_names[] = {".x", "bt.", "cg.", "dc.", "dt.", "ep.", "ft.", "is.", "lu.", "mg.", "sp.", "ua.", /*NAS*/
-	"bt-mz", "lu-mz", "sp-mz", /*NAS-MZ*/
+	const char *bm_names[] = {".x",
 	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
-	"LU", "FFT", "CHOLESKY", /*Splash2*/
-	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP 2001 */
-	"md_omp_", "bwaves_", "nabmd_", "bt_", "bots-alignment_", "bots-sparselu_", "ilbdc_", /*"fma3d", "swim_", */ "convert_", "mg_", "lu_", "smithwaterman_", "kdtree_", /* Spec OMP 2012 */
 	};
 
 	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
