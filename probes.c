@@ -1,5 +1,4 @@
 #include "spcd.h"
-#include <linux/binfmts.h>
 
 unsigned long spcd_pf;
 unsigned long spcd_pte_fixes;
@@ -170,68 +169,44 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 
 	jprobe_return();
 }
-#endif
+#endif /* ENABLE_EXTRA_PF */
 
-void spcd_exit_process_handler(struct task_struct *task)
-{
-	int pid = task->pid;
-	int tid = spcd_get_tid(pid);
-	int at;
-
-	if (tid > -1) {
-		spcd_delete_pid(pid);
-		at = spcd_get_active_threads();
-		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", task->comm, pid, tid, at);
-		if (at == 0) {
-			printk("SPCD: stop app %s (pid %d, tid %d)\n", task->comm, pid, tid);
-			print_stats();
-			reset_stats();
-		}
-	}
-
-	jprobe_return();
-}
 
 static
-//int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
-//void spcd_new_process_handler(int argc, const char *const *__argv, struct linux_binprm *bprm)
-void spcd_new_process_handler(struct task_struct *tsk)
+void spcd_process_handler(struct task_struct *tsk)
 {
-//	struct task_struct *task = current;
-	printk("EXEC %s\n",tsk->comm);
+	int at;
 
-	if (check_name(tsk->comm) && spcd_get_tid(tsk->pid) == -1) {
-		int tid = spcd_add_pid(tsk->pid);
-		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
+	if (check_name(tsk->comm)) {
+		if (tsk->flags & PF_EXITING) {
+			int tid = spcd_get_tid(tsk->pid);
+			spcd_delete_pid(tsk->pid);
+			at = spcd_get_active_threads();
+			printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", tsk->comm, tsk->pid, tid, at);
+			if (at == 0) {
+				printk("SPCD: stop app %s (pid %d, tid %d)\n", tsk->comm, tsk->pid, tid);
+				print_stats();
+				reset_stats();
+			}
+		} else {
+			int tid = spcd_add_pid(tsk->pid);
+			printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
+		}
 	}
 
 	jprobe_return() ;
 }
 
+
 static
-int spcd_fork_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+int spcd_thread_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    int pid = regs_return_value(regs);
-    struct pid *pids;
-    struct task_struct *task = NULL;
+	int pid = regs_return_value(regs);
 
-    if (spcd_get_active_threads()==0)
-        return 0;
-
-    rcu_read_lock();
-    pids = find_vpid(pid);
-    if (pids)
-        task = pid_task(pids, PIDTYPE_PID);
-    rcu_read_unlock();
-
-    if (!task)
-        return 0;
-
-
-	if (check_name(task->comm)) {
-		int tid = spcd_add_pid(task->pid);
+	if (check_name(current->comm) && pid > 0) {
+		int tid = spcd_add_pid(pid);
 		spcd_vma_shared_flag = 0;
-		printk("SPCD: new thread %s (pid:%d, tid:%d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
+		printk("SPCD: new thread %s (pid:%d, tid:%d); #active: %d\n", current->comm, pid, tid, spcd_get_active_threads());
 	}
 
 	return 0;
@@ -244,20 +219,13 @@ static struct jprobe spcd_pte_fault_probe = {
 	.kp.symbol_name = "handle_pte_fault",
 };
 
-static struct kretprobe spcd_fork_probe = {
-	.handler = spcd_fork_handler,
+static struct kretprobe spcd_thread_probe = {
+	.handler = spcd_thread_handler,
 	.kp.symbol_name = "do_fork",
 };
 
-
-static struct jprobe spcd_exit_process_probe = {
-	.entry = spcd_exit_process_handler,
-	.kp.symbol_name = "perf_event_exit_task",
-};
-
-static struct jprobe spcd_new_process_probe = {
-	.entry = spcd_new_process_handler,
-	//.kp.symbol_name = "copy_strings_kernel",
+static struct jprobe spcd_process_probe = {
+	.entry = spcd_process_handler,
 	.kp.symbol_name = "acct_update_integrals",
 };
 
@@ -273,19 +241,17 @@ static struct jprobe spcd_unmap_page_range_probe = {
 };
 #endif
 
+
 void register_probes(void)
 {
 	int ret;
 	if ((ret=register_jprobe(&spcd_pte_fault_probe))) {
 		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
 	}
-	if ((ret=register_jprobe(&spcd_exit_process_probe))){
-		printk("SPCD BUG: perf_event_exit_task missing, %d\n", ret);
+	if ((ret=register_jprobe(&spcd_process_probe))){
+		printk("SPCD BUG: acct_update_integrals missing, %d\n", ret);
 	}
-	if ((ret=register_jprobe(&spcd_new_process_probe))){
-		printk("SPCD BUG: do_execve missing, %d\n", ret);
-	}
-	if ((ret=register_kretprobe(&spcd_fork_probe))){
+	if ((ret=register_kretprobe(&spcd_thread_probe))){
 		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
 #ifdef ENABLE_EXTRA_PF
@@ -302,9 +268,8 @@ void register_probes(void)
 void unregister_probes(void)
 {
 	unregister_jprobe(&spcd_pte_fault_probe);
-	unregister_jprobe(&spcd_exit_process_probe);
-	unregister_jprobe(&spcd_new_process_probe);
-	unregister_kretprobe(&spcd_fork_probe);
+	unregister_jprobe(&spcd_process_probe);
+	unregister_kretprobe(&spcd_thread_probe);
 #ifdef ENABLE_EXTRA_PF
 	unregister_jprobe(&spcd_del_page_probe);
 	unregister_jprobe(&spcd_unmap_page_range_probe);
