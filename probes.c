@@ -172,22 +172,42 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 #endif /* ENABLE_EXTRA_PF */
 
 
+void spcd_exit_process_handler(struct task_struct *task)
+{
+	int pid = task->pid;
+	int tid = spcd_get_tid(pid);
+	int at;
+
+	if (tid > -1) {
+		spcd_delete_pid(pid);
+		at = spcd_get_active_threads();
+		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", task->comm, pid, tid, at);
+		if (at == 0) {
+			printk("SPCD: stop app %s (pid %d, tid %d)\n", task->comm, pid, tid);
+			print_stats();
+			reset_stats();
+		}
+	}
+
+	jprobe_return();
+}
+
 static
 void spcd_process_handler(struct task_struct *tsk)
 {
 	int at, tid = spcd_get_tid(tsk->pid);
 
-	if (tid > -1 && tsk->flags & PF_EXITING) {
-		spcd_delete_pid(tsk->pid);
-		at = spcd_get_active_threads();
-		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", tsk->comm, tsk->pid, tid, at);
-		if (at == 0) {
-			printk("SPCD: stop app %s (pid %d, tid %d)\n", tsk->comm, tsk->pid, tid);
-			print_stats();
-			reset_stats();
-		}
-		jprobe_return();
-	}
+	// if (tid > -1 && tsk->flags & PF_EXITING) {
+	// 	spcd_delete_pid(tsk->pid);
+	// 	at = spcd_get_active_threads();
+	// 	printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", tsk->comm, tsk->pid, tid, at);
+	// 	if (at == 0) {
+	// 		printk("SPCD: stop app %s (pid %d, tid %d)\n", tsk->comm, tsk->pid, tid);
+	// 		print_stats();
+	// 		reset_stats();
+	// 	}
+	// 	jprobe_return();
+	// }
 
 	if (check_name(tsk->comm) && tid == -1 && !(tsk->flags & PF_EXITING)) {
 		tid = spcd_add_pid(tsk->pid);
@@ -229,6 +249,11 @@ static struct jprobe spcd_process_probe = {
 	.kp.symbol_name = "acct_update_integrals",
 };
 
+static struct jprobe spcd_exit_process_probe = {
+	.entry = spcd_exit_process_handler,
+	.kp.symbol_name = "perf_event_exit_task",
+};
+
 #ifdef ENABLE_EXTRA_PF
 static struct jprobe spcd_del_page_probe = {
 	.entry = spcd_del_page_handler,
@@ -247,6 +272,9 @@ void register_probes(void)
 	int ret;
 	if ((ret=register_jprobe(&spcd_pte_fault_probe))) {
 		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
+	}
+	if ((ret=register_jprobe(&spcd_exit_process_probe))){
+		printk("SPCD BUG: perf_event_exit_task missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_process_probe))){
 		printk("SPCD BUG: acct_update_integrals missing, %d\n", ret);
@@ -270,6 +298,7 @@ void unregister_probes(void)
 	unregister_jprobe(&spcd_pte_fault_probe);
 	unregister_jprobe(&spcd_process_probe);
 	unregister_kretprobe(&spcd_thread_probe);
+	unregister_jprobe(&spcd_exit_process_probe);
 #ifdef ENABLE_EXTRA_PF
 	unregister_jprobe(&spcd_del_page_probe);
 	unregister_jprobe(&spcd_unmap_page_range_probe);
