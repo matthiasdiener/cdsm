@@ -191,7 +191,10 @@ void spcd_process_handler(struct task_struct *tsk)
 			print_stats();
 			reset_stats();
 		}
-	} else if (tid == -1) {
+		goto out;
+	} 
+
+	if (spcd_get_tid(tsk->pid) == -1) {
 		int tid = spcd_add_pid(tsk->pid);
 		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
 	}
