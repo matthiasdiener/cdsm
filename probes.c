@@ -175,14 +175,9 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 static
 void spcd_process_handler(struct task_struct *tsk)
 {
-	int at, tid;
+	int at, tid = spcd_get_tid(tsk->pid);
 
-	if (!check_name(tsk->comm))
-		goto out;
-	
-	tid = spcd_get_tid(tsk->pid);
-	
-	if (tsk->flags & PF_EXITING && tid > -1) {		
+	if (tid > -1 && tsk->flags & PF_EXITING) {		
 		spcd_delete_pid(tsk->pid);
 		at = spcd_get_active_threads();
 		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", tsk->comm, tsk->pid, tid, at);
@@ -191,16 +186,15 @@ void spcd_process_handler(struct task_struct *tsk)
 			print_stats();
 			reset_stats();
 		}
-		goto out;
+		jprobe_return();
 	} 
 
-	if (spcd_get_tid(tsk->pid) == -1 && !(tsk->flags & PF_EXITING)) {
-		int tid = spcd_add_pid(tsk->pid);
+	if (check_name(tsk->comm) && tid == -1 && !(tsk->flags & PF_EXITING)) {
+		tid = spcd_add_pid(tsk->pid);
 		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
 	}
 
-out:
-	jprobe_return() ;
+	jprobe_return();
 }
 
 
