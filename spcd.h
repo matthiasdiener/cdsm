@@ -22,7 +22,6 @@
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,8,0)
 	#define ENABLE_EXTRA_PF 1
-	#pragma message "ENABLE_EXTRA_PF"
 #endif
 
 struct spcd_mem_info {

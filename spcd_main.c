@@ -51,6 +51,7 @@ int init_module(void)
 	spcd_map_init();
 
 #ifdef ENABLE_EXTRA_PF
+	#pragma message "ENABLE_EXTRA_PF"
 	if (do_pf) {
 		pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 		wake_up_process(pf_thread);
