@@ -1,4 +1,5 @@
 #include "spcd.h"
+#include <linux/binfmts.h>
 
 unsigned long spcd_pf;
 unsigned long spcd_pte_fixes;
@@ -192,16 +193,19 @@ void spcd_exit_process_handler(struct task_struct *task)
 }
 
 static
-int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+//int spcd_new_process_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+//void spcd_new_process_handler(int argc, const char *const *__argv, struct linux_binprm *bprm)
+void spcd_new_process_handler(struct task_struct *tsk)
 {
-	struct task_struct *task = current;
+//	struct task_struct *task = current;
+	printk("EXEC %s\n",tsk->comm);
 
-	if (check_name(task->comm)) {
-		int tid = spcd_add_pid(task->pid);
-		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", task->comm, task->pid, tid, spcd_get_active_threads());
+	if (check_name(tsk->comm) && spcd_get_tid(tsk->pid) == -1) {
+		int tid = spcd_add_pid(tsk->pid);
+		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
 	}
 
-	return 0;
+	jprobe_return() ;
 }
 
 static
@@ -251,9 +255,10 @@ static struct jprobe spcd_exit_process_probe = {
 	.kp.symbol_name = "perf_event_exit_task",
 };
 
-static struct kretprobe spcd_new_process_probe = {
-	.handler = spcd_new_process_handler,
-	.kp.symbol_name = "do_execve",
+static struct jprobe spcd_new_process_probe = {
+	.entry = spcd_new_process_handler,
+	//.kp.symbol_name = "copy_strings_kernel",
+	.kp.symbol_name = "acct_update_integrals",
 };
 
 #ifdef ENABLE_EXTRA_PF
@@ -277,7 +282,7 @@ void register_probes(void)
 	if ((ret=register_jprobe(&spcd_exit_process_probe))){
 		printk("SPCD BUG: perf_event_exit_task missing, %d\n", ret);
 	}
-	if ((ret=register_kretprobe(&spcd_new_process_probe))){
+	if ((ret=register_jprobe(&spcd_new_process_probe))){
 		printk("SPCD BUG: do_execve missing, %d\n", ret);
 	}
 	if ((ret=register_kretprobe(&spcd_fork_probe))){
@@ -298,7 +303,7 @@ void unregister_probes(void)
 {
 	unregister_jprobe(&spcd_pte_fault_probe);
 	unregister_jprobe(&spcd_exit_process_probe);
-	unregister_kretprobe(&spcd_new_process_probe);
+	unregister_jprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
 #ifdef ENABLE_EXTRA_PF
 	unregister_jprobe(&spcd_del_page_probe);
