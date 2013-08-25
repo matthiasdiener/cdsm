@@ -156,7 +156,7 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 	pgd_t *pgd;
 	unsigned long next;
 
-	if (spcd_get_tid(current->pid) == -1)
+	if (!check_name(current->comm))
 		jprobe_return();
 
 	pgd = pgd_offset(vma->vm_mm, addr);
