@@ -1,5 +1,7 @@
 #include "spcd.h"
 
+#include <linux/kprobes.h>
+
 unsigned long spcd_pf;
 unsigned long spcd_pte_fixes;
 int spcd_vma_shared_flag = 1;

@@ -1,6 +1,8 @@
 #include "spcd.h"
 #include "libspcd.h"
 
+#include <linux/module.h>
+#include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 
 static struct proc_dir_entry *spcd_proc_root;
@@ -57,7 +59,8 @@ int matrix_read(struct seq_file *m, void *v)
 }
 
 
-/* TODO: fix this for new procfs API
+/* TODO: fix this for new procfs API */
+/*
 static
 int matrix_read_raw(char *buf, char **start, off_t offset, int count, int *eof, void *data)
 {

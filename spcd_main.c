@@ -1,6 +1,8 @@
 #include "spcd.h"
 #include "version.h"
 
+#include <linux/module.h>
+
 MODULE_LICENSE("GPL");
 
 #define NUM_FAULTS_DEFAULT 9

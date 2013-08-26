@@ -1,16 +1,12 @@
 #ifndef __SPCD_COMM_H
 #define __SPCD_COMM_H
 
-#include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/hash.h>
 #include <linux/kthread.h>
-#include <linux/kprobes.h>
 #include <linux/kallsyms.h>
-#include <linux/spinlock.h>
 #include <asm-generic/tlb.h>
-#include <linux/slab.h>
-#include <linux/proc_fs.h>
+
 #include <linux/version.h>
 
 #include "libmapping.h"
