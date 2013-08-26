@@ -83,29 +83,28 @@ extern int num_nodes, num_cpus, num_cores, num_threads, pu[256];
 extern struct spcd_share_matrix spcd_main_matrix;
 
 static inline
-unsigned get_share(int i, int j)
+unsigned get_share(int first, int second)
 {
-	int res;
-
-	res = i > j ? spcd_main_matrix.matrix[(i<<max_threads_bits) + j] : spcd_main_matrix.matrix[(j<<max_threads_bits) + i];
-
-	return res;
+	if (first > second)
+		return spcd_main_matrix.matrix[(first << max_threads_bits) + second];
+	else
+		return spcd_main_matrix.matrix[(second << max_threads_bits) + first];
 }
 
 
 static inline
 void inc_share(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
-	// TODO: replace with Atomic incr.
+	/* TODO:
+		- replace with Atomic incr.
+		- check if spinlock needed
+		- compare TSC_DELTA
+	*/
 
-	// spin_lock(&spcd_main_matrix.lock);
-	// if (new_tsc-old_tsc <= TSC_DELTA) {
 	if (first > second)
 		spcd_main_matrix.matrix[(first << max_threads_bits) + second] ++;
 	else
 		spcd_main_matrix.matrix[(second << max_threads_bits) + first] ++;
-	// }
-	// spin_unlock(&spcd_main_matrix.lock);
 }
 
 /* ProcFS */
