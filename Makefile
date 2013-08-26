@@ -8,7 +8,7 @@ spcd-objs := libspcd.o pagefault.o mem.o pid.o comm.o probes.o map.o topo.o spcd
 
 ccflags-y += -g -Wall -D_SPCD -I$(SRCDIR)/libmapping $(LMCFLAGS)
 
-isnuma=$(shell hwloc-info|grep -i numanode; if [ $$? -eq 1 ];then echo 0;else echo 1;fi)
+isnuma=$(shell hwloc-info|grep -qi numanode; if [ $$? -eq 1 ]; then echo 0; else echo 1;fi)
 kmaj=$(shell uname -r | tr '.' ' ' | awk '{print $$1}' )
 kmin=$(shell uname -r | tr '.' ' ' | awk '{print $$2}' )
 islow=$(shell if [ $(kmaj) -lt 3 -o $(kmin) -lt 8 ]; then echo 1; else echo 0; fi)
