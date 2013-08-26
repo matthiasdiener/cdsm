@@ -52,7 +52,7 @@ void fix_pte(pmd_t *pmd, pte_t *pte)
 #endif
 }
 
-
+static
 void spcd_pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
@@ -76,6 +76,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 }
 
 #ifdef ENABLE_EXTRA_PF
+static
 void spcd_del_page_handler(struct page *page)
 {
 	if (page_mapped(page))
@@ -147,7 +148,7 @@ unsigned long zap_pud_range(struct mmu_gather *tlb,
 	return addr;
 }
 
-
+static
 void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 								   struct vm_area_struct *vma,
 								   unsigned long addr, unsigned long end,
@@ -229,7 +230,6 @@ static struct jprobe spcd_process_probe = {
 	.kp.symbol_name = "acct_update_integrals",
 };
 
-#ifdef ENABLE_EXTRA_PF
 static struct jprobe spcd_del_page_probe = {
 	.entry = spcd_del_page_handler,
 	.kp.symbol_name = "__delete_from_page_cache",
@@ -239,7 +239,6 @@ static struct jprobe spcd_unmap_page_range_probe = {
 	.entry = spcd_unmap_page_range_handler,
 	.kp.symbol_name = "unmap_page_range",
 };
-#endif
 
 
 void register_probes(void)
