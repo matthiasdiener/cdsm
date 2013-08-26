@@ -43,6 +43,11 @@ int check_name(char *name)
 }
 
 
+static inline
+void fix_pte_empty(pmd_t *pmd, pte_t *pte)
+{
+	/* Empty */
+}
 
 
 static inline
@@ -54,7 +59,7 @@ void fix_pte_real(pmd_t *pmd, pte_t *pte)
 	}
 }
 
-void (*fix_pte)(pmd_t *pmd, pte_t *pte) = fix_pte_real;
+void (*fix_pte)(pmd_t *pmd, pte_t *pte) = fix_pte_empty;
 
 static
 void spcd_pte_fault_handler(struct mm_struct *mm,
@@ -257,6 +262,8 @@ void register_probes(void)
 		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
 	if (do_pf) {
+		fix_pte = fix_pte_real;
+
 		if ((ret=register_jprobe(&spcd_del_page_probe))){
 			printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
 		}
