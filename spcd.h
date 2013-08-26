@@ -16,10 +16,6 @@
 #define SPCD_PID_HASH_BITS 14UL
 #define SPCD_PID_HASH_SIZE (1UL << SPCD_PID_HASH_BITS)
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,8,0)
-	#define ENABLE_EXTRA_PF 1
-#endif
-
 struct spcd_mem_info {
 	unsigned long pg_addr;
 	unsigned long tsc;
@@ -30,6 +26,8 @@ extern int max_threads;
 extern int max_threads_bits;
 extern int spcd_shift;
 extern int spcd_mem_hash_bits;
+
+extern int do_pf;
 
 extern unsigned long spcd_pte_fixes;
 extern unsigned long spcd_pf;
