@@ -25,7 +25,6 @@ int spcd_map_func(void* v)
 	topo->root = libmapping_create_fake_topology(arities, nlevels, pu, NULL);
 	topo->root->weight = 0;
 	topo->root->type = GRAPH_ELTYPE_ROOT;
-	// topo->pu_number = npus;
 
 	data.topology = topo;
 

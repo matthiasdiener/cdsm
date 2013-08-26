@@ -20,7 +20,7 @@ void spcd_delete_pid(int pid)
 	if (tid != -1 && spcd_pid[h].pid == pid) {
 		spcd_pid[h].tid = -1;
 		spcd_pid[h].pid = -1;
-		//TODO: need to delete from spcd_pid_reverse?
+		/* TODO: need to delete from spcd_pid_reverse? */
 		at = atomic_dec_return(&spcd_active_threads);
 	}
 

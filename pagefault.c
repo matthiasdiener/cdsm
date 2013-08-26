@@ -27,12 +27,10 @@ int spcd_pagefault_func(void* v)
 			return 0;
 
 		if (spcd_get_active_threads() < 4) {
-			// spcd_pf_pagewalk(spcd_task->mm);
 			continue;
 		}
 		for (i=0; i<spcd_get_active_threads(); i++) {
 			struct task_struct *tsk = pid_task(find_vpid(spcd_get_pid(i)), PIDTYPE_PID);
-			// printk("pagewalk thread %d, pid %d, tsk %p\n", i, spcd_get_pid(i), tsk);
 			if (tsk)
 				pf_pagewalk(i, tsk->mm);
 
@@ -47,16 +45,15 @@ static inline
 int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, struct mm_walk *walk)
 {
 
-	if (pte_none(*pte)
-		|| !pte_present(*pte)
-		// || !pte_young(*pte)
-		// || pte_special(*pte)
+	if (pte_none(*pte) || !pte_present(*pte)
+		/* || !pte_young(*pte)
+		 || pte_special(*pte) */
 		)
 		return 0;
 
 	proc[(long)walk->private].next_addr = addr;
 
-	//TODO: try pte_mknuma on 3.8
+	/* TODO: try pte_mknuma on 3.8 */
 	*pte = pte_clear_flags(*pte, _PAGE_PRESENT);
 
 	spcd_pf_extra++;
@@ -78,33 +75,6 @@ int is_shared(struct vm_area_struct *vma)
 	return vma->vm_flags & VM_SHARED ? 1 : 0;
 }
 
-/*
-static pte_t *walk_page_table(struct mm_struct *mm, unsigned long addr)
-{
-	pgd_t *pgd;
-	pte_t *ptep = NULL;
-	pud_t *pud;
-	pmd_t *pmd;
-
-	pgd = pgd_offset(mm, addr);
-	if (pgd_none(*pgd) || pgd_bad(*pgd))
-		goto out;
-
-	pud = pud_offset(pgd, addr);
-	if (pud_none(*pud) || pud_bad(*pud))
-		goto out;
-
-	pmd = pmd_offset(pud, addr);
-	if (pmd_none(*pmd) || pmd_bad(*pmd))
-		goto out;
-
-	ptep = pte_offset_map(pmd, addr);
-out:
-	return ptep;
-
-}
-*/
-
 static inline
 struct vm_area_struct* find_next_vma(long pid, struct mm_struct *mm, struct vm_area_struct* prev_vma)
 {
@@ -122,12 +92,8 @@ struct vm_area_struct* find_next_vma(long pid, struct mm_struct *mm, struct vm_a
 			tmp = tmp->vm_next;
 		}
 
-		if (tmp && (!spcd_vma_shared_flag || is_shared(tmp))) {
-			// pte_t *pte = walk_page_table(mm, tmp->vm_start);
-			// unsigned long physaddr = pte ? pte_pfn(*pte) : 0;
-			// printk("pid: %d, vma: %lx, size: %lu physaddr: %lx\n", mm->owner->pid, tmp->vm_start, (tmp->vm_end-tmp->vm_start)/1024, physaddr);
+		if (tmp && (!spcd_vma_shared_flag || is_shared(tmp)))
 			return tmp;
-		}
 	}
 }
 
@@ -168,7 +134,7 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 			addr_pbit_changed = (*walk_page_range_p)(proc[pid].next_addr, proc[pid].vma->vm_end, &walk);
 
 			if (addr_pbit_changed) {
-				proc[pid].next_addr += PAGE_SIZE*((get_cycles()%61) + 1); //Magic
+				proc[pid].next_addr += PAGE_SIZE*((get_cycles()%61) + 1); /* Magic */
 				if (proc[pid].next_addr >= proc[pid].vma->vm_end) {
 					proc[pid].vma = find_next_vma(pid, mm, proc[pid].vma);
 					if (!proc[pid].vma) goto out;
@@ -184,7 +150,6 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 
 	}
 out:
-	// printk("pagewalk thread %ld done, %d faults\n", pid, i);
 	up_write(&mm->mmap_sem);
 }
 
@@ -192,11 +157,12 @@ out:
 void spcd_pf_thread_clear(void)
 {
 	spcd_pf_extra = 0;
+
 	if (!proc)
 		proc = kmalloc(max_threads * sizeof (struct pf_process_t), GFP_KERNEL);
 	if (!proc)
-		printk("SPCD BUG: could not allocate proc\n");
-	if (proc)
+		printk("SPCD BUG: could not allocate proc array\n");
+	else
 		memset(proc, 0, max_threads * sizeof (struct pf_process_t));
 
 	if (!walk_page_range_p) {

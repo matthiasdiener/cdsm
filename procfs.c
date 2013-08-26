@@ -145,7 +145,7 @@ int spcd_proc_init(void)
 
 	proc_create("matrix", 0, spcd_proc_root, &matrix_ops);
 	proc_create("pids", 0, spcd_proc_root, &pids_ops);
-	// proc_create("raw_matrix", 0, spcd_proc_root, spcd_read_raw_matrix, NULL);
+	/* proc_create("raw_matrix", 0, spcd_proc_root, spcd_read_raw_matrix, NULL); */
 	proc_create("reset", 0666, spcd_proc_root, &reset_ops);
 
 	return 0;
@@ -156,7 +156,7 @@ void spcd_proc_cleanup(void)
 {
 	remove_proc_entry("reset", spcd_proc_root);
 	remove_proc_entry("pids", spcd_proc_root);
-	// remove_proc_entry("raw_matrix", spcd_proc_root);
+	/* remove_proc_entry("raw_matrix", spcd_proc_root); */
 	remove_proc_entry("matrix", spcd_proc_root);
 	remove_proc_entry("spcd",NULL);
 }

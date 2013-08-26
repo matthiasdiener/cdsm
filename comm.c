@@ -19,11 +19,11 @@ void spcd_check_comm(int tid, unsigned long address)
 	unsigned new_tsc = get_cycles();
 
 	switch (sh) {
-		case 0: // no one accessed page before, store accessing thread in pos 0
+		case 0: /* no one accessed page before, store accessing thread in pos 0 */
 			elem->sharer[0] = tid;
 			break;
 
-		case 1: // one previous access => needs to be in pos 0
+		case 1: /* one previous access => needs to be in pos 0 */
 			if (elem->sharer[0] != tid) {
 				inc_share(tid, elem->sharer[0], elem->tsc, new_tsc);
 				elem->sharer[1] = elem->sharer[0];
@@ -31,7 +31,7 @@ void spcd_check_comm(int tid, unsigned long address)
 			}
 			break;
 
-		case 2: // two previous accesses
+		case 2: /* two previous accesses */
 			if (elem->sharer[0] != tid && elem->sharer[1] != tid) {
 				inc_share(tid, elem->sharer[0], elem->tsc, new_tsc);
 				inc_share(tid, elem->sharer[1], elem->tsc, new_tsc);
