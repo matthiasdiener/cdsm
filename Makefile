@@ -8,6 +8,12 @@ spcd-objs := libspcd.o pagefault.o mem.o pid.o comm.o probes.o map.o topo.o spcd
 
 ccflags-y += -g -Wall -D_SPCD -I$(SRCDIR)/libmapping $(LMCFLAGS)
 
+isnotnuma=$(shell hwloc-info|grep -i numanode; echo $$?)
+
+ifeq ($(isnotnuma), 1)
+	ccflags-y += -DENABLE_EXTRA_PF
+endif
+
 .PHONY: all clean install dist
 
 all:
