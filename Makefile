@@ -3,7 +3,7 @@ include $(SRCDIR)/libmapping/make.config.spcd
 include $(SRCDIR)/libmapping/make.macros
 
 obj-m := spcd.o
-spcd-objs := libspcd.o pagefault.o mem.o pid.o sharing.o probes.o map.o topo.o spcd_main.o procfs.o libmapping/mapping-greedy.o libmapping/topology.o libmapping/lib.o libmapping/graph.o
+spcd-objs := libspcd.o pagefault.o mem.o pid.o comm.o probes.o map.o topo.o spcd_main.o procfs.o libmapping/mapping-greedy.o libmapping/topology.o libmapping/lib.o libmapping/graph.o
 
 
 ccflags-y += -g -Wall -D_SPCD -I$(SRCDIR)/libmapping $(LMCFLAGS)

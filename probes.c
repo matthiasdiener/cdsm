@@ -31,20 +31,11 @@ void print_stats(void)
 static inline
 int check_name(char *name)
 {
-	const char *bm_names[] = {".x", "bt.", "cg.", "dc.", "dt.", "ep.", "ft.", "is.", "lu.", "mg.", "sp.", "ua.", /*NAS*/
-	"bt-mz", "lu-mz", "sp-mz", /*NAS-MZ*/
-	"blackscholes", "bodytrack", "facesim", "ferret", "freqmine", "rtview", "swaptions", "fluidanimate", "vips", "x264", "canneal", "dedup", "streamcluster", /*Parsec*/
-	"LU", "FFT", "CHOLESKY", /*Splash2*/
-	"wupwise_", "swim_", "mgrid_", "applu_", "galgel_", "equake_", "apsi_", "gafort_", "fma3d_", "art_", "ammp_", /* Spec OMP 2001 */
-	"md_omp_", "bwaves_", "nabmd_", "bt_", "bots-alignment_", "bots-sparselu_", "ilbdc_", /*"fma3d", "swim_", */ "convert_", "mg_", "lu_", "smithwaterman_", "kdtree_", /* Spec OMP 2012 */
-	};
+	int len = strlen(name);
 
-	int i, len = sizeof(bm_names)/sizeof(bm_names[0]);
-
-	for (i=0; i<len; i++) {
-		if (strstr(name, bm_names[i]))
-			return 1;
-	}
+	/* Only programs whose name ends with ".x" are accepted */
+	if (name[len-2] == '.' && name[len-1] == 'x')
+		return 1;
 
 	return 0;
 }
@@ -53,19 +44,12 @@ int check_name(char *name)
 static inline
 void fix_pte(pmd_t *pmd, pte_t *pte)
 {
+#ifdef ENABLE_EXTRA_PF
 	if (!pte_present(*pte) && !pte_none(*pte)) {
 		*pte = pte_set_flags(*pte, _PAGE_PRESENT);
 		spcd_pte_fixes++;
 	}
-}
-
-
-static inline
-int is_shared(struct vm_area_struct *vma)
-{
-	if (!vma)
-		return 0;
-	return vma->vm_flags & VM_SHARED ? 1 : 0;
+#endif
 }
 
 
@@ -75,28 +59,23 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 {
 	int pid = current->pid;
 	int tid = spcd_get_tid(pid);
-	unsigned long physaddr;
 
+	/* TODO: check if we can move this into the next if */
 	fix_pte(pmd, pte);
 
 	if (tid != -1){
+		unsigned long physaddr = pte_pfn(*pte);
 		spcd_pf++;
-		// if (is_shared(find_vma(mm, address))) {
-			physaddr = pte_pfn(*pte);
-			// unsigned long finaladdr = (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1));
-			if (physaddr)
-			//spcd_check_comm(tid, physaddr<<(PAGE_SHIFT) );
+
+		/* TODO: make the physaddr calculation later so it never is zero */
+		if (physaddr)
 			spcd_check_comm(tid, (physaddr<<PAGE_SHIFT) | (address & (PAGE_SIZE-1)));
-		// if (pid != mm->owner->pid)
-			// printk("tid:%d,addr:%lx\n", tid, physaddr);
-			// printk("addr:%lx physaddr: %lx, finaladdr: %lx\n", address, physaddr, finaladdr);
-		// }
 	}
 
 	jprobe_return();
 }
 
-
+#ifdef ENABLE_EXTRA_PF
 void spcd_del_page_handler(struct page *page)
 {
 	if (page_mapped(page))
@@ -190,7 +169,7 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 
 	jprobe_return();
 }
-
+#endif
 
 void spcd_exit_process_handler(struct task_struct *task)
 {
@@ -277,6 +256,7 @@ static struct kretprobe spcd_new_process_probe = {
 	.kp.symbol_name = "do_execve",
 };
 
+#ifdef ENABLE_EXTRA_PF
 static struct jprobe spcd_del_page_probe = {
 	.entry = spcd_del_page_handler,
 	.kp.symbol_name = "__delete_from_page_cache",
@@ -286,7 +266,7 @@ static struct jprobe spcd_unmap_page_range_probe = {
 	.entry = spcd_unmap_page_range_handler,
 	.kp.symbol_name = "unmap_page_range",
 };
-
+#endif
 
 void register_probes(void)
 {
@@ -303,12 +283,14 @@ void register_probes(void)
 	if ((ret=register_kretprobe(&spcd_fork_probe))){
 		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
+#ifdef ENABLE_EXTRA_PF
 	if ((ret=register_jprobe(&spcd_del_page_probe))){
 		printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
 	}
 	if ((ret=register_jprobe(&spcd_unmap_page_range_probe))){
 		printk("SPCD BUG: unmap_page_range missing, %d\n", ret);
 	}
+#endif
 }
 
 
@@ -318,6 +300,8 @@ void unregister_probes(void)
 	unregister_jprobe(&spcd_exit_process_probe);
 	unregister_kretprobe(&spcd_new_process_probe);
 	unregister_kretprobe(&spcd_fork_probe);
+#ifdef ENABLE_EXTRA_PF
 	unregister_jprobe(&spcd_del_page_probe);
 	unregister_jprobe(&spcd_unmap_page_range_probe);
+#endif
 }

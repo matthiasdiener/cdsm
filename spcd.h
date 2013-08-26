@@ -11,6 +11,7 @@
 #include <asm-generic/tlb.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
+#include <linux/version.h>
 
 #include "libmapping.h"
 
@@ -18,6 +19,10 @@
 
 #define SPCD_PID_HASH_BITS 14UL
 #define SPCD_PID_HASH_SIZE (1UL << SPCD_PID_HASH_BITS)
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,8,0)
+	#define ENABLE_EXTRA_PF 1
+#endif
 
 struct spcd_mem_info {
 	unsigned long pg_addr;
