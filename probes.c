@@ -230,6 +230,7 @@ static struct jprobe spcd_process_probe = {
 	.kp.symbol_name = "acct_update_integrals",
 };
 
+#ifdef ENABLE_EXTRA_PF
 static struct jprobe spcd_del_page_probe = {
 	.entry = spcd_del_page_handler,
 	.kp.symbol_name = "__delete_from_page_cache",
@@ -239,6 +240,7 @@ static struct jprobe spcd_unmap_page_range_probe = {
 	.entry = spcd_unmap_page_range_handler,
 	.kp.symbol_name = "unmap_page_range",
 };
+#endif
 
 
 void register_probes(void)
