@@ -41,7 +41,7 @@ int init_module(void)
 	max_threads_bits = ilog2(max_threads);
 
 	printk("SPCD: Start (version %s)\n", SPCD_VERSION);
-	printk("    additional pagefaults (do_pf): %s\n", do_pf == ENABLE_EXTRA_PF ? "yes (default)" : "no");
+	printk("    additional pagefaults (do_pf): %s %s\n", do_pf ? "yes" : "no", do_pf==ENABLE_EXTRA_PF ? "(default)" : "");
 	printk("    extra pagefaults (num_faults): %d %s\n", num_faults, num_faults==NUM_FAULTS_DEFAULT ? "(default)" : "");
 	printk("    maximum threads (max_threads): %d %s\n", max_threads, max_threads==NUM_MAX_THREADS_DEFAULT ? "(default)" : "");
 	printk("    use mapping (do_map): %s\n", do_map ? "yes" : "no (default)");
