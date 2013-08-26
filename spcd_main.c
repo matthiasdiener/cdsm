@@ -60,7 +60,6 @@ int init_module(void)
 
 
 	if (do_pf) {
-		#pragma message "ENABLE_EXTRA_PF"
 		pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
 		wake_up_process(pf_thread);
 	}
