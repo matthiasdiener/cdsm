@@ -38,20 +38,23 @@ struct spcd_mem_info* spcd_get_mem_init(unsigned long address)
 }
 
 
-void spcd_mem_clear(void)
+void spcd_mem_init(void)
 {
-	int spcd_mem_hash_size = 1UL << spcd_mem_hash_bits;
+	int hash_size = 1UL << spcd_mem_hash_bits;
+
 	if (!mem)
-		mem = vmalloc(sizeof(struct spcd_mem_info) * spcd_mem_hash_size);
+		mem = vmalloc(sizeof(struct spcd_mem_info) * hash_size);
+
 	if (mem)
-		memset(mem, 0, sizeof(struct spcd_mem_info) * spcd_mem_hash_size);
+		memset(mem, 0, sizeof(struct spcd_mem_info) * hash_size);
 	else
 		printk("SPCD BUG: could not allocate memory for mem hash table\n");
+
 	spcd_addr_conflict = 0;
 }
 
 
-void spcd_mem_stop(void)
+void spcd_mem_cleanup(void)
 {
 	if (mem)
 		vfree(mem);

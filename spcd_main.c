@@ -16,8 +16,8 @@ MODULE_LICENSE("GPL");
 	#define ENABLE_EXTRA_PF 0
 #endif
 
-static struct task_struct *pf_thread;
-static struct task_struct *map_thread;
+static struct task_struct *spcd_pf_thread;
+static struct task_struct *spcd_map_thread;
 
 int num_faults = NUM_FAULTS_DEFAULT;
 int do_map = 0;
@@ -33,7 +33,7 @@ module_param(spcd_shift, int, 0);
 module_param(spcd_mem_hash_bits, int, 0);
 module_param(do_pf, int, 1);
 
-struct spcd_share_matrix spcd_main_matrix = {.matrix = NULL, .nthreads = 0};
+struct spcd_comm_matrix spcd_matrix = {.matrix = NULL, .nthreads = 0};
 
 int init_module(void)
 {
@@ -49,26 +49,25 @@ int init_module(void)
 	printk("    mem hash table size (spcd_mem_hash_bits): %d bits, %d elements %s\n", spcd_mem_hash_bits, 1<<spcd_mem_hash_bits, spcd_mem_hash_bits==SPCD_MEM_HASH_BITS_DEFAULT ?
 		"(default)" : "");
 
-	spcd_main_matrix.matrix = NULL;
-	spin_lock_init(&spcd_main_matrix.lock);
+	spin_lock_init(&spcd_matrix.lock);
 
 	reset_stats();
-	register_probes();
+	spcd_probes_init();
 
 	spcd_proc_init();
 	spcd_map_init();
 
 
 	if (do_pf) {
-		pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
-		wake_up_process(pf_thread);
+		spcd_pf_thread = kthread_create(spcd_pagefault_func, NULL, "spcd_pf_thread");
+		wake_up_process(spcd_pf_thread);
 	}
 
-	topo_start();
+	topo_init();
 
 	if (do_map) {
-		map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
-		wake_up_process(map_thread);
+		spcd_map_thread = kthread_create(spcd_map_func, NULL, "spcd_map_thread");
+		wake_up_process(spcd_map_thread);
 	}
 
 	return 0;
@@ -77,20 +76,20 @@ int init_module(void)
 
 void cleanup_module(void)
 {
-	if (pf_thread)
-		kthread_stop(pf_thread);
+	if (spcd_pf_thread)
+		kthread_stop(spcd_pf_thread);
 
-	if (map_thread)
-		kthread_stop(map_thread);
+	if (spcd_map_thread)
+		kthread_stop(spcd_map_thread);
 
-	if (spcd_main_matrix.matrix)
-		kfree(spcd_main_matrix.matrix);
+	if (spcd_matrix.matrix)
+		kfree(spcd_matrix.matrix);
 
 	spcd_proc_cleanup();
 
-	unregister_probes();
+	spcd_probes_cleanup();
 
-	spcd_mem_stop();
+	spcd_mem_cleanup();
 
 	printk("SPCD: Quit (version %s)\n", SPCD_VERSION);
 }

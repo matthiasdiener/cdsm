@@ -10,12 +10,12 @@ int spcd_vma_shared_flag = 1;
 void reset_stats(void)
 {
 	spcd_pid_clear();
-	spcd_mem_clear();
+	spcd_mem_init();
 	spcd_pte_fixes = 0;
 	spcd_pf = 0;
 	spcd_vma_shared_flag = 1;
-	spcd_share_clear();
-	spcd_pf_thread_clear();
+	spcd_comm_init();
+	spcd_pf_thread_init();
 }
 
 
@@ -26,7 +26,7 @@ void print_stats(void)
 
 	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, spcd_pf, spcd_pf_extra, spcd_pte_fixes, spcd_addr_conflict);
 
-	spcd_print_share();
+	spcd_print_comm();
 }
 
 
@@ -250,9 +250,10 @@ static struct jprobe spcd_unmap_page_range_probe = {
 };
 
 
-void register_probes(void)
+void spcd_probes_init(void)
 {
 	int ret;
+
 	if ((ret=register_jprobe(&spcd_pte_fault_probe))) {
 		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
 	}
@@ -262,6 +263,7 @@ void register_probes(void)
 	if ((ret=register_kretprobe(&spcd_thread_probe))){
 		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
+
 	if (do_pf) {
 		fix_pte = fix_pte_real;
 
@@ -275,7 +277,7 @@ void register_probes(void)
 }
 
 
-void unregister_probes(void)
+void spcd_probes_cleanup(void)
 {
 	unregister_jprobe(&spcd_pte_fault_probe);
 	unregister_jprobe(&spcd_process_probe);

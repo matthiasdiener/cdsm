@@ -17,7 +17,7 @@
 	#define LM_PRINTF_OUT NULL
 	#define lm_printf(...) printk(__VA_ARGS__)
 	#define lm_fprintf(out, ...) printk(__VA_ARGS__)
-	
+
 	#define lm_calloc(count, tsize) kmalloc((count) * (tsize), GFP_KERNEL)
 	#define lm_free(p) kfree(p)
 #endif
@@ -55,9 +55,9 @@
 	{
 		return (row < col) ? m->values_[row][col] : m->values_[col][row];
 	}
-	
+
 	#define comm_matrix_el(m, row, col)  comm_matrix_ptr_el(&(m), row, col)
-	
+
 	static inline void comm_matrix_ptr_write (comm_matrix_t *m, uint32_t row, uint32_t col, uint64_t val)
 	{
 		if (row < col)
@@ -65,9 +65,9 @@
 		else
 			m->values_[col][row] = val;
 	}
-	
+
 	#define comm_matrix_write(m, row, col, val)  comm_matrix_ptr_write(&(m), row, col, val)
-	
+
 	static inline void comm_matrix_ptr_add (comm_matrix_t *m, uint32_t row, uint32_t col, uint64_t val)
 	{
 		if (row < col)
@@ -75,9 +75,9 @@
 		else
 			m->values_[col][row] += val;
 	}
-	
+
 	#define comm_matrix_add(m, row, col, val)  comm_matrix_ptr_add(&(m), row, col, val)
-	
+
 	static inline void comm_matrix_ptr_sub (comm_matrix_t *m, uint32_t row, uint32_t col, uint64_t val)
 	{
 		if (row < col)
@@ -85,26 +85,26 @@
 		else
 			m->values_[col][row] -= val;
 	}
-	
+
 	#define comm_matrix_sub(m, row, col, val)  comm_matrix_ptr_sub(&(m), row, col, val)
-	
+
 #else
-	struct spcd_share_matrix {
+	struct spcd_comm_matrix {
 		unsigned *matrix;
 		spinlock_t lock;
 		uint32_t nthreads;
 	};
-	typedef struct spcd_share_matrix comm_matrix_t;
+	typedef struct spcd_comm_matrix comm_matrix_t;
 	extern int max_threads_bits;
 
 	static inline
-	unsigned get_matrix(struct spcd_share_matrix *m, int i, int j)
+	unsigned get_matrix(struct spcd_comm_matrix *m, int i, int j)
 	{
 		return i > j ? m->matrix[(i<<max_threads_bits) + j] : m->matrix[(j<<max_threads_bits) + i];
 	}
 
 	static inline
-	void set_matrix(struct spcd_share_matrix *m, int i, int j, unsigned v)
+	void set_matrix(struct spcd_comm_matrix *m, int i, int j, unsigned v)
 	{
 		if (i > j)
 			m->matrix[(i << max_threads_bits) + j] = v;

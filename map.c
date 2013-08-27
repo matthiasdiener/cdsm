@@ -39,10 +39,10 @@ int spcd_map_func(void* v)
 		nt = spcd_get_active_threads();
 		if (nt >= 4) {
 			thread_map_alg_map_t mapdata;
-			mapdata.m_init = &spcd_main_matrix;
+			mapdata.m_init = &spcd_matrix;
 			mapdata.map = map;
 
-			spcd_main_matrix.nthreads = nt;
+			spcd_matrix.nthreads = nt;
 			libmapping_mapping_algorithm_greedy_map (&mapdata);
 			printk("MAP \"");
 			for (i=0; i<nt; i++){

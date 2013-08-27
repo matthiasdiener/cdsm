@@ -147,7 +147,7 @@ out:
 }
 
 
-void spcd_pf_thread_clear(void)
+void spcd_pf_thread_init(void)
 {
 	spcd_pf_extra = 0;
 

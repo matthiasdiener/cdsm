@@ -8,7 +8,7 @@
 int num_nodes = 0, num_cpus = 0, num_cores = 0, num_threads = 0;
 int pu[256];
 
-void topo_start(void)
+void topo_init(void)
 {
 	int node, cpu, sibling, core;
 	int index = 0, i;

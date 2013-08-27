@@ -48,17 +48,17 @@ int spcd_get_active_threads(void);
 
 /* Mem functions */
 struct spcd_mem_info* spcd_get_mem_init(unsigned long addr);
-void spcd_mem_clear(void);
-void spcd_mem_stop(void);
+void spcd_mem_init(void);
+void spcd_mem_cleanup(void);
 
 /* Communication functions */
 void spcd_check_comm(int tid, unsigned long address);
-void spcd_print_share(void);
-void spcd_share_clear(void);
+void spcd_print_comm(void);
+void spcd_comm_init(void);
 
 /* PF thread */
 int spcd_pagefault_func(void* v);
-void spcd_pf_thread_clear(void);
+void spcd_pf_thread_init(void);
 
 /* Mapping */
 int spcd_map_func(void* v);
@@ -66,32 +66,32 @@ void spcd_set_affinity(int tid, int core);
 void spcd_map_init(void);
 
 /* Probes */
-void register_probes(void);
-void unregister_probes(void);
+void spcd_probes_init(void);
+void spcd_probes_cleanup(void);
 
 /* Intercept */
 int interceptor_start(void);
 void interceptor_stop(void);
 
 /* Topology */
-void topo_start(void);
+void topo_init(void);
 extern int num_nodes, num_cpus, num_cores, num_threads, pu[256];
 
-/* Share Matrix */
-extern struct spcd_share_matrix spcd_main_matrix;
+/* Communication Matrix */
+extern struct spcd_comm_matrix spcd_matrix;
 
 static inline
-unsigned get_share(int first, int second)
+unsigned get_comm(int first, int second)
 {
 	if (first > second)
-		return spcd_main_matrix.matrix[(first << max_threads_bits) + second];
+		return spcd_matrix.matrix[(first << max_threads_bits) + second];
 	else
-		return spcd_main_matrix.matrix[(second << max_threads_bits) + first];
+		return spcd_matrix.matrix[(second << max_threads_bits) + first];
 }
 
 
 static inline
-void inc_share(int first, int second, unsigned old_tsc, unsigned long new_tsc)
+void inc_comm(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 {
 	/* TODO:
 		- replace with Atomic incr.
@@ -100,9 +100,9 @@ void inc_share(int first, int second, unsigned old_tsc, unsigned long new_tsc)
 	*/
 
 	if (first > second)
-		spcd_main_matrix.matrix[(first << max_threads_bits) + second] ++;
+		spcd_matrix.matrix[(first << max_threads_bits) + second] ++;
 	else
-		spcd_main_matrix.matrix[(second << max_threads_bits) + first] ++;
+		spcd_matrix.matrix[(second << max_threads_bits) + first] ++;
 }
 
 /* ProcFS */

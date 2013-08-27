@@ -10,12 +10,10 @@ static struct proc_dir_entry *spcd_proc_root;
 static
 ssize_t matrix_reset(struct file *file, const char __user *buffer, size_t count, loff_t *pos)
 {
-	if (!spcd_main_matrix.matrix)
+	if (!spcd_matrix.matrix)
 		return count;
 
-	spin_lock(&spcd_main_matrix.lock);
-	memset(spcd_main_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
-	spin_unlock(&spcd_main_matrix.lock);
+	memset(spcd_matrix.matrix, 0, sizeof(unsigned) * max_threads * max_threads);
 
 	return count;
 }
@@ -48,7 +46,7 @@ int matrix_read(struct seq_file *m, void *v)
 
 	for (i = nt-1; i >= 0; i--) {
 		for (j = 0; j < nt; j++) {
-			seq_printf(m, "%u", get_share(i, j));
+			seq_printf(m, "%u", get_comm(i, j));
 			if (j != nt-1)
 				seq_printf(m, ",");
 		}
@@ -82,13 +80,11 @@ int matrix_read_raw(char *buf, char **start, off_t offset, int count, int *eof, 
 			temp.pids[i] = spcd_get_pid(temp.num_threads - 1 - i);
 		}
 
-		spin_lock(&spcd_main_matrix.lock);
-		temp.matrix = spcd_main_matrix.matrix;
+		temp.matrix = spcd_matrix.matrix;
 		ptr = spcd_matrix_encode(&temp);
 		tmp_buffer_size = spcd_matrix_size(ptr);
 		tmp_buffer = kmalloc(tmp_buffer_size, GFP_KERNEL);
 		memcpy(tmp_buffer, ptr, tmp_buffer_size);
-		spin_unlock(&spcd_main_matrix.lock);
 
 		kfree(ptr);
 		kfree(temp.pids);
