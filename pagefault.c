@@ -8,8 +8,7 @@ struct pf_process_t {
 
 static struct pf_process_t* proc = NULL;
 
-extern int num_faults;
-
+extern int num_faults; /* module parameter */
 unsigned long spcd_pf_extra;
 
 static void pf_pagewalk(long pid, struct mm_struct *mm);
@@ -22,7 +21,7 @@ int spcd_pagefault_func(void* v)
 {
 	int i;
 	while (1) {
-		msleep(100);
+		msleep(100); /* TODO: check this */
 		if (kthread_should_stop())
 			return 0;
 
