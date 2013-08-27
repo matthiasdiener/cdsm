@@ -1,7 +1,5 @@
 #include "spcd.h"
 
-extern void map_simple(void);
-extern void map_drake(int nt);
 
 static long (*sched_setaffinity_p)(pid_t pid, const struct cpumask *in_mask);
 

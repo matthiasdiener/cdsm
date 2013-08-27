@@ -59,6 +59,7 @@ void fix_pte_real(pmd_t *pmd, pte_t *pte)
 	}
 }
 
+static
 void (*fix_pte)(pmd_t *pmd, pte_t *pte) = fix_pte_empty;
 
 static
