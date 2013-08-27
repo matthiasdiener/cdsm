@@ -90,7 +90,6 @@ void cleanup_module(void)
 
 	unregister_probes();
 
-	topo_stop();
 	spcd_mem_stop();
 
 	printk("SPCD: Quit (version %s)\n", SPCD_VERSION);

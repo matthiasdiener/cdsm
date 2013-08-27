@@ -63,13 +63,6 @@ int callback_page_walk(pte_t *pte, unsigned long addr, unsigned long next_addr, 
 
 
 static inline
-int is_writable(struct vm_area_struct *vma)
-{
-	return vma->vm_flags & VM_WRITE ? 1 : 0;
-}
-
-
-static inline
 int is_shared(struct vm_area_struct *vma)
 {
 	return vma->vm_flags & VM_SHARED ? 1 : 0;

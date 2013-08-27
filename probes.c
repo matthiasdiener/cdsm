@@ -187,7 +187,7 @@ void spcd_process_handler(struct task_struct *tsk)
 {
 	int at, tid = spcd_get_tid(tsk->pid);
 
-	if (tid > -1 && tsk->flags & PF_EXITING) {
+	if (tid > -1 && (tsk->flags & PF_EXITING)) {
 		spcd_delete_pid(tsk->pid);
 		at = spcd_get_active_threads();
 		printk("SPCD: %s stop (pid %d, tid %d), #active: %d\n", tsk->comm, tsk->pid, tid, at);

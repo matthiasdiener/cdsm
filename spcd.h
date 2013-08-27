@@ -75,7 +75,6 @@ void interceptor_stop(void);
 
 /* Topology */
 void topo_start(void);
-void topo_stop(void);
 extern int num_nodes, num_cpus, num_cores, num_threads, pu[256];
 
 /* Share Matrix */

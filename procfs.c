@@ -142,7 +142,7 @@ int spcd_proc_init(void)
 {
 	spcd_proc_root = proc_mkdir("spcd", NULL);
 	if (!spcd_proc_root) {
-		printk(KERN_INFO "SPCD BUG: error creating proc root entry");
+		printk("SPCD BUG: error creating proc root entry\n");
 		return -ENOMEM;
 	}
 
