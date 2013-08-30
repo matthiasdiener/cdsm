@@ -63,7 +63,7 @@ static
 void (*fix_pte)(pmd_t *pmd, pte_t *pte) = fix_pte_empty;
 
 static
-void spcd_pte_fault_handler(struct mm_struct *mm,
+void pte_fault_handler(struct mm_struct *mm,
 							struct vm_area_struct *vma, unsigned long address,
 							pte_t *pte, pmd_t *pmd, unsigned int flags)
 {
@@ -87,7 +87,7 @@ void spcd_pte_fault_handler(struct mm_struct *mm,
 
 
 static
-void spcd_del_page_handler(struct page *page)
+void del_page_handler(struct page *page)
 {
 	if (page_mapped(page))
 		atomic_set(&(page)->_mapcount, -1);
@@ -159,7 +159,7 @@ unsigned long zap_pud_range(struct mmu_gather *tlb,
 }
 
 static
-void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
+void unmap_page_range_handler(struct mmu_gather *tlb,
 								   struct vm_area_struct *vma,
 								   unsigned long addr, unsigned long end,
 								   struct zap_details *details)
@@ -183,7 +183,7 @@ void spcd_unmap_page_range_handler(struct mmu_gather *tlb,
 
 
 static
-void spcd_process_handler(struct task_struct *tsk)
+void process_handler(struct task_struct *tsk)
 {
 	int at, tid = spcd_get_tid(tsk->pid);
 
@@ -209,7 +209,7 @@ void spcd_process_handler(struct task_struct *tsk)
 
 
 static
-int spcd_thread_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
+int thread_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
 	int pid = regs_return_value(regs);
 
@@ -224,28 +224,28 @@ int spcd_thread_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 
 
-static struct jprobe spcd_pte_fault_probe = {
-	.entry = spcd_pte_fault_handler,
+static struct jprobe pte_fault_probe = {
+	.entry = pte_fault_handler,
 	.kp.symbol_name = "handle_pte_fault",
 };
 
-static struct kretprobe spcd_thread_probe = {
-	.handler = spcd_thread_handler,
+static struct kretprobe thread_probe = {
+	.handler = thread_handler,
 	.kp.symbol_name = "do_fork",
 };
 
-static struct jprobe spcd_process_probe = {
-	.entry = spcd_process_handler,
+static struct jprobe process_probe = {
+	.entry = process_handler,
 	.kp.symbol_name = "acct_update_integrals",
 };
 
-static struct jprobe spcd_del_page_probe = {
-	.entry = spcd_del_page_handler,
+static struct jprobe del_page_probe = {
+	.entry = del_page_handler,
 	.kp.symbol_name = "__delete_from_page_cache",
 };
 
-static struct jprobe spcd_unmap_page_range_probe = {
-	.entry = spcd_unmap_page_range_handler,
+static struct jprobe unmap_page_range_probe = {
+	.entry = unmap_page_range_handler,
 	.kp.symbol_name = "unmap_page_range",
 };
 
@@ -254,23 +254,23 @@ void spcd_probes_init(void)
 {
 	int ret;
 
-	if ((ret=register_jprobe(&spcd_pte_fault_probe))) {
+	if ((ret=register_jprobe(&pte_fault_probe))) {
 		printk("SPCD BUG: handle_pte_fault missing, %d\n", ret);
 	}
-	if ((ret=register_jprobe(&spcd_process_probe))){
+	if ((ret=register_jprobe(&process_probe))){
 		printk("SPCD BUG: acct_update_integrals missing, %d\n", ret);
 	}
-	if ((ret=register_kretprobe(&spcd_thread_probe))){
+	if ((ret=register_kretprobe(&thread_probe))){
 		printk("SPCD BUG: do_fork missing, %d\n", ret);
 	}
 
 	if (do_pf) {
 		fix_pte = fix_pte_real;
 
-		if ((ret=register_jprobe(&spcd_del_page_probe))){
+		if ((ret=register_jprobe(&del_page_probe))){
 			printk("SPCD BUG: __delete_from_page_cache missing, %d\n", ret);
 		}
-		if ((ret=register_jprobe(&spcd_unmap_page_range_probe))){
+		if ((ret=register_jprobe(&unmap_page_range_probe))){
 			printk("SPCD BUG: unmap_page_range missing, %d\n", ret);
 		}
 	}
@@ -279,11 +279,11 @@ void spcd_probes_init(void)
 
 void spcd_probes_cleanup(void)
 {
-	unregister_jprobe(&spcd_pte_fault_probe);
-	unregister_jprobe(&spcd_process_probe);
-	unregister_kretprobe(&spcd_thread_probe);
+	unregister_jprobe(&pte_fault_probe);
+	unregister_jprobe(&process_probe);
+	unregister_kretprobe(&thread_probe);
 	if (do_pf) {
-		unregister_jprobe(&spcd_del_page_probe);
-		unregister_jprobe(&spcd_unmap_page_range_probe);
+		unregister_jprobe(&del_page_probe);
+		unregister_jprobe(&unmap_page_range_probe);
 	}
 }
