@@ -56,6 +56,20 @@ int matrix_read(struct seq_file *m, void *v)
 	return 0;
 }
 
+static
+ssize_t set_shift(struct file *file, const char __user *buffer, size_t count, loff_t *pos)
+{
+	char buf[200];
+	unsigned int v;
+
+	copy_from_user(buf, buffer, count);
+	buf[count-1] = 0;
+	kstrtouint(buf, 0,  &v);
+
+	printk("SPCD: setting spcd_shift to %lu: %u (%s)\n", count, v, buf);
+	spcd_shift = v;
+	return count;
+}
 
 /* TODO: fix this for new procfs API */
 /*
@@ -134,6 +148,11 @@ static const struct file_operations pids_ops = {
 	.release = single_release,
 };
 
+static const struct file_operations shift_ops = {
+	.owner = THIS_MODULE,
+	.write = set_shift,
+};
+
 int spcd_proc_init(void)
 {
 	spcd_proc_root = proc_mkdir("spcd", NULL);
@@ -146,6 +165,7 @@ int spcd_proc_init(void)
 	proc_create("pids", 0, spcd_proc_root, &pids_ops);
 	/* proc_create("raw_matrix", 0, spcd_proc_root, spcd_read_raw_matrix, NULL); */
 	proc_create("reset", 0666, spcd_proc_root, &reset_ops);
+	proc_create("shift", 0666, spcd_proc_root, &shift_ops);
 
 	return 0;
 }
@@ -153,6 +173,7 @@ int spcd_proc_init(void)
 
 void spcd_proc_cleanup(void)
 {
+	remove_proc_entry("shift", spcd_proc_root);
 	remove_proc_entry("reset", spcd_proc_root);
 	remove_proc_entry("pids", spcd_proc_root);
 	/* remove_proc_entry("raw_matrix", spcd_proc_root); */
