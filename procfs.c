@@ -66,7 +66,7 @@ ssize_t set_shift(struct file *file, const char __user *buffer, size_t count, lo
 	buf[count-1] = 0;
 	kstrtouint(buf, 0,  &v);
 
-	printk("SPCD: setting spcd_shift to %lu: %u (%s)\n", count, v, buf);
+	printk("SPCD: setting spcd_shift to %u\n", v);
 	spcd_shift = v;
 	return count;
 }
