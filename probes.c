@@ -24,9 +24,9 @@ void print_stats(void)
 {
 	int nt = spcd_get_num_threads();
 
-	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, spcd_pf, spcd_pf_extra, spcd_pte_fixes, spcd_addr_conflict);
-
 	spcd_print_comm();
+
+	printk("(%d threads): %lu pfs (%lu extra, %lu fixes), %lu addr conflicts\n", nt, spcd_pf, spcd_pf_extra, spcd_pte_fixes, spcd_addr_conflict);
 }
 
 

@@ -29,8 +29,15 @@ void spcd_delete_pid(int pid)
 
 int spcd_add_pid(int pid)
 {
-	unsigned h = hash_32(pid, SPCD_PID_HASH_BITS);
+	unsigned h;
 	int at;
+
+	if (spcd_get_num_threads()>=max_threads) {
+		printk("SPCD BUG: trying to create more than %u (max_threads) threads\n", max_threads);
+		return -1;
+	}
+
+	h = hash_32(pid, SPCD_PID_HASH_BITS);
 
 	if (spcd_pid[h].pid == -1) {
 		spcd_pid[h].pid = pid;
