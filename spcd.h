@@ -56,9 +56,10 @@ void spcd_check_comm(int tid, unsigned long address);
 void spcd_print_comm(void);
 void spcd_comm_init(void);
 
-/* PF thread */
+/* Extra pagefaults thread */
 int spcd_pagefault_func(void* v);
 void spcd_pf_thread_init(void);
+extern int spcd_num_faults;
 
 /* Mapping */
 int spcd_map_func(void* v);

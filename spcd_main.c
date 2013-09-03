@@ -35,10 +35,13 @@ module_param(do_pf, int, 1);
 
 struct spcd_comm_matrix spcd_matrix = {.matrix = NULL, .nthreads = 0};
 
+int spcd_num_faults;
+
 int init_module(void)
 {
 	max_threads = roundup_pow_of_two(max_threads);
 	max_threads_bits = ilog2(max_threads);
+	spcd_num_faults = num_faults;
 
 	printk("SPCD: Start (version %s)\n", SPCD_VERSION);
 	printk("    additional pagefaults (do_pf): %s %s\n", do_pf ? "yes" : "no", do_pf==ENABLE_EXTRA_PF ? "(default)" : "");

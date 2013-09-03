@@ -8,7 +8,6 @@ struct pf_process_t {
 
 static struct pf_process_t* proc = NULL;
 
-extern int num_faults; /* module parameter */
 unsigned long spcd_pf_extra;
 
 static void pf_pagewalk(long pid, struct mm_struct *mm);
@@ -105,7 +104,7 @@ void pf_pagewalk(long pid, struct mm_struct *mm)
 
 	down_write(&mm->mmap_sem);
 
-	for (i = 0; i < num_faults; i++) {
+	for (i = 0; i < spcd_num_faults; i++) {
 		unsigned addr_pbit_changed = 0;
 		unsigned long start = proc[pid].num_walks;
 
