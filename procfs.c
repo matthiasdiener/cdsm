@@ -156,10 +156,6 @@ static const struct file_operations shift_ops = {
 int spcd_proc_init(void)
 {
 	spcd_proc_root = proc_mkdir("spcd", NULL);
-	if (!spcd_proc_root) {
-		printk("SPCD BUG: error creating proc root entry\n");
-		return -ENOMEM;
-	}
 
 	proc_create("matrix", 0, spcd_proc_root, &matrix_ops);
 	proc_create("pids", 0, spcd_proc_root, &pids_ops);
@@ -178,5 +174,6 @@ void spcd_proc_cleanup(void)
 	remove_proc_entry("pids", spcd_proc_root);
 	/* remove_proc_entry("raw_matrix", spcd_proc_root); */
 	remove_proc_entry("matrix", spcd_proc_root);
-	remove_proc_entry("spcd",NULL);
+
+	remove_proc_entry("spcd", NULL);
 }
