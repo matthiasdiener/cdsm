@@ -35,8 +35,8 @@ clean:
 
 
 install: all
-	@if test $(shell lsmod | grep spcd >/dev/null; echo $$?) -eq 0; then sudo rmmod spcd; fi
-	sudo insmod $(PWD)/spcd.ko $(options)
+	@if test $(shell lsmod | grep spcd >/dev/null; echo $$?) -eq 0; then sudo /sbin/rmmod spcd; fi
+	sudo /sbin/insmod $(PWD)/spcd.ko $(options)
 	@dmesg | grep -i "spcd bug"; echo -n
 
 dist: clean
