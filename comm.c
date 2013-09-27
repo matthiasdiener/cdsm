@@ -56,8 +56,8 @@ void spcd_print_comm(void)
 {
 	int i, j;
 	int nt = spcd_get_num_threads();
-	int sum = 0, sum_sqr = 0;
-	int av, va;
+	unsigned long sum = 0, sum_sqr = 0;
+	unsigned long av, va;
 
 	if (nt < 2)
 		return;
@@ -77,7 +77,7 @@ void spcd_print_comm(void)
 	av = sum / nt / nt;
 	va = (sum_sqr - ((sum*sum)/nt/nt))/(nt-1)/(nt-1);
 
-	printk ("avg: %d, var: %d, hf: %d\n", av, va, av ? va/av : 0);
+	printk ("avg: %lu, var: %lu, hf: %lu\n", av, va, av ? va/av : 0);
 }
 
 
