@@ -20,7 +20,7 @@ int spcd_pagefault_func(void* v)
 {
 	int i;
 	while (1) {
-		msleep(100); /* TODO: check this */
+		msleep_interruptible(10); /* TODO: check this */
 		if (kthread_should_stop())
 			return 0;
 

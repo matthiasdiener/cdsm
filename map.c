@@ -59,7 +59,7 @@ int spcd_map_func(void* v)
 			for (i=0; i<MAX_THREADS; i++)
 				oldmap[i] = -1;
 		}
-		msleep(100);
+		msleep_interruptible(100);
 	}
 
 	libmapping_graph_destroy(&topo->graph);
