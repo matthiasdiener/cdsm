@@ -31,7 +31,7 @@ module_param(do_map, int, 0);
 module_param(max_threads, int, 0);
 module_param(spcd_shift, int, 0);
 module_param(spcd_mem_hash_bits, int, 0);
-module_param(do_pf, int, 1);
+module_param(do_pf, int, 0);
 
 struct spcd_comm_matrix spcd_matrix = {.matrix = NULL, .nthreads = 0};
 
