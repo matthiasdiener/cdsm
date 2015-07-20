@@ -9,12 +9,10 @@ int spcd_vma_shared_flag = 1;
 
 void reset_stats(void)
 {
-	spcd_pid_clear();
 	spcd_mem_init();
 	spcd_pte_fixes = 0;
 	spcd_pf = 0;
 	spcd_vma_shared_flag = 1;
-	spcd_comm_init();
 	spcd_pf_thread_init();
 }
 
@@ -200,6 +198,10 @@ void process_handler(struct task_struct *tsk)
 	}
 
 	if (check_name(tsk->comm) && tid == -1 && !(tsk->flags & PF_EXITING)) {
+		if (spcd_get_active_threads() == 0) {
+			spcd_pid_clear();
+			spcd_comm_init();
+		}
 		tid = spcd_add_pid(tsk->pid);
 		printk("SPCD: new process %s (pid %d, tid %d); #active: %d\n", tsk->comm, tsk->pid, tid, spcd_get_active_threads());
 	}
